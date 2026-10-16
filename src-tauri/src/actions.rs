@@ -15,7 +15,7 @@ use crate::utils::{
     self, show_processing_overlay, show_recording_overlay, show_transcribing_overlay,
 };
 use crate::TranscriptionCoordinator;
-use log::{debug, error, warn};
+use log::{debug, error, info, warn};
 use once_cell::sync::Lazy;
 use std::collections::HashMap;
 use std::future::Future;
@@ -45,6 +45,34 @@ impl Drop for FinishGuard {
         // WAV copy, engine scratch); hand the cached pages back to the OS so
         // they don't sit in malloc arenas until they get swapped out (#1792).
         crate::memory::trim_freed_memory();
+    }
+}
+
+/// Per-stage latency of one transcription pipeline run, logged as a single
+/// info line once the paste attempt finishes, e.g.
+/// `timing: transcribe=812ms post_process=1430ms paste=35ms total=2277ms`.
+///
+/// `transcribe` covers the model run (live finalize or batch decode,
+/// including any model-load wait), `post_process` the LLM post-processing
+/// call (near zero when disabled), and `paste` the clipboard paste itself.
+/// `total` spans the whole stop-to-paste pipeline, so it also includes what
+/// sits between the stages: recording teardown, WAV save/verify, history
+/// persistence, and main-thread dispatch.
+struct PipelineTimings {
+    started: Instant,
+    transcribe: Duration,
+    post_process: Duration,
+}
+
+impl PipelineTimings {
+    fn log(&self, paste: Duration) {
+        info!(
+            "timing: transcribe={}ms post_process={}ms paste={}ms total={}ms",
+            self.transcribe.as_millis(),
+            self.post_process.as_millis(),
+            paste.as_millis(),
+            self.started.elapsed().as_millis()
+        );
     }
 }
 
@@ -606,6 +634,7 @@ impl ShortcutAction for TranscribeAction {
 
         tauri::async_runtime::spawn(async move {
             let _guard = FinishGuard(ah.clone(), Arc::clone(&tm));
+            let pipeline_started = Instant::now();
             debug!(
                 "Starting async transcription task for binding: {}",
                 binding_id
@@ -651,6 +680,7 @@ impl ShortcutAction for TranscribeAction {
                     // as an error, so it never starts a batch run.
                     let transcription_time = Instant::now();
                     let transcription_result = tm.transcribe_recording(samples);
+                    let transcribe_elapsed = transcription_time.elapsed();
 
                     // Await WAV save and verify
                     let wav_saved = match wav_handle.await {
@@ -698,6 +728,7 @@ impl ShortcutAction for TranscribeAction {
                                     show_processing_overlay(&ah);
                                 }
                             }
+                            let post_process_started = Instant::now();
                             let Some(processed) = complete_unless_cancelled(
                                 process_transcription_output(&ah, &transcription, post_process),
                                 || rm.was_cancelled_since(cancel_generation),
@@ -708,6 +739,11 @@ impl ShortcutAction for TranscribeAction {
                                 utils::hide_recording_overlay(&ah);
                                 set_tray_state(&ah, TrayIconState::Idle);
                                 return;
+                            };
+                            let timings = PipelineTimings {
+                                started: pipeline_started,
+                                transcribe: transcribe_elapsed,
+                                post_process: post_process_started.elapsed(),
                             };
 
                             if rm.was_cancelled_since(cancel_generation) {
@@ -735,7 +771,6 @@ impl ShortcutAction for TranscribeAction {
                                 set_tray_state(&ah, TrayIconState::Idle);
                             } else {
                                 let ah_clone = ah.clone();
-                                let paste_time = Instant::now();
                                 let final_text = processed.final_text;
                                 let rm_for_paste = Arc::clone(&rm);
                                 ah.run_on_main_thread(move || {
@@ -746,16 +781,18 @@ impl ShortcutAction for TranscribeAction {
                                         return;
                                     }
 
+                                    let paste_started = Instant::now();
                                     match utils::paste(final_text, ah_clone.clone()) {
                                         Ok(()) => debug!(
                                             "Text pasted successfully in {:?}",
-                                            paste_time.elapsed()
+                                            paste_started.elapsed()
                                         ),
                                         Err(e) => {
                                             error!("Failed to paste transcription: {}", e);
                                             let _ = ah_clone.emit("paste-error", ());
                                         }
                                     }
+                                    timings.log(paste_started.elapsed());
                                     utils::hide_recording_overlay(&ah_clone);
                                     set_tray_state(&ah_clone, TrayIconState::Idle);
                                 })
