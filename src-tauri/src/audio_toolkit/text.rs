@@ -232,7 +232,7 @@ pub fn apply_custom_words(text: &str, custom_words: &[String], threshold: f64) -
 ///
 /// Kana and Hangul are deliberately excluded: only Han ideograms have
 /// Mandarin pinyin, so CJK spans for pinyin matching stop at them.
-fn is_han(c: char) -> bool {
+pub(crate) fn is_han(c: char) -> bool {
     matches!(c, '\u{3400}'..='\u{4DBF}' | '\u{4E00}'..='\u{9FFF}')
 }
 
@@ -271,7 +271,7 @@ fn canonical_syllable(syllable: &str) -> String {
 
 /// Canonical toneless pinyin of one Han character, or `None` when the
 /// character has no pinyin data (rare ideograms).
-fn canonical_syllable_of(c: char) -> Option<String> {
+pub(crate) fn canonical_syllable_of(c: char) -> Option<String> {
     c.to_pinyin()
         .map(|pinyin| canonical_syllable(pinyin.plain()))
 }

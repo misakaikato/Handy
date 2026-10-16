@@ -782,11 +782,21 @@ impl ShortcutAction for TranscribeAction {
                                     }
 
                                     let paste_started = Instant::now();
+                                    let pasted_text = final_text.clone();
                                     match utils::paste(final_text, ah_clone.clone()) {
-                                        Ok(()) => debug!(
-                                            "Text pasted successfully in {:?}",
-                                            paste_started.elapsed()
-                                        ),
+                                        Ok(()) => {
+                                            debug!(
+                                                "Text pasted successfully in {:?}",
+                                                paste_started.elapsed()
+                                            );
+                                            // Learn custom words from the user's
+                                            // corrections of the pasted text (no-op
+                                            // unless enabled, macOS only).
+                                            crate::auto_learn::schedule_after_paste(
+                                                &ah_clone,
+                                                pasted_text,
+                                            );
+                                        }
                                         Err(e) => {
                                             error!("Failed to paste transcription: {}", e);
                                             let _ = ah_clone.emit("paste-error", ());

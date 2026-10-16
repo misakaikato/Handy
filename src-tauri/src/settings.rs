@@ -535,6 +535,14 @@ pub struct AppSettings {
     /// `overlay_position` (position `none` → style `None`).
     #[serde(default = "default_overlay_style")]
     pub overlay_style: OverlayStyle,
+    /// Learn custom words from the user's manual corrections after a paste
+    /// (macOS: reads the focused text field via the Accessibility API).
+    #[serde(default)]
+    pub auto_learn_custom_words: bool,
+    /// How long to wait after a paste before reading the focused text field
+    /// looking for corrections, in milliseconds.
+    #[serde(default = "default_auto_learn_delay_ms")]
+    pub auto_learn_delay_ms: u64,
 }
 
 fn default_model() -> String {
@@ -630,6 +638,13 @@ fn default_word_correction_threshold() -> f64 {
 
 fn default_paste_delay_ms() -> u64 {
     60
+}
+
+/// Default wait before reading the focused text field for corrections after
+/// a paste: long enough for the user to notice and fix a wrong term, short
+/// enough that the field usually still holds the pasted text.
+fn default_auto_learn_delay_ms() -> u64 {
+    8_000
 }
 
 fn default_paste_delay_after_ms() -> u64 {
@@ -1022,6 +1037,8 @@ pub fn get_default_settings() -> AppSettings {
         vad_backend: VadBackend::default(),
         long_form_chunking: default_long_form_chunking(),
         overlay_style: default_overlay_style(),
+        auto_learn_custom_words: false,
+        auto_learn_delay_ms: default_auto_learn_delay_ms(),
     }
 }
 
