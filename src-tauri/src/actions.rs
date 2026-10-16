@@ -147,6 +147,36 @@ fn should_use_streaming_overlay(style: OverlayStyle, is_streaming: bool) -> bool
     style == OverlayStyle::Live && is_streaming
 }
 
+/// Suffix appended to post-processing prompts that lists the user's custom
+/// words as a glossary, so the rewrite model keeps their preferred
+/// spellings. Empty when there is nothing to inject.
+fn custom_words_glossary(custom_words: &[String]) -> String {
+    const MAX_TERMS: usize = 50;
+    const MAX_CHARS: usize = 1_000;
+
+    let mut joined = String::new();
+    let mut terms = 0;
+    for word in custom_words {
+        let term = word.trim();
+        if term.is_empty() {
+            continue;
+        }
+        if terms >= MAX_TERMS || joined.len() + term.len() + 2 > MAX_CHARS {
+            break;
+        }
+        if !joined.is_empty() {
+            joined.push_str(", ");
+        }
+        joined.push_str(term);
+        terms += 1;
+    }
+    if joined.is_empty() {
+        String::new()
+    } else {
+        format!("\n\nPreferred terms (use these exact spellings where they apply): {joined}")
+    }
+}
+
 async fn post_process_transcription(settings: &AppSettings, transcription: &str) -> Option<String> {
     if is_blank_transcription(transcription) {
         debug!("Post-processing skipped because the transcription is empty");
@@ -222,7 +252,8 @@ async fn post_process_transcription(settings: &AppSettings, transcription: &str)
     if provider.supports_structured_output {
         debug!("Using structured outputs for provider '{}'", provider.id);
 
-        let system_prompt = build_system_prompt(&prompt);
+        let glossary = custom_words_glossary(&settings.custom_words);
+        let system_prompt = format!("{}{glossary}", build_system_prompt(&prompt));
         let user_content = transcription.to_string();
 
         // Handle Apple Intelligence separately since it uses native Swift APIs
@@ -337,7 +368,8 @@ async fn post_process_transcription(settings: &AppSettings, transcription: &str)
     }
 
     // Legacy mode: Replace ${output} variable in the prompt with the actual text
-    let processed_prompt = prompt.replace("${output}", transcription);
+    let glossary = custom_words_glossary(&settings.custom_words);
+    let processed_prompt = format!("{}{glossary}", prompt.replace("${output}", transcription));
     debug!("Processed prompt length: {} chars", processed_prompt.len());
 
     match crate::llm_client::send_chat_completion(
@@ -923,8 +955,8 @@ pub static ACTION_MAP: Lazy<HashMap<String, Arc<dyn ShortcutAction>>> = Lazy::ne
 #[cfg(test)]
 mod tests {
     use super::{
-        complete_unless_cancelled, is_blank_transcription, should_use_streaming_overlay,
-        strip_think_block,
+        complete_unless_cancelled, custom_words_glossary, is_blank_transcription,
+        should_use_streaming_overlay, strip_think_block,
     };
     use crate::settings::OverlayStyle;
     use std::future;
@@ -938,6 +970,33 @@ mod tests {
         assert!(is_blank_transcription(""));
         assert!(is_blank_transcription("   "));
         assert!(is_blank_transcription("\t\n  \r\n"));
+    }
+
+    #[test]
+    fn glossary_is_empty_without_custom_words() {
+        assert_eq!(custom_words_glossary(&[]), "");
+        assert_eq!(custom_words_glossary(&["  ".to_string()]), "");
+    }
+
+    #[test]
+    fn glossary_lists_custom_words() {
+        let glossary = custom_words_glossary(&["Handy".to_string(), "微信".to_string()]);
+        assert_eq!(
+            glossary,
+            "\n\nPreferred terms (use these exact spellings where they apply): Handy, 微信"
+        );
+    }
+
+    #[test]
+    fn glossary_skips_empty_entries_and_caps_size() {
+        let words: Vec<String> = (0..300).map(|i| format!("word{i}")).collect();
+        let glossary = custom_words_glossary(&words);
+        assert!(glossary.len() < 1_200);
+        assert!(glossary.contains("word0"));
+        assert!(!glossary.contains("word299"));
+
+        let words = vec!["a".to_string(), "  ".to_string(), "b".to_string()];
+        assert!(custom_words_glossary(&words).ends_with("a, b"));
     }
 
     #[test]
