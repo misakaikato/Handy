@@ -555,6 +555,10 @@
         "title": "Verzögerung des automatischen Lernens",
         "description": "Wie lange nach dem Einfügen gewartet wird, bevor das Textfeld auf korrigierte Begriffe geprüft wird."
       },
+      "autoLearnNotification": {
+        "title": "Dauer der Lern-Benachrichtigung",
+        "description": "Wie lange die Benachrichtigung über gelernte Wörter sichtbar bleibt."
+      },
       "holdThreshold": {
         "title": "Halte-Schwellenwert",
         "description": "Nur im Modus „Automatisch“: wie lange (in Millisekunden) die Tastenkombination gedrückt bleiben muss, damit sie als Halten statt als Tippen zählt. Verringern, wenn die Aufnahme nach kurzem Halten weiterläuft; erhöhen, wenn bewusstes Tippen als Halten gewertet wird."
@@ -714,5 +718,10 @@
     "learnMore": "So behebst du das",
     "recorderBlocked": "Tastenkürzel können gerade nicht aufgezeichnet werden — macOS Secure Input blockiert Tastenereignisse. Behebe zuerst die Secure-Input-Warnung.",
     "dismiss": "Ausblenden"
+  },
+  "autoLearn": {
+    "learned": "Gelernt: {{words}}",
+    "separator": ", ",
+    "undo": "Rückgängig"
   }
 }

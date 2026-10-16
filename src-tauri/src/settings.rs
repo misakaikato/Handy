@@ -543,6 +543,9 @@ pub struct AppSettings {
     /// looking for corrections, in milliseconds.
     #[serde(default = "default_auto_learn_delay_ms")]
     pub auto_learn_delay_ms: u64,
+    /// How long the learned-words toast stays visible, in milliseconds.
+    #[serde(default = "default_auto_learn_notification_duration_ms")]
+    pub auto_learn_notification_duration_ms: u64,
 }
 
 fn default_model() -> String {
@@ -645,6 +648,12 @@ fn default_paste_delay_ms() -> u64 {
 /// enough that the field usually still holds the pasted text.
 fn default_auto_learn_delay_ms() -> u64 {
     8_000
+}
+
+/// Default visibility of the learned-words toast: long enough to read the
+/// terms and hit Undo, short enough not to linger over the user's work.
+fn default_auto_learn_notification_duration_ms() -> u64 {
+    5_000
 }
 
 fn default_paste_delay_after_ms() -> u64 {
@@ -1039,6 +1048,7 @@ pub fn get_default_settings() -> AppSettings {
         overlay_style: default_overlay_style(),
         auto_learn_custom_words: false,
         auto_learn_delay_ms: default_auto_learn_delay_ms(),
+        auto_learn_notification_duration_ms: default_auto_learn_notification_duration_ms(),
     }
 }
 

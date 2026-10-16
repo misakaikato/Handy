@@ -569,6 +569,10 @@
         "title": "Forsinkelse for automatisk læring",
         "description": "Hvor længe der ventes efter indsættelse, før tekstfeltet tjekkes for korrigerede termer."
       },
+      "autoLearnNotification": {
+        "title": "Varighed af læringsmeddelelse",
+        "description": "Hvor længe meddelelsen om lærte ord forbliver synlig."
+      },
       "holdThreshold": {
         "title": "Holdetærskel",
         "description": "Kun i automatisk tilstand: hvor længe (i millisekunder) genvejen skal holdes nede, før det tæller som et hold i stedet for et tryk. Sænk værdien, hvis korte hold lader optagelsen køre videre; hæv den, hvis bevidste tryk behandles som hold."
@@ -714,5 +718,10 @@
     "learnMore": "Sådan løser du det",
     "recorderBlocked": "Genveje kan ikke optages lige nu — macOS Secure Input blokerer tastehændelser. Løs advarslen om Secure Input først.",
     "dismiss": "Afvis"
+  },
+  "autoLearn": {
+    "learned": "Lært: {{words}}",
+    "separator": ", ",
+    "undo": "Fortryd"
   }
 }

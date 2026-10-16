@@ -57,6 +57,13 @@ export const DebugSettings: React.FC<DebugSettingsProps> = ({
         />
         <ReliablePasteToggle descriptionMode="tooltip" grouped={true} />
         <AutoLearnDelay descriptionMode="tooltip" grouped={true} />
+        <AutoLearnDelay
+          descriptionMode="tooltip"
+          grouped={true}
+          settingKey="auto_learn_notification_duration_ms"
+          labelKey="settings.debug.autoLearnNotification.title"
+          descriptionKey="settings.debug.autoLearnNotification.description"
+        />
         <HoldThreshold descriptionMode="tooltip" grouped={true} />
         <RecordingBuffer descriptionMode="tooltip" grouped={true} />
         <AlwaysOnMicrophone descriptionMode="tooltip" grouped={true} />

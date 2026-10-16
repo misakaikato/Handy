@@ -362,6 +362,7 @@ fn initialize_core_logic(app_handle: &AppHandle) {
 
     // Create the recording overlay window (hidden by default)
     utils::create_recording_overlay(app_handle);
+    auto_learn::create_learned_toast(app_handle);
 }
 
 #[tauri::command]
@@ -691,6 +692,8 @@ pub fn run(cli_args: CliArgs) {
             shortcut::update_custom_words,
             shortcut::change_auto_learn_custom_words_setting,
             shortcut::change_auto_learn_delay_ms_setting,
+            shortcut::change_auto_learn_notification_duration_ms_setting,
+            shortcut::undo_auto_learn,
             shortcut::suspend_all_bindings,
             shortcut::resume_all_bindings,
             shortcut::change_mute_while_recording_setting,

@@ -555,6 +555,10 @@
         "title": "自動学習の遅延",
         "description": "貼り付け後、テキストフィールドの修正を確認するまでの待機時間。"
       },
+      "autoLearnNotification": {
+        "title": "自動学習通知の表示時間",
+        "description": "学習した単語の通知を表示する時間。"
+      },
       "holdThreshold": {
         "title": "長押しのしきい値",
         "description": "「自動」モードのみ: タップではなく長押しとみなすためにショートカットを押し続ける必要がある時間（ミリ秒）。短い長押しの後も録音が続いてしまう場合は下げ、意図したタップが長押しと判定される場合は上げてください。"
@@ -714,5 +718,10 @@
     "learnMore": "解決方法",
     "recorderBlocked": "現在ショートカットを記録できません。macOS の Secure Input がキーイベントをブロックしています。先に Secure Input の警告を解消してください。",
     "dismiss": "閉じる"
+  },
+  "autoLearn": {
+    "learned": "学習済み: {{words}}",
+    "separator": "、",
+    "undo": "元に戻す"
   }
 }

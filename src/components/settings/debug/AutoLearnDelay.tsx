@@ -4,14 +4,30 @@ import { Slider } from "../../ui/Slider";
 import { useSettings } from "../../../hooks/useSettings";
 import { useOsType } from "../../../hooks/useOsType";
 
-/**
- * Delay before the backend reads the focused text field looking for
- * corrections to learn. Debug-gated companion of the auto-learn toggle.
- */
-export const AutoLearnDelay: React.FC<{
+type AutoLearnTimingKey =
+  | "auto_learn_delay_ms"
+  | "auto_learn_notification_duration_ms";
+
+interface AutoLearnTimingProps {
   descriptionMode?: "inline" | "tooltip";
   grouped?: boolean;
-}> = ({ descriptionMode = "tooltip", grouped = false }) => {
+  settingKey?: AutoLearnTimingKey;
+  labelKey?: string;
+  descriptionKey?: string;
+}
+
+/**
+ * Debug-gated sliders for the auto-learn timing: the wait before reading the
+ * focused field, and how long the learned-words toast stays visible.
+ * macOS only, matching the feature.
+ */
+export const AutoLearnDelay: React.FC<AutoLearnTimingProps> = ({
+  descriptionMode = "tooltip",
+  grouped = false,
+  settingKey = "auto_learn_delay_ms",
+  labelKey = "settings.debug.autoLearnDelay.title",
+  descriptionKey = "settings.debug.autoLearnDelay.description",
+}) => {
   const osType = useOsType();
   const { t } = useTranslation();
   const { settings, updateSetting, resetSetting, isUpdating } = useSettings();
@@ -22,15 +38,18 @@ export const AutoLearnDelay: React.FC<{
 
   return (
     <Slider
-      value={settings?.auto_learn_delay_ms ?? 8000}
-      onChange={(value: number) => updateSetting("auto_learn_delay_ms", value)}
-      onReset={() => resetSetting("auto_learn_delay_ms")}
-      isResetting={isUpdating("auto_learn_delay_ms")}
+      value={
+        settings?.[settingKey] ??
+        (settingKey === "auto_learn_delay_ms" ? 8000 : 5000)
+      }
+      onChange={(value: number) => updateSetting(settingKey, value)}
+      onReset={() => resetSetting(settingKey)}
+      isResetting={isUpdating(settingKey)}
       min={1000}
       max={30000}
       step={500}
-      label={t("settings.debug.autoLearnDelay.title")}
-      description={t("settings.debug.autoLearnDelay.description")}
+      label={t(labelKey)}
+      description={t(descriptionKey)}
       descriptionMode={descriptionMode}
       grouped={grouped}
       formatValue={(v) => `${(v / 1000).toFixed(1)}s`}

@@ -1,0 +1,71 @@
+@import "../styles/theme.css";
+
+/* Keep the card geometry in sync with TOAST_WIDTH/TOAST_HEIGHT in
+   src-tauri/src/auto_learn/notify.rs. The card fills the window; the window
+   itself is transparent and borderless. */
+:root {
+  --t-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --t-surface: color-mix(in srgb, var(--color-background) 98%, transparent);
+  --t-text: var(--color-text);
+  --t-accent: var(--color-logo-primary);
+  --t-border: color-mix(in srgb, var(--color-mid-gray) 22%, transparent);
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.toast-card {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 0 18px;
+  background: var(--t-surface);
+  border: 1px solid var(--t-border);
+  border-radius: 22px;
+  font-family: var(--t-font);
+  font-size: 13px;
+  color: var(--t-text);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.toast-words {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.toast-undo {
+  flex: 0 0 auto;
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--t-accent);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 8px;
+}
+
+.toast-undo:hover {
+  filter: brightness(1.1);
+}
+
+.toast-undo:active {
+  filter: brightness(0.9);
+}

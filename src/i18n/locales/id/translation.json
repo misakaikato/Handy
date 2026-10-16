@@ -569,6 +569,10 @@
         "title": "Penundaan pembelajaran otomatis",
         "description": "Berapa lama menunggu setelah menempel sebelum memeriksa istilah yang diperbaiki di kolom teks."
       },
+      "autoLearnNotification": {
+        "title": "Durasi notifikasi pembelajaran",
+        "description": "Berapa lama notifikasi kata yang dipelajari tetap terlihat."
+      },
       "holdThreshold": {
         "title": "Ambang Waktu Tahan",
         "description": "Hanya mode Otomatis: berapa lama (dalam milidetik) pintasan harus ditahan agar dianggap ditahan, bukan ditekan singkat. Turunkan jika penahanan singkat membuat perekaman tetap aktif; naikkan jika ketukan yang disengaja dianggap sebagai penahanan."
@@ -714,5 +718,10 @@
     "learnMore": "Cara memperbaiki",
     "recorderBlocked": "Pintasan tidak dapat direkam saat ini — macOS Secure Input memblokir peristiwa tombol. Selesaikan peringatan Secure Input terlebih dahulu.",
     "dismiss": "Tutup"
+  },
+  "autoLearn": {
+    "learned": "Dipelajari: {{words}}",
+    "separator": ", ",
+    "undo": "Urungkan"
   }
 }

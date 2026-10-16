@@ -518,6 +518,21 @@ fn same_word_in(word: &str, list: &[String]) -> bool {
     })
 }
 
+/// Removes the words of one learn event from the custom-word list, using the
+/// same match rule as the dedupe key (exact for Han-containing words,
+/// ASCII case-insensitive otherwise). Entries the user added or edited since
+/// learning stay untouched unless they match a learned word. Returns how many
+/// entries were removed.
+pub(crate) fn remove_learned_words(learned: &[String], custom_words: &mut Vec<String>) -> usize {
+    let before = custom_words.len();
+    custom_words.retain(|existing| {
+        !learned
+            .iter()
+            .any(|word| same_word_in(word, std::slice::from_ref(existing)))
+    });
+    before - custom_words.len()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -720,5 +735,44 @@ mod tests {
         assert_eq!(forward_chars(s, 0, 3), 5);
         assert_eq!(back_chars(s, 5, 2), 1);
         assert_eq!(floor_char_boundary(s, 2), 1);
+    }
+
+    #[test]
+    fn remove_learned_words_removes_only_the_learned_batch() {
+        // A real learn batch never contains words that already existed
+        // (dedupe at learn time uses the same match rule).
+        let mut words: Vec<String> = ["微信", "Handy", "chatgpt"]
+            .iter()
+            .map(|w| w.to_string())
+            .collect();
+        let learned = ["微信".to_string(), "handy".to_string()];
+
+        let removed = remove_learned_words(&learned, &mut words);
+
+        assert_eq!(removed, 2);
+        assert_eq!(words, vec!["chatgpt".to_string()]);
+    }
+
+    #[test]
+    fn remove_learned_words_keeps_unrelated_and_similar_words() {
+        let mut words: Vec<String> = ["威信".to_string(), "ChatGPT".to_string()]
+            .iter()
+            .map(|w| w.to_string())
+            .collect();
+        let learned = ["微信".to_string()];
+
+        let removed = remove_learned_words(&learned, &mut words);
+
+        assert_eq!(removed, 0);
+        assert_eq!(words.len(), 2);
+    }
+
+    #[test]
+    fn remove_learned_words_is_a_noop_when_already_deleted() {
+        let mut words: Vec<String> = vec!["别的".to_string()];
+        let learned = ["微信".to_string()];
+
+        assert_eq!(remove_learned_words(&learned, &mut words), 0);
+        assert_eq!(words, vec!["别的".to_string()]);
     }
 }

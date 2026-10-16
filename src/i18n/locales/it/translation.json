@@ -555,6 +555,10 @@
         "title": "Ritardo dell'apprendimento automatico",
         "description": "Quanto attendere dopo l'incollaggio prima di controllare i termini corretti nel campo di testo."
       },
+      "autoLearnNotification": {
+        "title": "Durata della notifica di apprendimento",
+        "description": "Per quanto tempo resta visibile la notifica delle parole apprese."
+      },
       "holdThreshold": {
         "title": "Soglia di pressione prolungata",
         "description": "Solo in modalità Automatico: per quanto tempo (in millisecondi) la scorciatoia deve restare premuta per contare come pressione prolungata invece di un tocco. Riduci se la registrazione resta attiva dopo pressioni brevi; aumenta se i tocchi intenzionali vengono interpretati come pressioni prolungate."
@@ -714,5 +718,10 @@
     "learnMore": "Come risolvere",
     "recorderBlocked": "Non è possibile registrare scorciatoie in questo momento: Secure Input di macOS sta bloccando gli eventi dei tasti. Risolvi prima l'avviso di Secure Input.",
     "dismiss": "Ignora"
+  },
+  "autoLearn": {
+    "learned": "Appreso: {{words}}",
+    "separator": ", ",
+    "undo": "Annulla"
   }
 }

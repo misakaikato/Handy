@@ -555,6 +555,10 @@
         "title": "Zpoždění automatického učení",
         "description": "Jak dlouho čekat po vložení před kontrolou opravených výrazů v textovém poli."
       },
+      "autoLearnNotification": {
+        "title": "Doba zobrazení oznámení o učení",
+        "description": "Jak dlouho zůstává oznámení o naučených slovech viditelné."
+      },
       "holdThreshold": {
         "title": "Práh podržení",
         "description": "Pouze v automatickém režimu: jak dlouho (v milisekundách) musí být zkratka držena, aby se počítala jako podržení místo klepnutí. Snižte, pokud po krátkém podržení nahrávání zůstává zapnuté; zvyšte, pokud jsou záměrná klepnutí vyhodnocena jako podržení."
@@ -714,5 +718,10 @@
     "learnMore": "Jak to vyřešit",
     "recorderBlocked": "Zkratky teď nelze nahrát — Secure Input v macOS blokuje události kláves. Nejprve vyřešte upozornění na Secure Input.",
     "dismiss": "Zavřít"
+  },
+  "autoLearn": {
+    "learned": "Naučeno: {{words}}",
+    "separator": ", ",
+    "undo": "Zpět"
   }
 }

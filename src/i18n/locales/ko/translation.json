@@ -550,6 +550,10 @@
         "title": "자동 학습 지연",
         "description": "붙여넣기 후 텍스트 필드의 수정 내용을 확인하기까지 대기하는 시간."
       },
+      "autoLearnNotification": {
+        "title": "자동 학습 알림 표시 시간",
+        "description": "학습된 단어 알림이 표시되는 시간."
+      },
       "holdThreshold": {
         "title": "길게 누르기 기준 시간",
         "description": "자동 모드 전용: 탭이 아닌 길게 누르기로 인식되려면 단축키를 얼마나 오래(밀리초) 누르고 있어야 하는지 설정합니다. 짧게 누른 뒤에도 녹음이 계속 켜져 있으면 낮추고, 의도한 탭이 길게 누르기로 처리되면 높이세요."
@@ -714,5 +718,10 @@
     "learnMore": "해결 방법",
     "recorderBlocked": "지금은 단축키를 등록할 수 없습니다. macOS Secure Input이 키 이벤트를 차단하고 있습니다. Secure Input 경고를 먼저 해결하세요.",
     "dismiss": "닫기"
+  },
+  "autoLearn": {
+    "learned": "학습됨: {{words}}",
+    "separator": ", ",
+    "undo": "실행 취소"
   }
 }

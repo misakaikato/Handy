@@ -569,6 +569,10 @@
         "title": "Vertraging automatisch leren",
         "description": "Hoe lang gewacht wordt na het plakken voordat het tekstveld op gecorrigeerde termen wordt gecontroleerd."
       },
+      "autoLearnNotification": {
+        "title": "Duur van de leermelding",
+        "description": "Hoe lang de melding van geleerde woorden zichtbaar blijft."
+      },
       "holdThreshold": {
         "title": "Vasthouddrempel",
         "description": "Alleen in de modus Automatisch: hoe lang (in milliseconden) de sneltoets ingedrukt moet blijven om als vasthouden te tellen in plaats van als tik. Verlaag dit als de opname na kort vasthouden blijft doorlopen; verhoog het als bewuste tikken als vasthouden worden gezien."
@@ -714,5 +718,10 @@
     "learnMore": "Hoe je dit oplost",
     "recorderBlocked": "Sneltoetsen kunnen nu niet worden opgenomen — Secure Input van macOS blokkeert toetsgebeurtenissen. Los eerst de Secure Input-waarschuwing op.",
     "dismiss": "Sluiten"
+  },
+  "autoLearn": {
+    "learned": "Geleerd: {{words}}",
+    "separator": ", ",
+    "undo": "Ongedaan maken"
   }
 }

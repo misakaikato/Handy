@@ -336,6 +336,26 @@ async changeAutoLearnDelayMsSetting(ms: number) : Promise<Result<null, string>> 
     else return { status: "error", error: e  as any };
 }
 },
+async changeAutoLearnNotificationDurationMsSetting(ms: number) : Promise<Result<null, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("change_auto_learn_notification_duration_ms_setting", { ms }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+/**
+ * Removes the words added by the toast's learn event (no-op when the event
+ * is stale or the platform has no auto-learning).
+ */
+async undoAutoLearn(eventId: number) : Promise<Result<null, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("undo_auto_learn", { eventId }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
 /**
  * Temporarily unregister all bindings while the user is recording a
  * shortcut in the UI. This avoids firing actions while keys are recorded.
@@ -1068,7 +1088,11 @@ auto_learn_custom_words?: boolean;
  * How long to wait after a paste before reading the focused text field
  * looking for corrections, in milliseconds.
  */
-auto_learn_delay_ms?: number }
+auto_learn_delay_ms?: number; 
+/**
+ * How long the learned-words toast stays visible, in milliseconds.
+ */
+auto_learn_notification_duration_ms?: number }
 export type AudioDevice = { index: string; name: string; is_default: boolean }
 export type AutoSubmitKey = "enter" | "ctrl_enter" | "cmd_enter"
 export type AvailableAccelerators = { transcribe: string[]; gpu_devices: GpuDeviceOption[] }

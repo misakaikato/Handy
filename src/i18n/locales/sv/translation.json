@@ -555,6 +555,10 @@
         "title": "Fördröjning för automatisk inlärning",
         "description": "Hur länge appen väntar efter inklistring innan textfältet kontrolleras efter korrigerade termer."
       },
+      "autoLearnNotification": {
+        "title": "Varaktighet för inlärningsavisering",
+        "description": "Hur länge aviseringen om inlärda ord förblir synlig."
+      },
       "holdThreshold": {
         "title": "Tröskel för hållning",
         "description": "Endast i automatiskt läge: hur länge (i millisekunder) genvägen måste hållas nere för att räknas som hållning i stället för ett tryck. Sänk värdet om inspelningen fortsätter efter korta hållningar; höj det om avsiktliga tryck tolkas som hållning."
@@ -714,5 +718,10 @@
     "learnMore": "Så här löser du det",
     "recorderBlocked": "Det går inte att spela in kortkommandon just nu — macOS Secure Input blockerar tangenthändelser. Lös varningen om Secure Input först.",
     "dismiss": "Avfärda"
+  },
+  "autoLearn": {
+    "learned": "Inlärt: {{words}}",
+    "separator": ", ",
+    "undo": "Ångra"
   }
 }

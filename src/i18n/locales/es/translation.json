@@ -555,6 +555,10 @@
         "title": "Retardo del aprendizaje automático",
         "description": "Cuánto esperar tras pegar antes de comprobar si hay términos corregidos en el campo de texto."
       },
+      "autoLearnNotification": {
+        "title": "Duración del aviso de aprendizaje",
+        "description": "Cuánto tiempo permanece visible la notificación de palabras aprendidas."
+      },
       "holdThreshold": {
         "title": "Umbral de pulsación",
         "description": "Solo en el modo Automático: cuánto tiempo (en milisegundos) debe mantenerse pulsado el atajo para contar como mantener en lugar de un toque. Redúcelo si la grabación sigue activa tras pulsaciones cortas; auméntalo si los toques deliberados se interpretan como mantener."
@@ -714,5 +718,10 @@
     "learnMore": "Cómo solucionarlo",
     "recorderBlocked": "Ahora mismo no se pueden grabar atajos: Secure Input de macOS está bloqueando los eventos de teclado. Resuelve primero el aviso de Secure Input.",
     "dismiss": "Descartar"
+  },
+  "autoLearn": {
+    "learned": "Aprendido: {{words}}",
+    "separator": ", ",
+    "undo": "Deshacer"
   }
 }

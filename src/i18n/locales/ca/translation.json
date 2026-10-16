@@ -569,6 +569,10 @@
         "title": "Retard de l'aprenentatge automàtic",
         "description": "Quant esperar després d'enganxar abans de comprovar els termes corregits al camp de text."
       },
+      "autoLearnNotification": {
+        "title": "Durada de l'avís d'aprenentatge",
+        "description": "Quant de temps roman visible l'avís de les paraules apreses."
+      },
       "holdThreshold": {
         "title": "Llindar de pulsació llarga",
         "description": "Només en mode automàtic: temps (en mil·lisegons) que cal mantenir premuda la drecera perquè es consideri una pulsació llarga en lloc d'una de breu. Reduïu-lo si les pulsacions llargues curtes deixen l'enregistrament actiu; augmenteu-lo si les pulsacions breus intencionades es tracten com a llargues."
@@ -714,5 +718,10 @@
     "learnMore": "Com es resol",
     "recorderBlocked": "Ara no se'n poden enregistrar dreceres: l'entrada segura del macOS bloca els esdeveniments de tecla. Resol primer l'avís d'entrada segura.",
     "dismiss": "Descarta"
+  },
+  "autoLearn": {
+    "learned": "Apres: {{words}}",
+    "separator": ", ",
+    "undo": "Desfés"
   }
 }

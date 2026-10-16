@@ -18,6 +18,8 @@
 
 #[cfg(any(target_os = "macos", test))]
 mod logic;
+#[cfg(target_os = "macos")]
+mod notify;
 
 #[cfg(target_os = "macos")]
 use crate::settings::{get_settings, write_settings, PasteMethod};
@@ -74,7 +76,7 @@ fn learn_from_correction(app: &AppHandle, pasted: &str) {
     }
 
     info!("Auto-learned custom words: {learned:?}");
-    settings.custom_words.extend(learned);
+    settings.custom_words.extend(learned.clone());
     write_settings(app, settings);
 
     // Let an open settings window pick up the new words.
@@ -82,6 +84,34 @@ fn learn_from_correction(app: &AppHandle, pasted: &str) {
         "settings-changed",
         serde_json::json!({ "setting": "custom_words" }),
     );
+
+    notify::show_learned_toast(app, learned);
+}
+
+/// Creates the learned-words toast window (hidden). No-op outside macOS,
+/// where auto-learning is not wired up yet.
+pub fn create_learned_toast(app: &AppHandle) {
+    #[cfg(target_os = "macos")]
+    notify::create_learned_toast(app);
+    #[cfg(not(target_os = "macos"))]
+    {
+        let _ = app;
+    }
+}
+
+/// Removes the words added by the given learn event from `custom_words`,
+/// persists the change and hides the toast. Returns whether an event with
+/// this id was still pending; always false outside macOS.
+pub fn undo_last_learned(app: &AppHandle, event_id: u64) -> bool {
+    #[cfg(target_os = "macos")]
+    {
+        notify::undo_last_learned(app, event_id)
+    }
+    #[cfg(not(target_os = "macos"))]
+    {
+        let _ = (app, event_id);
+        false
+    }
 }
 
 // ------------------------------------------------------- macOS AX glue

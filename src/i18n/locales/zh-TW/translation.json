@@ -555,6 +555,10 @@
         "title": "自動學習延遲",
         "description": "貼上後等待多久再檢查文字欄位中修正的詞彙。"
       },
+      "autoLearnNotification": {
+        "title": "自動學習提示時長",
+        "description": "學習詞彙通知的顯示時長。"
+      },
       "holdThreshold": {
         "title": "長按判定時長",
         "description": "僅適用於「自動」模式：快捷鍵需要按住多久（毫秒）才算作按住而不是輕按。如果短暫按住後錄音仍持續，請調低；如果刻意的輕按被視為按住，請調高。"
@@ -714,5 +718,10 @@
     "learnMore": "如何解決",
     "recorderBlocked": "目前無法錄製快捷鍵——macOS 的 Secure Input 正在阻擋按鍵事件。請先解決 Secure Input 警告。",
     "dismiss": "關閉"
+  },
+  "autoLearn": {
+    "learned": "已學習：{{words}}",
+    "separator": "、",
+    "undo": "復原"
   }
 }

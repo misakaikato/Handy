@@ -555,6 +555,10 @@
         "title": "Opóźnienie automatycznej nauki",
         "description": "Jak długo czekać po wklejeniu przed sprawdzeniem poprawionych terminów w polu tekstowym."
       },
+      "autoLearnNotification": {
+        "title": "Czas trwania powiadomienia o nauce",
+        "description": "Jak długo widoczne jest powiadomienie o nauczonych słowach."
+      },
       "holdThreshold": {
         "title": "Próg przytrzymania",
         "description": "Tylko w trybie automatycznym: jak długo (w milisekundach) skrót musi być przytrzymany, aby liczył się jako przytrzymanie, a nie dotknięcie. Zmniejsz, jeśli po krótkim przytrzymaniu nagrywanie pozostaje włączone; zwiększ, jeśli celowe dotknięcia są traktowane jako przytrzymanie."
@@ -714,5 +718,10 @@
     "learnMore": "Jak to naprawić",
     "recorderBlocked": "Nie można teraz nagrać skrótu — Secure Input w macOS blokuje zdarzenia klawiszy. Najpierw rozwiąż ostrzeżenie o Secure Input.",
     "dismiss": "Odrzuć"
+  },
+  "autoLearn": {
+    "learned": "Nauczono: {{words}}",
+    "separator": ", ",
+    "undo": "Cofnij"
   }
 }

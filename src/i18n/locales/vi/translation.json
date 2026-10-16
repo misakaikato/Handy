@@ -555,6 +555,10 @@
         "title": "Độ trễ tự động học",
         "description": "Thời gian chờ sau khi dán trước khi kiểm tra các thuật ngữ đã sửa trong ô văn bản."
       },
+      "autoLearnNotification": {
+        "title": "Thời lượng thông báo tự học",
+        "description": "Thông báo về các từ đã học hiển thị bao lâu."
+      },
       "holdThreshold": {
         "title": "Ngưỡng giữ phím",
         "description": "Chỉ áp dụng cho chế độ Tự động: phím tắt phải được giữ trong bao lâu (mili giây) để được tính là giữ thay vì nhấn nhanh. Giảm xuống nếu bản ghi vẫn tiếp tục sau khi giữ ngắn; tăng lên nếu các lần nhấn nhanh có chủ ý bị coi là giữ phím."
@@ -714,5 +718,10 @@
     "learnMore": "Cách khắc phục",
     "recorderBlocked": "Hiện không thể ghi phím tắt — Secure Input của macOS đang chặn các sự kiện phím. Hãy xử lý cảnh báo Secure Input trước.",
     "dismiss": "Bỏ qua"
+  },
+  "autoLearn": {
+    "learned": "Đã học: {{words}}",
+    "separator": ", ",
+    "undo": "Hoàn tác"
   }
 }

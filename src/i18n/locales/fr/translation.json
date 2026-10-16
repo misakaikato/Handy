@@ -555,6 +555,10 @@
         "title": "Délai d'apprentissage automatique",
         "description": "Temps d'attente après le collage avant de vérifier les termes corrigés dans le champ de texte."
       },
+      "autoLearnNotification": {
+        "title": "Durée de la notification d'apprentissage",
+        "description": "Combien de temps la notification des mots appris reste visible."
+      },
       "holdThreshold": {
         "title": "Seuil de maintien",
         "description": "Mode Auto uniquement : durée (en millisecondes) pendant laquelle le raccourci doit rester enfoncé pour compter comme un maintien plutôt qu'une pression brève. Diminuez si l'enregistrement reste actif après un maintien court ; augmentez si des pressions brèves volontaires sont traitées comme un maintien."
@@ -714,5 +718,10 @@
     "learnMore": "Comment résoudre ce problème",
     "recorderBlocked": "Impossible d'enregistrer un raccourci pour le moment : Secure Input de macOS bloque les événements clavier. Résolvez d'abord l'avertissement Secure Input.",
     "dismiss": "Ignorer"
+  },
+  "autoLearn": {
+    "learned": "Appris : {{words}}",
+    "separator": ", ",
+    "undo": "Annuler"
   }
 }

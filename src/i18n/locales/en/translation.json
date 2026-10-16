@@ -569,6 +569,10 @@
         "title": "Auto-Learn Delay",
         "description": "How long to wait after pasting before checking the text field for corrected terms."
       },
+      "autoLearnNotification": {
+        "title": "Auto-Learn Toast Duration",
+        "description": "How long the learned-words notification stays visible."
+      },
       "holdThreshold": {
         "title": "Hold Threshold",
         "description": "Auto mode only: how long (in milliseconds) the shortcut must be held before it counts as a hold instead of a tap. Lower if short holds keep leaving recording on; raise if deliberate taps get treated as holds."
@@ -714,5 +718,10 @@
     "learnMore": "How to fix",
     "recorderBlocked": "Can't record shortcuts right now — macOS Secure Input is blocking key events. Resolve the Secure Input warning first.",
     "dismiss": "Dismiss"
+  },
+  "autoLearn": {
+    "learned": "Learned: {{words}}",
+    "separator": ", ",
+    "undo": "Undo"
   }
 }

@@ -906,6 +906,27 @@ pub fn change_auto_learn_delay_ms_setting(app: AppHandle, ms: u64) -> Result<(),
 
 #[tauri::command]
 #[specta::specta]
+pub fn change_auto_learn_notification_duration_ms_setting(
+    app: AppHandle,
+    ms: u64,
+) -> Result<(), String> {
+    let mut settings = settings::get_settings(&app);
+    settings.auto_learn_notification_duration_ms = ms;
+    settings::write_settings(&app, settings);
+    Ok(())
+}
+
+/// Removes the words added by the toast's learn event (no-op when the event
+/// is stale or the platform has no auto-learning).
+#[tauri::command]
+#[specta::specta]
+pub fn undo_auto_learn(app: AppHandle, event_id: u64) -> Result<(), String> {
+    crate::auto_learn::undo_last_learned(&app, event_id);
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
 pub fn change_word_correction_threshold_setting(
     app: AppHandle,
     threshold: f64,
