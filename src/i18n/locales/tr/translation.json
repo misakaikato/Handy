@@ -351,6 +351,10 @@
         "remove": "{{word}} Kaldır",
         "duplicate": "\"{{word}}\" zaten mevcut"
       },
+      "autoLearnCustomWords": {
+        "title": "Özel kelimeleri öğrenme",
+        "description": "Yapıştırdıktan sonra metin alanını izler ve düzelttiğiniz terimleri özel kelimelere ekler (yalnızca macOS)."
+      },
       "voiceActivityDetection": {
         "title": "Ses Etkinliği Algılama",
         "description": "Kayıtlardaki sessizliği filtreler. Akış destekli modeller daha uzun bir VAD kuyruğu kullanır; VAD devre dışı bırakıldığında ham ses kaydedilir."
@@ -546,6 +550,10 @@
       "pasteDelayAfter": {
         "title": "Yapıştırma Gecikmesi (Sonra)",
         "description": "Yapıştırma tuşundan sonra, önceki panonuz geri yüklenmeden önceki gecikme (milisaniye cinsinden). Transkripsiyon yerine eski pano içeriği yapıştırılıyorsa artırın."
+      },
+      "autoLearnDelay": {
+        "title": "Otomatik öğrenme gecikmesi",
+        "description": "Yapıştırdıktan sonra metin alanındaki düzeltilmiş terimleri kontrol etmeden önce beklenecek süre."
       },
       "holdThreshold": {
         "title": "Basılı tutma eşiği",

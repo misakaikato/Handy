@@ -345,11 +345,15 @@
       },
       "customWords": {
         "title": "自訂詞彙",
-        "description": "協助支援的模型辨識名稱和專業術語。目前，模糊修正僅適用於使用 A–Z 字母和數字的詞語。",
+        "description": "協助支援的模型辨識名稱和專業術語。模糊修正按拼寫比對 A–Z 詞彙，按讀音比對中文詞彙。",
         "placeholder": "新增詞彙",
         "add": "新增",
         "remove": "刪除 {{word}}",
         "duplicate": "「{{word}}」已存在"
+      },
+      "autoLearnCustomWords": {
+        "title": "自動學習自訂詞彙",
+        "description": "貼上後稍候讀取文字欄位內容，將你手動修正的詞自動加入自訂詞彙（僅 macOS）。"
       },
       "voiceActivityDetection": {
         "title": "語音活動偵測",
@@ -546,6 +550,10 @@
       "pasteDelayAfter": {
         "title": "貼上延遲（後）",
         "description": "發送貼上按鍵後、還原先前剪貼簿前的延遲（毫秒）。如果貼上的是舊的剪貼簿內容而非轉錄文字，請增加此值。"
+      },
+      "autoLearnDelay": {
+        "title": "自動學習延遲",
+        "description": "貼上後等待多久再檢查文字欄位中修正的詞彙。"
       },
       "holdThreshold": {
         "title": "長按判定時長",

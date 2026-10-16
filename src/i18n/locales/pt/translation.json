@@ -351,6 +351,10 @@
         "remove": "Remover {{word}}",
         "duplicate": "\"{{word}}\" já existe"
       },
+      "autoLearnCustomWords": {
+        "title": "Aprender palavras personalizadas",
+        "description": "Após colar, observa o campo de texto e adiciona os termos corrigidos às palavras personalizadas (apenas macOS)."
+      },
       "voiceActivityDetection": {
         "title": "Detecção de atividade de voz",
         "description": "Filtra o silêncio das gravações. Modelos com suporte a streaming usam uma cauda de VAD mais longa; desativar o VAD grava o áudio bruto."
@@ -546,6 +550,10 @@
       "pasteDelayAfter": {
         "title": "Atraso de colagem (depois)",
         "description": "Atraso (em milissegundos) após a tecla de colar, antes de restaurar a área de transferência anterior. Aumente se o conteúdo antigo da área de transferência estiver sendo colado em vez da transcrição."
+      },
+      "autoLearnDelay": {
+        "title": "Atraso da aprendizagem automática",
+        "description": "Quanto esperar após colar antes de verificar se há termos corrigidos no campo de texto."
       },
       "holdThreshold": {
         "title": "Limite de tempo de pressão",

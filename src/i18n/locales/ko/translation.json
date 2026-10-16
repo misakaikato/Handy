@@ -351,6 +351,10 @@
         "remove": "{{word}} 제거",
         "duplicate": "\"{{word}}\"이(가) 이미 존재합니다"
       },
+      "autoLearnCustomWords": {
+        "title": "사용자 지정 단어 자동 학습",
+        "description": "붙여넣기 후 텍스트 필드를 확인하여 수정한 용어를 사용자 지정 단어에 자동으로 추가합니다(macOS 전용)."
+      },
       "voiceActivityDetection": {
         "title": "음성 활동 감지",
         "description": "녹음에서 무음 구간을 걸러냅니다. 스트리밍 지원 모델은 더 긴 VAD 테일을 사용하며, VAD를 끄면 원본 오디오가 그대로 녹음됩니다."
@@ -541,6 +545,10 @@
       "pasteDelayAfter": {
         "title": "붙여넣기 지연 (이후)",
         "description": "붙여넣기 키 입력을 보낸 후 이전 클립보드를 복원하기 전의 지연 시간(밀리초). 전사된 텍스트 대신 이전 클립보드 내용이 붙여넣어지면 늘리세요."
+      },
+      "autoLearnDelay": {
+        "title": "자동 학습 지연",
+        "description": "붙여넣기 후 텍스트 필드의 수정 내용을 확인하기까지 대기하는 시간."
       },
       "holdThreshold": {
         "title": "길게 누르기 기준 시간",

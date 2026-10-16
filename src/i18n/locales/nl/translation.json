@@ -351,6 +351,10 @@
         "remove": "{{word}} verwijderen",
         "duplicate": "\"{{word}}\" bestaat al"
       },
+      "autoLearnCustomWords": {
+        "title": "Aangepaste woorden leren",
+        "description": "Bekijkt het tekstveld kort na het plakken en voegt gecorrigeerde termen toe aan aangepaste woorden (alleen macOS)."
+      },
       "voiceActivityDetection": {
         "title": "Spraakactiviteitsdetectie (VAD)",
         "description": "Filter stilte uit opnames. Streaming-modellen gebruiken een langere VAD-uitloop; het uitschakelen van VAD neemt de ruwe audio op."
@@ -560,6 +564,10 @@
       "pasteDelayAfter": {
         "title": "Plakvertraging (na)",
         "description": "Vertraging (in milliseconden) na de plak-toetsaanslag, voordat je vorige klembord wordt hersteld. Verhoog dit als de oude klembordinhoud wordt geplakt in plaats van de transcriptie."
+      },
+      "autoLearnDelay": {
+        "title": "Vertraging automatisch leren",
+        "description": "Hoe lang gewacht wordt na het plakken voordat het tekstveld op gecorrigeerde termen wordt gecontroleerd."
       },
       "holdThreshold": {
         "title": "Vasthouddrempel",

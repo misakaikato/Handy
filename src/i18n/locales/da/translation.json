@@ -351,6 +351,10 @@
         "remove": "Fjern {{word}}",
         "duplicate": "\"{{word}}\" findes allerede"
       },
+      "autoLearnCustomWords": {
+        "title": "Lær tilpassede ord",
+        "description": "Efter indsættelse overvåges tekstfeltet kort, og korrigerede termer tilføjes til tilpassede ord (kun macOS)."
+      },
       "voiceActivityDetection": {
         "title": "Stemmeaktivitetsdetektion",
         "description": "Filtrer stilhed fra optagelser. Streaming-modeller bruger en længere VAD-hale; deaktivering af VAD optager rå lyd."
@@ -560,6 +564,10 @@
       "pasteDelayAfter": {
         "title": "Forsinkelse af indsættelse (efter)",
         "description": "Forsinkelse (i millisekunder) efter tastetrykket for indsætning, før din tidligere udklipsholder gendannes. Øg, hvis dit gamle udklipsholderindhold bliver indsat i stedet for transskriptionen."
+      },
+      "autoLearnDelay": {
+        "title": "Forsinkelse for automatisk læring",
+        "description": "Hvor længe der ventes efter indsættelse, før tekstfeltet tjekkes for korrigerede termer."
       },
       "holdThreshold": {
         "title": "Holdetærskel",

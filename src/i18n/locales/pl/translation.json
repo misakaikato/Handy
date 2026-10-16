@@ -351,6 +351,10 @@
         "remove": "Usuń {{word}}",
         "duplicate": "\"{{word}}\" już istnieje"
       },
+      "autoLearnCustomWords": {
+        "title": "Uczenie się słów niestandardowych",
+        "description": "Po wklejeniu obserwuje pole tekstowe i dodaje poprawione terminy do słów niestandardowych (tylko macOS)."
+      },
       "voiceActivityDetection": {
         "title": "Wykrywanie aktywności głosowej",
         "description": "Odfiltrowuje ciszę z nagrań. Modele obsługujące streaming używają dłuższego marginesu VAD; wyłączenie VAD nagrywa surowy dźwięk."
@@ -546,6 +550,10 @@
       "pasteDelayAfter": {
         "title": "Opóźnienie wklejania (po)",
         "description": "Opóźnienie (w milisekundach) po klawiszu wklejania, przed przywróceniem poprzedniego schowka. Zwiększ, jeśli zamiast transkrypcji wklejana jest stara zawartość schowka."
+      },
+      "autoLearnDelay": {
+        "title": "Opóźnienie automatycznej nauki",
+        "description": "Jak długo czekać po wklejeniu przed sprawdzeniem poprawionych terminów w polu tekstowym."
       },
       "holdThreshold": {
         "title": "Próg przytrzymania",

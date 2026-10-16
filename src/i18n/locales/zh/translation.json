@@ -345,11 +345,15 @@
       },
       "customWords": {
         "title": "自定义词汇",
-        "description": "帮助受支持的模型识别名称和专业术语。目前，模糊纠错仅适用于使用 A–Z 字母和数字的词语。",
+        "description": "帮助受支持的模型识别名称和专业术语。模糊纠错按拼写匹配 A–Z 词汇，按读音匹配中文词汇。",
         "placeholder": "添加词汇",
         "add": "添加",
         "remove": "删除 {{word}}",
         "duplicate": "\"{{word}}\" 已存在"
+      },
+      "autoLearnCustomWords": {
+        "title": "自动学习自定义词汇",
+        "description": "粘贴后稍候读取文本框内容，把你手动修正的词自动加入自定义词汇（仅 macOS）。"
       },
       "voiceActivityDetection": {
         "title": "语音活动检测",
@@ -546,6 +550,10 @@
       "pasteDelayAfter": {
         "title": "粘贴延迟（后）",
         "description": "发送粘贴按键后、恢复先前剪贴板前的延迟（毫秒）。如果粘贴的是旧的剪贴板内容而非转录文本，请增加此值。"
+      },
+      "autoLearnDelay": {
+        "title": "自动学习延迟",
+        "description": "粘贴后等待多久再检查文本框中修正的词汇。"
       },
       "holdThreshold": {
         "title": "长按判定时长",

@@ -351,6 +351,10 @@
         "remove": "{{word}}を削除",
         "duplicate": "「{{word}}」は既に存在します"
       },
+      "autoLearnCustomWords": {
+        "title": "カスタム単語を自動学習",
+        "description": "貼り付け後、テキストフィールドを確認し、修正した用語をカスタム単語に自動追加します（macOS のみ）。"
+      },
       "voiceActivityDetection": {
         "title": "音声区間検出 (VAD)",
         "description": "録音から無音部分を除去します。ストリーミング対応モデルはより長い音声検出区間を使用します。VAD を無効にすると音声をそのまま録音します。"
@@ -546,6 +550,10 @@
       "pasteDelayAfter": {
         "title": "貼り付け遅延(後)",
         "description": "貼り付けキーを送信した後、以前のクリップボードを復元する前の遅延(ミリ秒)。文字起こしではなく古いクリップボードの内容が貼り付けられる場合は増やしてください。"
+      },
+      "autoLearnDelay": {
+        "title": "自動学習の遅延",
+        "description": "貼り付け後、テキストフィールドの修正を確認するまでの待機時間。"
       },
       "holdThreshold": {
         "title": "長押しのしきい値",

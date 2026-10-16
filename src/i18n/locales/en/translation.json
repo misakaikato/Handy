@@ -345,11 +345,15 @@
       },
       "customWords": {
         "title": "Custom Words",
-        "description": "Help supported models recognize names and specialized terms. Fuzzy correction is currently limited to words using A–Z and numbers.",
+        "description": "Help supported models recognize names and specialized terms. Fuzzy correction matches A–Z words by spelling and Chinese words by pronunciation.",
         "placeholder": "Add a word",
         "add": "Add",
         "remove": "Remove {{word}}",
         "duplicate": "\"{{word}}\" already exists"
+      },
+      "autoLearnCustomWords": {
+        "title": "Learn Custom Words",
+        "description": "After pasting, watch the text field briefly and add terms you corrected to Custom Words (macOS)."
       },
       "voiceActivityDetection": {
         "title": "Voice Activity Detection",
@@ -560,6 +564,10 @@
       "pasteDelayAfter": {
         "title": "Paste Delay (After)",
         "description": "Delay (in milliseconds) after the paste keystroke, before restoring your previous clipboard. Increase if your old clipboard content is being pasted instead of the transcription."
+      },
+      "autoLearnDelay": {
+        "title": "Auto-Learn Delay",
+        "description": "How long to wait after pasting before checking the text field for corrected terms."
       },
       "holdThreshold": {
         "title": "Hold Threshold",

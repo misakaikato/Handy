@@ -351,6 +351,10 @@
         "remove": "Odebrat {{word}}",
         "duplicate": "\"{{word}}\" již existuje"
       },
+      "autoLearnCustomWords": {
+        "title": "Učení se vlastním slovům",
+        "description": "Po vložení chvíli sleduje textové pole a opravené výrazy přidá do vlastních slov (pouze macOS)."
+      },
       "voiceActivityDetection": {
         "title": "Detekce hlasové aktivity",
         "description": "Odfiltruje ticho z nahrávek. Modely podporující streaming používají delší doběh VAD; vypnutí VAD nahrává surový zvuk."
@@ -546,6 +550,10 @@
       "pasteDelayAfter": {
         "title": "Zpoždění vložení (po)",
         "description": "Zpoždění (v milisekundách) po klávese pro vložení, před obnovením předchozí schránky. Zvyšte, pokud se místo přepisu vkládá starý obsah schránky."
+      },
+      "autoLearnDelay": {
+        "title": "Zpoždění automatického učení",
+        "description": "Jak dlouho čekat po vložení před kontrolou opravených výrazů v textovém poli."
       },
       "holdThreshold": {
         "title": "Práh podržení",

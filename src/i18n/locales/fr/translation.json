@@ -351,6 +351,10 @@
         "remove": "Supprimer {{word}}",
         "duplicate": "\"{{word}}\" existe déjà"
       },
+      "autoLearnCustomWords": {
+        "title": "Apprendre des mots personnalisés",
+        "description": "Après le collage, observe le champ de texte et ajoute les termes corrigés aux mots personnalisés (macOS uniquement)."
+      },
       "voiceActivityDetection": {
         "title": "Détection d'activité vocale (VAD)",
         "description": "Filtre le silence des enregistrements. Les modèles compatibles avec le streaming utilisent une marge de détection VAD plus longue ; désactiver le VAD enregistre l'audio brut."
@@ -546,6 +550,10 @@
       "pasteDelayAfter": {
         "title": "Délai de collage (après)",
         "description": "Délai (en millisecondes) après la touche de collage, avant la restauration de votre presse-papiers précédent. Augmentez si l'ancien contenu du presse-papiers est collé à la place de la transcription."
+      },
+      "autoLearnDelay": {
+        "title": "Délai d'apprentissage automatique",
+        "description": "Temps d'attente après le collage avant de vérifier les termes corrigés dans le champ de texte."
       },
       "holdThreshold": {
         "title": "Seuil de maintien",

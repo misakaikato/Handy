@@ -351,6 +351,10 @@
         "remove": "Hapus {{word}}",
         "duplicate": "\"{{word}}\" sudah ada"
       },
+      "autoLearnCustomWords": {
+        "title": "Pelajari kata khusus",
+        "description": "Setelah menempel, memeriksa kolom teks dan menambahkan istilah yang Anda perbaiki ke kata khusus (khusus macOS)."
+      },
       "voiceActivityDetection": {
         "title": "Deteksi Aktivitas Suara",
         "description": "Saring keheningan dari rekaman. Model yang mendukung streaming menggunakan ekor VAD yang lebih panjang; menonaktifkan VAD akan merekam audio mentah."
@@ -560,6 +564,10 @@
       "pasteDelayAfter": {
         "title": "Jeda Tempel (Sesudah)",
         "description": "Jeda (dalam milidetik) setelah perintah tempel dikirim sebelum mengembalikan isi papan klip sebelumnya. Tingkatkan jika isi papan klip lama yang ditempel alih-alih transkripsi."
+      },
+      "autoLearnDelay": {
+        "title": "Penundaan pembelajaran otomatis",
+        "description": "Berapa lama menunggu setelah menempel sebelum memeriksa istilah yang diperbaiki di kolom teks."
       },
       "holdThreshold": {
         "title": "Ambang Waktu Tahan",

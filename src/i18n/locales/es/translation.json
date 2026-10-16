@@ -351,6 +351,10 @@
         "remove": "Eliminar {{word}}",
         "duplicate": "\"{{word}}\" ya existe"
       },
+      "autoLearnCustomWords": {
+        "title": "Aprender palabras personalizadas",
+        "description": "Tras pegar, observa el campo de texto y añade los términos que corrijas a las palabras personalizadas (solo macOS)."
+      },
       "voiceActivityDetection": {
         "title": "Detección de actividad de voz",
         "description": "Filtra el silencio de las grabaciones. Los modelos compatibles con streaming usan una cola de VAD más larga; desactivar el VAD graba audio sin procesar."
@@ -546,6 +550,10 @@
       "pasteDelayAfter": {
         "title": "Retraso de pegado (después)",
         "description": "Retraso (en milisegundos) después de la pulsación de tecla de pegar, antes de restaurar el portapapeles anterior. Auméntelo si se pega el contenido antiguo del portapapeles en lugar de la transcripción."
+      },
+      "autoLearnDelay": {
+        "title": "Retardo del aprendizaje automático",
+        "description": "Cuánto esperar tras pegar antes de comprobar si hay términos corregidos en el campo de texto."
       },
       "holdThreshold": {
         "title": "Umbral de pulsación",

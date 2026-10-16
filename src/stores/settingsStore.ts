@@ -141,6 +141,10 @@ const settingUpdaters: {
     commands.changeOverlayPositionSetting(value as string),
   debug_mode: (value) => commands.changeDebugModeSetting(value as boolean),
   custom_words: (value) => commands.updateCustomWords(value as string[]),
+  auto_learn_custom_words: (value) =>
+    commands.changeAutoLearnCustomWordsSetting(value as boolean),
+  auto_learn_delay_ms: (value) =>
+    commands.changeAutoLearnDelayMsSetting(value as number),
   word_correction_threshold: (value) =>
     commands.changeWordCorrectionThresholdSetting(value as number),
   paste_delay_ms: (value) =>

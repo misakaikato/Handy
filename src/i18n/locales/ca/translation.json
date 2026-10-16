@@ -351,6 +351,10 @@
         "remove": "Suprimiu {{word}}",
         "duplicate": "«{{word}}» ja existeix"
       },
+      "autoLearnCustomWords": {
+        "title": "Aprèn paraules personalitzades",
+        "description": "Després d'enganxar, observa el camp de text i afegeix els termes corregits a les paraules personalitzades (només macOS)."
+      },
       "voiceActivityDetection": {
         "title": "Detecció d'activitat de veu",
         "description": "Filtra els silencis dels enregistraments. Els models compatibles amb la transcripció en temps real utilitzen un marge final de detecció de veu més llarg; si desactiveu la detecció, s'enregistra l'àudio sense filtrar."
@@ -560,6 +564,10 @@
       "pasteDelayAfter": {
         "title": "Retard après d'enganxar",
         "description": "Retard (en mil·lisegons) després d'enviar la combinació de tecles per enganxar i abans de restaurar el porta-retalls anterior. Augmenteu-lo si s'enganxa el contingut antic del porta-retalls en lloc de la transcripció."
+      },
+      "autoLearnDelay": {
+        "title": "Retard de l'aprenentatge automàtic",
+        "description": "Quant esperar després d'enganxar abans de comprovar els termes corregits al camp de text."
       },
       "holdThreshold": {
         "title": "Llindar de pulsació llarga",

@@ -351,6 +351,10 @@
         "remove": "{{word}} entfernen",
         "duplicate": "\"{{word}}\" existiert bereits"
       },
+      "autoLearnCustomWords": {
+        "title": "Benutzerdefinierte Wörter lernen",
+        "description": "Beobachtet das Textfeld kurz nach dem Einfügen und fügt korrigierte Begriffe zu den benutzerdefinierten Wörtern hinzu (nur macOS)."
+      },
       "voiceActivityDetection": {
         "title": "Sprachaktivitätserkennung (VAD)",
         "description": "Filtert Stille aus Aufnahmen. Streamingfähige Modelle verwenden ein längeres VAD-Ende; das Deaktivieren von VAD nimmt Rohaudio auf."
@@ -546,6 +550,10 @@
       "pasteDelayAfter": {
         "title": "Einfügeverzögerung (nachher)",
         "description": "Verzögerung (in Millisekunden) nach dem Einfüge-Tastendruck, bevor deine vorherige Zwischenablage wiederhergestellt wird. Erhöhe den Wert, wenn der alte Inhalt der Zwischenablage statt der Transkription eingefügt wird."
+      },
+      "autoLearnDelay": {
+        "title": "Verzögerung des automatischen Lernens",
+        "description": "Wie lange nach dem Einfügen gewartet wird, bevor das Textfeld auf korrigierte Begriffe geprüft wird."
       },
       "holdThreshold": {
         "title": "Halte-Schwellenwert",

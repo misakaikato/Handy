@@ -351,6 +351,10 @@
         "remove": "Xóa {{word}}",
         "duplicate": "\"{{word}}\" đã tồn tại"
       },
+      "autoLearnCustomWords": {
+        "title": "Học từ tùy chỉnh",
+        "description": "Sau khi dán, theo dõi ô văn bản và thêm các thuật ngữ bạn đã sửa vào từ tùy chỉnh (chỉ trên macOS)."
+      },
       "voiceActivityDetection": {
         "title": "Phát hiện hoạt động giọng nói",
         "description": "Lọc bỏ khoảng lặng khỏi bản ghi. Các mô hình hỗ trợ truyền trực tiếp dùng đuôi VAD dài hơn; tắt VAD sẽ ghi âm thanh thô."
@@ -546,6 +550,10 @@
       "pasteDelayAfter": {
         "title": "Độ trễ dán (sau)",
         "description": "Độ trễ (tính bằng mili giây) sau khi gửi phím dán, trước khi khôi phục bảng nhớ tạm trước đó. Tăng nếu nội dung bảng nhớ tạm cũ được dán thay vì bản chép lời."
+      },
+      "autoLearnDelay": {
+        "title": "Độ trễ tự động học",
+        "description": "Thời gian chờ sau khi dán trước khi kiểm tra các thuật ngữ đã sửa trong ô văn bản."
       },
       "holdThreshold": {
         "title": "Ngưỡng giữ phím",
