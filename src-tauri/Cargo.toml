@@ -84,6 +84,9 @@ tauri-plugin-dialog = "2.6"
 hf-hub = { git = "https://github.com/cjpais/hf-hub", branch = "cancellable-downloads", features = [
   "tokio",
 ] }
+# Toneless pinyin for CJK custom-word correction (audio_toolkit/text.rs). Only
+# the `plain` (no tone marks) data is needed; tone/heteronym tables stay out.
+pinyin = { version = "0.11", default-features = false, features = ["plain"] }
 
 [target.'cfg(unix)'.dependencies]
 signal-hook = "0.3"

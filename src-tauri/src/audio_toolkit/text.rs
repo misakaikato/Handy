@@ -1,5 +1,6 @@
 use natural::phonetics::soundex;
 use once_cell::sync::Lazy;
+use pinyin::ToPinyin;
 use regex::Regex;
 use strsim::levenshtein;
 
@@ -33,8 +34,10 @@ fn build_custom_word_match_keys(word: &str, word_index: usize) -> Vec<CustomWord
 
     // The fallback matcher is intentionally limited to ASCII terms. Its
     // whitespace tokenization and Soundex scoring are not suitable for CJK
-    // scripts. Unicode custom words remain available to models that accept
-    // them as native decode prompts; they are simply skipped by this fallback.
+    // scripts. Han-script custom words are corrected by the pinyin pass in
+    // [`apply_han_custom_words`] instead; every other Unicode custom word
+    // remains available to models that accept them as native decode prompts
+    // and is simply skipped by this fallback.
     if is_supported_fuzzy_key(&primary_key) {
         keys.push(CustomWordMatchKey {
             word_index,
@@ -140,6 +143,8 @@ fn find_best_match<'a>(
 /// - Levenshtein distance for string similarity
 /// - Soundex phonetic matching for pronunciation similarity
 /// - N-gram matching for multi-word speech artifacts (e.g., "Charge B" -> "ChargeBee")
+/// - Toneless-pinyin matching for Han-script custom words against CJK spans
+///   of the transcription (e.g., "威信" -> "微信")
 ///
 /// # Arguments
 /// * `text` - The input text to correct
@@ -153,6 +158,10 @@ pub fn apply_custom_words(text: &str, custom_words: &[String], threshold: f64) -
         return text.to_string();
     }
 
+    // Han-script custom words are corrected inside CJK spans by pinyin first;
+    // the whitespace-token matcher below is ASCII-only and never sees them.
+    let pinyin_corrected = apply_han_custom_words(text, custom_words, threshold);
+
     // Pre-compute normalized comparison keys to avoid repeated allocations.
     let custom_word_match_keys: Vec<CustomWordMatchKey> = custom_words
         .iter()
@@ -160,7 +169,7 @@ pub fn apply_custom_words(text: &str, custom_words: &[String], threshold: f64) -
         .flat_map(|(index, word)| build_custom_word_match_keys(word, index))
         .collect();
 
-    let words: Vec<&str> = text.split_whitespace().collect();
+    let words: Vec<&str> = pinyin_corrected.split_whitespace().collect();
     let mut result = Vec::new();
     let mut i = 0;
 
@@ -217,6 +226,170 @@ pub fn apply_custom_words(text: &str, custom_words: &[String], threshold: f64) -
     }
 
     result.join(" ")
+}
+
+/// Whether a character is a Han ideogram (simplified or traditional).
+///
+/// Kana and Hangul are deliberately excluded: only Han ideograms have
+/// Mandarin pinyin, so CJK spans for pinyin matching stop at them.
+fn is_han(c: char) -> bool {
+    matches!(c, '\u{3400}'..='\u{4DBF}' | '\u{4E00}'..='\u{9FFF}')
+}
+
+/// Whether a custom word consists entirely of Han characters, making it
+/// eligible for pinyin matching. Mixed-script terms (e.g. "微信GPT") keep
+/// their current handling: they are skipped here and by the ASCII fallback,
+/// and remain available to models that accept them as decode prompts.
+fn is_han_word(word: &str) -> bool {
+    !word.is_empty() && word.chars().all(is_han)
+}
+
+/// Canonical form of a toneless pinyin syllable under the accent confusions
+/// Handy treats as near-equal: z/zh, c/ch, s/sh and n/l initials, and
+/// an/ang, en/eng, in/ing finals. Two syllables are near-equal exactly when
+/// their canonical forms are equal ("zhang" and "zan" both become "zan").
+fn canonical_syllable(syllable: &str) -> String {
+    let mut canonical = syllable.to_string();
+    for (full, plain) in [("zh", "z"), ("ch", "c"), ("sh", "s")] {
+        if canonical.starts_with(full) {
+            canonical.replace_range(0..full.len(), plain);
+            break;
+        }
+    }
+    if canonical.starts_with('n') {
+        canonical.replace_range(0..1, "l");
+    }
+    for (nasal, plain) in [("ang", "an"), ("eng", "en"), ("ing", "in")] {
+        if canonical.ends_with(nasal) {
+            let start = canonical.len() - nasal.len();
+            canonical.replace_range(start.., plain);
+            break;
+        }
+    }
+    canonical
+}
+
+/// Canonical toneless pinyin of one Han character, or `None` when the
+/// character has no pinyin data (rare ideograms).
+fn canonical_syllable_of(c: char) -> Option<String> {
+    c.to_pinyin()
+        .map(|pinyin| canonical_syllable(pinyin.plain()))
+}
+
+/// A Han-script custom word prepared for pinyin matching: the original word
+/// plus the canonicalized toneless pinyin of each of its characters.
+struct HanPinyinKey {
+    word: String,
+    syllables: Vec<String>,
+}
+
+fn build_han_pinyin_keys(custom_words: &[String]) -> Vec<HanPinyinKey> {
+    custom_words
+        .iter()
+        .filter(|word| is_han_word(word))
+        .filter_map(|word| {
+            let syllables = word
+                .chars()
+                .map(canonical_syllable_of)
+                .collect::<Option<Vec<_>>>()?;
+            Some(HanPinyinKey {
+                word: word.clone(),
+                syllables,
+            })
+        })
+        .collect()
+}
+
+/// Applies Han-script custom words to the CJK spans of a transcription.
+///
+/// Within each maximal run of Han characters, windows of the same character
+/// length as a custom word are replaced by it when the window's toneless
+/// pinyin equals the word's (up to the near-equal confusions of
+/// [`canonical_syllable`]). `threshold` carries the English matcher's
+/// semantics: the share of syllables that are neither equal nor near-equal
+/// must stay below it, so at the default 0.18 every syllable has to sound
+/// right, while a higher threshold tolerates a genuinely wrong one.
+///
+/// The pass leaves every other byte of the text — non-Han scripts, Han text
+/// without Han custom words, punctuation — untouched, and is skipped
+/// entirely (one early return) when no custom word is pure Han.
+fn apply_han_custom_words(text: &str, custom_words: &[String], threshold: f64) -> String {
+    let keys = build_han_pinyin_keys(custom_words);
+    if keys.is_empty() {
+        return text.to_string();
+    }
+
+    let mut result = String::with_capacity(text.len());
+    let mut run: Vec<char> = Vec::new();
+
+    for c in text.chars() {
+        if is_han(c) {
+            run.push(c);
+        } else {
+            if !run.is_empty() {
+                result.push_str(&correct_han_run(&run, &keys, threshold));
+                run.clear();
+            }
+            result.push(c);
+        }
+    }
+    if !run.is_empty() {
+        result.push_str(&correct_han_run(&run, &keys, threshold));
+    }
+    result
+}
+
+/// Rewrites one maximal run of Han characters against the Han custom-word
+/// keys. Greedy left-to-right: at each position the best-scoring window is
+/// replaced (ties keep the earlier custom word, matching the English
+/// matcher's priority), then matching resumes after it.
+fn correct_han_run(run: &[char], keys: &[HanPinyinKey], threshold: f64) -> String {
+    // Canonical pinyin of each character of the run, computed once. Windows
+    // containing a character without pinyin data can never match.
+    let syllables: Vec<Option<String>> = run.iter().map(|c| canonical_syllable_of(*c)).collect();
+
+    let mut result = String::with_capacity(run.len() * 3);
+    let mut i = 0;
+    while i < run.len() {
+        let mut best: Option<(usize, &HanPinyinKey, f64)> = None;
+        for key in keys {
+            let len = key.syllables.len();
+            if i + len > run.len() {
+                continue;
+            }
+            let window = &syllables[i..i + len];
+            if window.iter().any(Option::is_none) {
+                continue;
+            }
+            let mismatches = window
+                .iter()
+                .zip(&key.syllables)
+                .filter(|(window_syllable, key_syllable)| {
+                    window_syllable.as_deref() != Some(key_syllable.as_str())
+                })
+                .count();
+            let score = mismatches as f64 / len as f64;
+            if score < threshold
+                && best
+                    .as_ref()
+                    .is_none_or(|(_, _, best_score)| score < *best_score)
+            {
+                best = Some((i + len, key, score));
+            }
+        }
+
+        match best {
+            Some((end, key, _)) => {
+                result.push_str(&key.word);
+                i = end;
+            }
+            None => {
+                result.push(run[i]);
+                i += 1;
+            }
+        }
+    }
+    result
 }
 
 /// Preserves the case pattern of the original word when applying a replacement
@@ -875,10 +1048,149 @@ mod tests {
     }
 
     #[test]
-    fn test_apply_custom_words_skips_cjk_fuzzy_matching() {
+    fn test_apply_custom_words_cjk_homophone_corrected_by_pinyin() {
+        // 你好 and 你号 are exact homophones (ni hao): the pinyin pass now
+        // corrects where the ASCII matcher used to leave CJK untouched.
         let text = "你好。";
         let custom_words = vec!["你号".to_string()];
         let result = apply_custom_words(text, &custom_words, 1.0);
+        assert_eq!(result, "你号。");
+    }
+
+    #[test]
+    fn test_apply_custom_words_pinyin_exact_homophone() {
+        // 威信 and 微信 are both wei xin.
+        let text = "我在用威信聊天";
+        let custom_words = vec!["微信".to_string()];
+        let result = apply_custom_words(text, &custom_words, 0.5);
+        assert_eq!(result, "我在用微信聊天");
+    }
+
+    #[test]
+    fn test_apply_custom_words_pinyin_near_equal_zh_z() {
+        // 自持 (zi chi) vs 支持 (zhi chi): z/zh and c/ch initials.
+        let text = "请自持一下";
+        let custom_words = vec!["支持".to_string()];
+        let result = apply_custom_words(text, &custom_words, 0.18);
+        assert_eq!(result, "请支持一下");
+    }
+
+    #[test]
+    fn test_apply_custom_words_pinyin_near_equal_n_l() {
+        // 河南 (he nan) vs 荷兰 (he lan): n/l initial.
+        let text = "荷兰是人口大省";
+        let custom_words = vec!["河南".to_string()];
+        let result = apply_custom_words(text, &custom_words, 0.18);
+        assert_eq!(result, "河南是人口大省");
+    }
+
+    #[test]
+    fn test_apply_custom_words_pinyin_near_equal_an_ang() {
+        // 班忙 (ban mang) vs 帮忙 (bang mang): an/ang finals.
+        let text = "请班忙收拾一下";
+        let custom_words = vec!["帮忙".to_string()];
+        let result = apply_custom_words(text, &custom_words, 0.18);
+        assert_eq!(result, "请帮忙收拾一下");
+    }
+
+    #[test]
+    fn test_apply_custom_words_pinyin_near_equal_en_eng() {
+        // 风真 (feng zhen) vs 风筝 (feng zheng): en/eng finals.
+        let text = "我在放风真";
+        let custom_words = vec!["风筝".to_string()];
+        let result = apply_custom_words(text, &custom_words, 0.18);
+        assert_eq!(result, "我在放风筝");
+    }
+
+    #[test]
+    fn test_apply_custom_words_pinyin_wrong_syllable_respects_threshold() {
+        // 微小 (wei xiao) shares only one syllable with 微信 (wei xin):
+        // score 0.5 is rejected at the default-like threshold and accepted
+        // only when the user raises the threshold above 0.5.
+        let text = "这个想法很微小";
+        let custom_words = vec!["微信".to_string()];
+
+        let strict = apply_custom_words(text, &custom_words, 0.18);
+        assert_eq!(strict, text);
+
+        let loose = apply_custom_words(text, &custom_words, 0.6);
+        assert_eq!(loose, "这个想法很微信");
+    }
+
+    #[test]
+    fn test_apply_custom_words_pinyin_length_mismatch_never_matches() {
+        // A two-character custom word cannot match a three-character span
+        // of different pinyin, and a longer word never consumes a shorter run.
+        let text = "谢谢你";
+        let custom_words = vec!["微信".to_string()];
+        let result = apply_custom_words(text, &custom_words, 0.5);
         assert_eq!(result, text);
+
+        let text = "微信";
+        let custom_words = vec!["微信公众号".to_string()];
+        let result = apply_custom_words(text, &custom_words, 0.5);
+        assert_eq!(result, text);
+    }
+
+    #[test]
+    fn test_apply_custom_words_pinyin_matches_once_per_window() {
+        // Greedy left-to-right: the custom word consumes exactly its own
+        // length; remaining characters are matched (or kept) individually.
+        let text = "你好好";
+        let custom_words = vec!["泥豪".to_string()];
+        let result = apply_custom_words(text, &custom_words, 0.5);
+        assert_eq!(result, "泥豪好");
+    }
+
+    #[test]
+    fn test_apply_custom_words_pinyin_preserves_surrounding_punctuation() {
+        let text = "打开「威信」，发条消息。";
+        let custom_words = vec!["微信".to_string()];
+        let result = apply_custom_words(text, &custom_words, 0.5);
+        assert_eq!(result, "打开「微信」，发条消息。");
+    }
+
+    #[test]
+    fn test_apply_custom_words_pinyin_and_english_together() {
+        // Both matchers run on the same text without disturbing each other.
+        let text = "open the 威信 app with helo wrold";
+        let custom_words = vec!["hello".to_string(), "world".to_string(), "微信".to_string()];
+        let result = apply_custom_words(text, &custom_words, 0.5);
+        assert_eq!(result, "open the 微信 app with hello world");
+    }
+
+    #[test]
+    fn test_apply_custom_words_han_word_leaves_english_untouched() {
+        let text = "helo wrold";
+        let custom_words = vec!["微信".to_string(), "world".to_string()];
+        let result = apply_custom_words(text, &custom_words, 0.5);
+        assert_eq!(result, "helo world");
+    }
+
+    #[test]
+    fn test_apply_custom_words_mixed_script_custom_word_skipped() {
+        // "微信GPT" is not pure Han: neither the pinyin pass nor the ASCII
+        // fallback rewrites the homophone span.
+        let text = "打开威信看看";
+        let custom_words = vec!["微信GPT".to_string()];
+        let result = apply_custom_words(text, &custom_words, 0.5);
+        assert_eq!(result, text);
+    }
+
+    #[test]
+    fn test_canonical_syllable_confusions() {
+        // Initials collapse: z/zh, c/ch, s/sh, n/l.
+        assert_eq!(canonical_syllable("zhi"), canonical_syllable("zi"));
+        assert_eq!(canonical_syllable("chi"), canonical_syllable("ci"));
+        assert_eq!(canonical_syllable("shan"), canonical_syllable("san"));
+        assert_eq!(canonical_syllable("nan"), canonical_syllable("lan"));
+        // Finals collapse: an/ang, en/eng, in/ing (including iang/uang/etc.).
+        assert_eq!(canonical_syllable("bang"), canonical_syllable("ban"));
+        assert_eq!(canonical_syllable("feng"), canonical_syllable("fen"));
+        assert_eq!(canonical_syllable("xing"), canonical_syllable("xin"));
+        assert_eq!(canonical_syllable("zhang"), canonical_syllable("zan"));
+        // Distinct syllables stay distinct.
+        assert_ne!(canonical_syllable("ma"), canonical_syllable("ba"));
+        assert_ne!(canonical_syllable("wei"), canonical_syllable("xiao"));
     }
 }
