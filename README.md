@@ -6,6 +6,28 @@
 
 Handy is a cross-platform desktop application that provides simple, privacy-focused speech transcription. Press a shortcut, speak, and have your words appear in any text field. This happens on your own computer without sending any information to the cloud.
 
+## 本 Fork 新增功能（misakaikato/Handy）
+
+> 这个 Fork 基于上游 [cjpais/Handy](https://github.com/cjpais/Handy)，重点改进中文听写和本地大模型后处理。下面的新功能大多默认关闭，可以在设置里逐项打开。
+> This fork builds on upstream Handy, with improvements for Chinese dictation and local-LLM post-processing. Most features below are off by default.
+
+**纠错与词表**
+- **中文自定义词按拼音模糊匹配**：按不带声调的拼音比对，z/zh、c/ch、s/sh、n/l、an/ang、en/eng、in/ing 视为同音，例如「威信」会纠正为「微信」。英文的匹配逻辑保持不变。
+- **自动学习自定义词（macOS）**：粘贴后稍等几秒读取输入框内容，比对用户改动，把读音相近的专有名词自动加入词表。学到词时弹出小提示，几秒内可以撤销。
+- **词表作为术语表注入后处理提示词**，让改写模型按你的写法输出。
+- **词表导入导出**：支持 txt、csv、json；导入前会预览新增词数，可选择合并或替换。
+
+**大模型后处理**
+- **光标上下文（macOS）**：把光标前后的文字作为参考上下文交给模型，自动跳过密码框。
+- **流式输出**：一边生成一边把文字打到光标处，并显示首字耗时。
+- **思考强度控制**：可选默认、关闭、低、中、高（对应 `enable_thinking` / `reasoning_effort`），并自动清理 `<think>` 内容。
+- **语音修改选中文字**：选中一段文字，按快捷键（默认 ⌥⇧E）说出修改要求，结果直接替换选区。
+
+**性能与统计**
+- **分阶段耗时日志**：`timing: transcribe=… post_process=… first_token=… paste=… total=…`。
+- **更快的粘贴**：剪贴板改为在后台恢复，粘贴前后的延迟都可以调。
+- **统计页面**：查看听写次数、字数、各阶段耗时的平均值与 P50/P90、每日趋势和最近学到的词，并可导出 CSV。
+
 ## Why Handy?
 
 Handy was created to fill the gap for a truly open source, extensible speech-to-text tool. As stated on [handy.computer](https://handy.computer):
