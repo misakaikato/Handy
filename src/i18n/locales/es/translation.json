@@ -651,6 +651,10 @@
         "permissionsButton": "Permisos",
         "modelsButton": "Selección de modelo",
         "exitButton": "Salir de la vista previa"
+      },
+      "pasteHold": {
+        "title": "Retención del modificador al pegar",
+        "description": "Cuánto tiempo (en milisegundos) se mantiene pulsada la tecla Cmd/Ctrl durante el pegado. Auméntalo si a veces no pega nada."
       }
     },
     "about": {

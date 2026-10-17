@@ -651,6 +651,10 @@
         "permissionsButton": "権限",
         "modelsButton": "モデル選択",
         "exitButton": "プレビューを終了"
+      },
+      "pasteHold": {
+        "title": "ペースト修飾キー保持時間",
+        "description": "ペースト操作中に Cmd/Ctrl 修飾キーを押し続ける時間（ミリ秒）。たまに貼り付けられない場合は増やしてください。"
       }
     },
     "about": {

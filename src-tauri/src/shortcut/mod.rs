@@ -1047,6 +1047,15 @@ pub fn change_paste_delay_after_ms_setting(app: AppHandle, ms: u64) -> Result<()
 
 #[tauri::command]
 #[specta::specta]
+pub fn change_paste_modifier_hold_ms_setting(app: AppHandle, ms: u64) -> Result<(), String> {
+    let mut settings = settings::get_settings(&app);
+    settings.paste_modifier_hold_ms = ms;
+    settings::write_settings(&app, settings);
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
 pub fn change_reliable_paste_setting(app: AppHandle, enabled: bool) -> Result<(), String> {
     let mut settings = settings::get_settings(&app);
     settings.reliable_paste = enabled;

@@ -511,6 +511,12 @@ pub struct AppSettings {
     pub paste_delay_ms: u64,
     #[serde(default = "default_paste_delay_after_ms")]
     pub paste_delay_after_ms: u64,
+    /// How long the paste chord's modifier stays held after the key click.
+    /// Apps that poll global keyboard state when handling the paste need the
+    /// modifier to still be down; most apps read it off the event's flags and
+    /// need no hold at all. See `input::send_paste_ctrl_v`.
+    #[serde(default = "default_paste_modifier_hold_ms")]
+    pub paste_modifier_hold_ms: u64,
     /// Debug-gated ("beta") receipt-sequenced paste: restore the clipboard only
     /// after the target app actually reads the transcript, instead of after a
     /// fixed delay. See `paste_tx`. macOS and Windows only.
@@ -683,7 +689,7 @@ fn default_word_correction_threshold() -> f64 {
 }
 
 fn default_paste_delay_ms() -> u64 {
-    60
+    50
 }
 
 /// Default wait before reading the focused text field for corrections after
@@ -714,7 +720,15 @@ pub(crate) fn default_voice_edit_prompt() -> String {
 }
 
 fn default_paste_delay_after_ms() -> u64 {
-    60
+    50
+}
+
+/// Default modifier hold for the legacy paste chord: a little under the
+/// historical 100ms (#165 dropped chords that were released too quickly on
+/// some systems), still conservative while the asynchronous clipboard
+/// restore and the configurable delays carry the latency win.
+fn default_paste_modifier_hold_ms() -> u64 {
+    80
 }
 
 fn default_auto_submit() -> bool {
@@ -1105,6 +1119,7 @@ pub fn get_default_settings() -> AppSettings {
         show_tray_icon: default_show_tray_icon(),
         paste_delay_ms: default_paste_delay_ms(),
         paste_delay_after_ms: default_paste_delay_after_ms(),
+        paste_modifier_hold_ms: default_paste_modifier_hold_ms(),
         reliable_paste: false,
         typing_tool: default_typing_tool(),
         external_script_path: None,

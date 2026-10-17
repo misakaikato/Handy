@@ -651,6 +651,10 @@
         "permissionsButton": "Autorisations",
         "modelsButton": "Sélection du modèle",
         "exitButton": "Quitter l’aperçu"
+      },
+      "pasteHold": {
+        "title": "Maintien du modificateur au collage",
+        "description": "Durée (en millisecondes) pendant laquelle la touche Cmd/Ctrl est maintenue lors du collage. Augmentez-la si le collage échoue parfois."
       }
     },
     "about": {

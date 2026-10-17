@@ -3,7 +3,18 @@ import { useTranslation } from "react-i18next";
 import { Slider } from "../../ui/Slider";
 import { useSettings } from "../../../hooks/useSettings";
 
-type PasteDelayKey = "paste_delay_ms" | "paste_delay_after_ms";
+type PasteDelayKey =
+  | "paste_delay_ms"
+  | "paste_delay_after_ms"
+  | "paste_modifier_hold_ms";
+
+// Mirrors the Rust `default_*_paste_*` fns so the slider shows the effective
+// value before settings have loaded.
+const PASTE_DELAY_DEFAULTS: Record<PasteDelayKey, number> = {
+  paste_delay_ms: 50,
+  paste_delay_after_ms: 50,
+  paste_modifier_hold_ms: 80,
+};
 
 interface PasteDelayProps {
   descriptionMode?: "tooltip" | "inline";
@@ -29,11 +40,11 @@ export const PasteDelay: React.FC<PasteDelayProps> = ({
 
   return (
     <Slider
-      value={settings?.[settingKey] ?? 60}
+      value={settings?.[settingKey] ?? PASTE_DELAY_DEFAULTS[settingKey]}
       onChange={handleDelayChange}
       onReset={() => resetSetting(settingKey)}
       isResetting={isUpdating(settingKey)}
-      min={10}
+      min={0}
       max={5000}
       step={10}
       label={t(labelKey)}

@@ -651,6 +651,10 @@
         "permissionsButton": "Berechtigungen",
         "modelsButton": "Modellauswahl",
         "exitButton": "Vorschau beenden"
+      },
+      "pasteHold": {
+        "title": "Haltedauer der Modifikatortaste beim Einfügen",
+        "description": "Wie lange (in Millisekunden) die Cmd-/Strg-Taste beim Einfügen gedrückt gehalten wird. Erhöhen, wenn Einfügen gelegentlich nicht wirkt."
       }
     },
     "about": {

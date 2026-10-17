@@ -651,6 +651,10 @@
         "permissionsButton": "Permissões",
         "modelsButton": "Seleção de modelo",
         "exitButton": "Sair da pré-visualização"
+      },
+      "pasteHold": {
+        "title": "Duração do modificador ao colar",
+        "description": "Quanto tempo (em milissegundos) a tecla Cmd/Ctrl permanece pressionada durante a colagem. Aumente se colar às vezes não fizer nada."
       }
     },
     "about": {

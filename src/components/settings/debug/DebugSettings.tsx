@@ -55,6 +55,13 @@ export const DebugSettings: React.FC<DebugSettingsProps> = ({
           labelKey="settings.debug.pasteDelayAfter.title"
           descriptionKey="settings.debug.pasteDelayAfter.description"
         />
+        <PasteDelay
+          descriptionMode="tooltip"
+          grouped={true}
+          settingKey="paste_modifier_hold_ms"
+          labelKey="settings.debug.pasteHold.title"
+          descriptionKey="settings.debug.pasteHold.description"
+        />
         <ReliablePasteToggle descriptionMode="tooltip" grouped={true} />
         <AutoLearnDelay descriptionMode="tooltip" grouped={true} />
         <AutoLearnDelay

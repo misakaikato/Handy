@@ -651,6 +651,10 @@
         "permissionsButton": "Autorizzazioni",
         "modelsButton": "Selezione del modello",
         "exitButton": "Esci dall’anteprima"
+      },
+      "pasteHold": {
+        "title": "Tenuta del modificatore durante lincollamento",
+        "description": "Per quanto tempo (in millisecondi) il tasto Cmd/Ctrl resta premuto durante lincollamento. Aumenta se lincollamento a volte non funziona."
       }
     },
     "about": {

@@ -651,6 +651,10 @@
         "permissionsButton": "权限",
         "modelsButton": "模型选择",
         "exitButton": "退出预览"
+      },
+      "pasteHold": {
+        "title": "粘贴按键保持时长",
+        "description": "粘贴组合键中修饰键按住的时长（毫秒）。如果偶尔粘贴无效，可适当增大。"
       }
     },
     "about": {

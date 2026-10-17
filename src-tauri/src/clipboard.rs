@@ -4,9 +4,11 @@ use crate::settings::TypingTool;
 use crate::settings::{get_settings, AutoSubmitKey, ClipboardHandling, PasteMethod};
 use enigo::{Direction, Enigo, Key, Keyboard};
 use log::info;
+use once_cell::sync::Lazy;
 use std::process::Command;
 #[cfg(target_os = "linux")]
 use std::sync::OnceLock;
+use std::sync::{Mutex, MutexGuard};
 use std::time::Duration;
 use tauri::{AppHandle, Manager};
 use tauri_plugin_clipboard_manager::ClipboardExt;
@@ -51,13 +53,84 @@ fn finish_clipboard_paste(
     paste_result
 }
 
+/// Monotonic generation of "who owns the clipboard". The paste path bumps it
+/// before writing the transcript; asynchronous restores (and any other
+/// clipboard writer, such as the copy flows) compare their ticket against
+/// the latest generation and only write when they still own the clipboard,
+/// so a late restore can never clobber a newer paste or copy.
+static CLIPBOARD_GENERATION: Lazy<Mutex<u64>> = Lazy::new(|| Mutex::new(0));
+
+fn lock_clipboard_generation() -> MutexGuard<'static, u64> {
+    // A poisoned lock only means an earlier writer panicked while holding
+    // it; the counter itself is still consistent, so keep going rather than
+    // breaking every future paste.
+    CLIPBOARD_GENERATION
+        .lock()
+        .unwrap_or_else(|poisoned| poisoned.into_inner())
+}
+
+/// Claims clipboard ownership and returns the new ticket.
+fn bump_clipboard_generation() -> u64 {
+    let mut guard = lock_clipboard_generation();
+    *guard += 1;
+    *guard
+}
+
+/// The generation that currently owns the clipboard.
+fn latest_clipboard_generation() -> u64 {
+    *lock_clipboard_generation()
+}
+
+/// Outcome of checking an asynchronous restore's ticket against the latest
+/// clipboard generation.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum RestoreDecision {
+    /// No newer clipboard write happened; the saved content may be restored.
+    Restore,
+    /// A newer paste or copy owns the clipboard now; restoring would clobber
+    /// its content, so the restore is dropped.
+    Cancelled,
+}
+
+fn restore_decision(ticket: u64, latest: u64) -> RestoreDecision {
+    if ticket == latest {
+        RestoreDecision::Restore
+    } else {
+        RestoreDecision::Cancelled
+    }
+}
+
+/// Restores the saved clipboard content off the paste path: waits the
+/// configured settle delay on a background thread, then restores only if no
+/// newer clipboard write claimed ownership in the meantime.
+fn spawn_clipboard_restore(
+    ticket: u64,
+    paste_delay_after_ms: u64,
+    restore: impl FnOnce() + Send + 'static,
+) {
+    std::thread::spawn(move || {
+        std::thread::sleep(Duration::from_millis(paste_delay_after_ms));
+        match restore_decision(ticket, latest_clipboard_generation()) {
+            RestoreDecision::Restore => restore(),
+            RestoreDecision::Cancelled => {
+                info!("Skipped stale clipboard restore: a newer clipboard write owns it");
+            }
+        }
+    });
+}
+
 /// Pastes text using the clipboard: saves current content, writes text, sends paste keystroke, restores clipboard.
+/// The restore runs asynchronously after `paste_delay_after_ms` (see
+/// `spawn_clipboard_restore`), so the pipeline continues as soon as the
+/// keystroke is on its way.
 fn paste_via_clipboard(
     text: &str,
     app_handle: &AppHandle,
     paste_method: &PasteMethod,
     paste_delay_ms: u64,
     paste_delay_after_ms: u64,
+    paste_modifier_hold_ms: u64,
+    clipboard_handling: ClipboardHandling,
 ) -> Result<(), String> {
     let clipboard = app_handle.clipboard();
     let saved_text = clipboard.read_text().ok().filter(|t| !t.is_empty());
@@ -69,6 +142,10 @@ fn paste_via_clipboard(
     } else {
         None
     };
+
+    // Claim clipboard ownership before writing, so a still-pending restore
+    // from a previous paste cancels instead of racing this one.
+    let ticket = bump_clipboard_generation();
 
     // Write text to clipboard first
     write_text_to_clipboard(app_handle, text)?;
@@ -88,11 +165,13 @@ fn paste_via_clipboard(
         // Fall back to enigo if no native tool handled it
         if !key_combo_sent {
             with_enigo(app_handle, |enigo| match paste_method {
-                // The legacy path cannot detect a mistimed chord, so it keeps the
-                // conservative 100ms modifier hold.
-                PasteMethod::CtrlV => input::send_paste_ctrl_v(enigo, 100),
-                PasteMethod::CtrlShiftV => input::send_paste_ctrl_shift_v(enigo, 100),
-                PasteMethod::ShiftInsert => input::send_paste_shift_insert(enigo, 100),
+                PasteMethod::CtrlV => input::send_paste_ctrl_v(enigo, paste_modifier_hold_ms),
+                PasteMethod::CtrlShiftV => {
+                    input::send_paste_ctrl_shift_v(enigo, paste_modifier_hold_ms)
+                }
+                PasteMethod::ShiftInsert => {
+                    input::send_paste_shift_insert(enigo, paste_modifier_hold_ms)
+                }
                 _ => Err("Invalid paste method for clipboard paste".into()),
             })?;
         }
@@ -100,13 +179,22 @@ fn paste_via_clipboard(
         Ok(())
     })();
 
-    finish_clipboard_paste(paste_result, paste_delay_after_ms, || {
+    // The user asked to keep the transcript on the clipboard: there is
+    // nothing to restore, and `paste`'s CopyToClipboard re-write already
+    // leaves the right content behind.
+    if paste_result.is_ok() && clipboard_handling == ClipboardHandling::CopyToClipboard {
+        return Ok(());
+    }
+
+    let restore_app_handle = app_handle.clone();
+    let restore = move || {
+        let clipboard = restore_app_handle.clipboard();
         // Restore original clipboard content even when key injection failed.
         // Text takes priority so this path stays identical to the previous behavior;
         // an image is only restored when the clipboard held no text at all, which is
         // the case that used to silently wipe screenshots.
         if let Some(clipboard_content) = saved_text {
-            let _ = write_text_to_clipboard(app_handle, &clipboard_content);
+            let _ = write_text_to_clipboard(&restore_app_handle, &clipboard_content);
         } else if let Some(image) = saved_image {
             info!("Restoring image to clipboard");
             let _ = clipboard.write_image(&image);
@@ -114,7 +202,20 @@ fn paste_via_clipboard(
             // Nothing was there to begin with — don't leave the transcription behind.
             let _ = clipboard.clear();
         }
-    })
+    };
+
+    match paste_result {
+        Ok(()) => {
+            // Success: restore off the paste path. The target app still gets
+            // its settle delay before the clipboard is put back, but the
+            // pipeline no longer waits for it.
+            spawn_clipboard_restore(ticket, paste_delay_after_ms, restore);
+            Ok(())
+        }
+        // Failure is rare: keep the old synchronous restore so an error is
+        // reported with the clipboard already back to its original state.
+        Err(_) => finish_clipboard_paste(paste_result, paste_delay_after_ms, restore),
+    }
 }
 
 /// Attempts to send a key combination using Linux-native tools.
@@ -797,6 +898,11 @@ pub(crate) fn send_copy_key(app_handle: &AppHandle) -> Result<(), String> {
     #[cfg(target_os = "linux")]
     let (modifier, key) = (Key::Control, Key::Unicode('c'));
 
+    // The focused app will overwrite the clipboard when it services the
+    // copy. Claim ownership first so a pending paste restore cancels instead
+    // of racing the copy's write.
+    bump_clipboard_generation();
+
     with_enigo(app_handle, |enigo| {
         enigo
             .key(modifier, Direction::Press)
@@ -817,6 +923,7 @@ pub fn paste(text: String, app_handle: AppHandle) -> Result<(), String> {
     let paste_method = settings.paste_method;
     let paste_delay_ms = settings.paste_delay_ms;
     let paste_delay_after_ms = settings.paste_delay_after_ms;
+    let paste_modifier_hold_ms = settings.paste_modifier_hold_ms;
 
     // Append trailing space if setting is enabled
     let text = if settings.append_trailing_space {
@@ -826,8 +933,8 @@ pub fn paste(text: String, app_handle: AppHandle) -> Result<(), String> {
     };
 
     info!(
-        "Using paste method: {:?}, delay before: {}ms, delay after: {}ms",
-        paste_method, paste_delay_ms, paste_delay_after_ms
+        "Using paste method: {:?}, delay before: {}ms, delay after: {}ms, modifier hold: {}ms",
+        paste_method, paste_delay_ms, paste_delay_after_ms, paste_modifier_hold_ms
     );
 
     // Perform the paste operation
@@ -875,6 +982,8 @@ pub fn paste(text: String, app_handle: AppHandle) -> Result<(), String> {
                 &paste_method,
                 paste_delay_ms,
                 paste_delay_after_ms,
+                paste_modifier_hold_ms,
+                settings.clipboard_handling,
             )?
         }
         PasteMethod::ExternalScript => {
@@ -1014,6 +1123,29 @@ e.g. 28:1 28:0 means pressing on the Enter button on a standard US keyboard.
 
         assert_eq!(result.unwrap_err(), "input failed");
         assert!(restored.get());
+    }
+
+    #[test]
+    fn restore_runs_while_ticket_is_latest() {
+        assert_eq!(restore_decision(7, 7), RestoreDecision::Restore);
+        assert_eq!(restore_decision(1, 1), RestoreDecision::Restore);
+    }
+
+    #[test]
+    fn restore_cancels_when_a_newer_generation_claimed_the_clipboard() {
+        // A newer paste (or a copy flow) bumped the counter after this
+        // restore was scheduled: restoring would clobber its content.
+        assert_eq!(restore_decision(3, 4), RestoreDecision::Cancelled);
+        assert_eq!(restore_decision(3, 9), RestoreDecision::Cancelled);
+    }
+
+    #[test]
+    fn clipboard_generation_bumps_monotonically() {
+        let first = bump_clipboard_generation();
+        let second = bump_clipboard_generation();
+
+        assert!(second > first, "generation must grow with every claim");
+        assert_eq!(latest_clipboard_generation(), second);
     }
 
     #[cfg(unix)]

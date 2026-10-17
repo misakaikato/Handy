@@ -651,6 +651,10 @@
         "permissionsButton": "Oprávnění",
         "modelsButton": "Výběr modelu",
         "exitButton": "Ukončit náhled"
+      },
+      "pasteHold": {
+        "title": "Držení modifikátoru při vkládání",
+        "description": "Jak dlouho (v milisekundách) zůstává klávesa Cmd/Ctrl stisknutá při vkládání. Zvyšte, pokud se vložení občas neprovede."
       }
     },
     "about": {

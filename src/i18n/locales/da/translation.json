@@ -651,6 +651,10 @@
         "verdictOk": "Tastehændelser når frem til Handy som normalt.",
         "verdictNoEvents": "Ingen hændelser registreret — trykkede du på nogen taster under testen?",
         "failed": "Diagnostik mislykkedes: {{error}}"
+      },
+      "pasteHold": {
+        "title": "Modifikatortastens holdetid ved indsættelse",
+        "description": "Hvor længe (i millisekunder) Cmd/Ctrl-tasten holdes nede under indsættelsen. Forøg, hvis indsættelse nogle gange ikke virker."
       }
     },
     "about": {

@@ -651,6 +651,10 @@
         "verdictOk": "Peristiwa tombol mencapai Handy secara normal.",
         "verdictNoEvents": "Tidak ada peristiwa yang tertangkap — apakah Anda menekan tombol selama pengujian?",
         "failed": "Diagnostik gagal: {{error}}"
+      },
+      "pasteHold": {
+        "title": "Tahanan Tombol Modifikator Saat Menempel",
+        "description": "Berapa lama (dalam milidetik) tombol Cmd/Ctrl ditahan saat menempel. Naikkan jika tempel kadang tidak berfungsi."
       }
     },
     "about": {

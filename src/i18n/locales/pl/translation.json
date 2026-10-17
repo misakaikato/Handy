@@ -651,6 +651,10 @@
         "permissionsButton": "Uprawnienia",
         "modelsButton": "Wybór modelu",
         "exitButton": "Zakończ podgląd"
+      },
+      "pasteHold": {
+        "title": "Przytrzymanie modyfikatora przy wklejaniu",
+        "description": "Jak długo (w milisekundach) klawisz Cmd/Ctrl jest przytrzymywany podczas wklejania. Zwiększ, jeśli wklejanie czasami nie działa."
       }
     },
     "about": {

@@ -156,8 +156,9 @@ pub(crate) fn evaluate(state: &TxState, now: Instant) -> WaitDecision {
     WaitDecision::KeepWaiting
 }
 
-/// Modifier hold for the receipt-sequenced chord, kept at parity with the
-/// legacy path (100ms) for the beta: that hold was added in #165 because real
+/// Modifier hold for the receipt-sequenced chord, kept in line with the
+/// legacy path's default hold (see `default_paste_modifier_hold_ms`) for the
+/// beta: that hold was added in #165 because real
 /// users' systems dropped chords released too quickly, and the beta should
 /// validate the receipt mechanism without changing a second variable.
 ///

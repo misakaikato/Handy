@@ -651,6 +651,10 @@
         "permissionsButton": "Quyền",
         "modelsButton": "Chọn mô hình",
         "exitButton": "Thoát xem trước"
+      },
+      "pasteHold": {
+        "title": "Thời gian giữ phím bổ trợ khi dán",
+        "description": "Thời gian (tính bằng mili giây) giữ phím Cmd/Ctrl trong thao tác dán. Tăng nếu đôi khi dán không hoạt động."
       }
     },
     "about": {

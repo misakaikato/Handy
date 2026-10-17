@@ -651,6 +651,10 @@
         "verdictOk": "Toetsgebeurtenissen bereiken Handy normaal.",
         "verdictNoEvents": "Geen gebeurtenissen vastgelegd — heb je tijdens de test toetsen ingedrukt?",
         "failed": "Diagnose mislukt: {{error}}"
+      },
+      "pasteHold": {
+        "title": "Vasthouden van modifikatortoets bij plakken",
+        "description": "Hoe lang (in milliseconden) de Cmd/Ctrl-toets wordt vastgehouden tijdens het plakken. Verhoog als plakken soms niets doet."
       }
     },
     "about": {

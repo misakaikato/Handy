@@ -651,6 +651,10 @@
         "permissionsButton": "권한",
         "modelsButton": "모델 선택",
         "exitButton": "미리보기 종료"
+      },
+      "pasteHold": {
+        "title": "붙여넣기 수정 키 유지 시간",
+        "description": "붙여넣기 키 입력 동안 Cmd/Ctrl 수정 키를 누르고 있는 시간(밀리초). 가끔 붙여넣기가 안 되면 늘리세요."
       }
     },
     "about": {

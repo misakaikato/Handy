@@ -651,6 +651,10 @@
         "permissionsButton": "Behörigheter",
         "modelsButton": "Modellval",
         "exitButton": "Avsluta förhandsvisning"
+      },
+      "pasteHold": {
+        "title": "Hålltid för modifierarknappen vid inklistring",
+        "description": "Hur länge (i millisekunder) Cmd/Ctrl hålls nedtryckt under inklistringen. Öka om inklistring ibland inte gör något."
       }
     },
     "about": {

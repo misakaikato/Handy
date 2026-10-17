@@ -651,6 +651,10 @@
         "permissionsButton": "İzinler",
         "modelsButton": "Model seçimi",
         "exitButton": "Önizlemeden çık"
+      },
+      "pasteHold": {
+        "title": "Yapıştırma tuşu basılı tutma süresi",
+        "description": "Yapıştırma sırasında Cmd/Ctrl tuşunun kaç milisaniye basılı tutulacağı. Yapıştırma bazen işe yaramıyorsa artırın."
       }
     },
     "about": {

@@ -651,6 +651,10 @@
         "permissionsButton": "權限",
         "modelsButton": "模型選擇",
         "exitButton": "結束預覽"
+      },
+      "pasteHold": {
+        "title": "貼上按鍵按住時長",
+        "description": "貼上組合鍵中修飾鍵按住的時長（毫秒）。如果偶爾貼上無效，可適當增大。"
       }
     },
     "about": {

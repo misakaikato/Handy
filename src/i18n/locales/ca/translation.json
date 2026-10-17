@@ -651,6 +651,10 @@
         "verdictOk": "Els esdeveniments de tecla arriben al Handy amb normalitat.",
         "verdictNoEvents": "No s'ha capturat cap esdeveniment. Heu premut alguna tecla durant la prova?",
         "failed": "El diagnòstic ha fallat: {{error}}"
+      },
+      "pasteHold": {
+        "title": "Retenció del modificador en enganxar",
+        "description": "Quant de temps (en mil·lisegons) es manté premuda la tecla Cmd/Ctrl durant lenganxat. Augmenta-ho si de vegades no enganxa res."
       }
     },
     "about": {

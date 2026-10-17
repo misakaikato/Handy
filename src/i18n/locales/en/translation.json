@@ -651,6 +651,10 @@
         "verdictOk": "Key events are reaching Handy normally.",
         "verdictNoEvents": "No events captured — did you press any keys during the test?",
         "failed": "Diagnostic failed: {{error}}"
+      },
+      "pasteHold": {
+        "title": "Paste Modifier Hold",
+        "description": "How long (in milliseconds) the Cmd/Ctrl modifier stays held down during the paste keystroke. Increase if pastes occasionally do nothing."
       }
     },
     "about": {
