@@ -263,12 +263,210 @@ pub fn send_paste_shift_insert(enigo: &mut Enigo, hold_ms: u64) -> Result<(), St
     Ok(())
 }
 
+/// Types text at the cursor with explicit handling for the characters that
+/// keystroke-level injection cannot carry reliably on macOS.
+///
+/// enigo's macOS `text` posts one CGEvent per 20 *characters* with no pacing
+/// (its inter-event accounting only runs on drop). Apps with an active input
+/// method drop characters when those unicode-string events arrive back to
+/// back; a chunk boundary can land inside a surrogate pair; and enigo works
+/// around a macOS quirk (an event whose string *starts* with a newline is
+/// silently dropped) by prefixing a zero-width space — which then lands in
+/// the text. Here the text is pre-split into runs of at most 20 UTF-16
+/// units (so enigo never splits again, and never sees a run starting with a
+/// newline), newlines and tabs become real Return/Tab keystrokes, invisible
+/// characters are dropped, and a small gap between events lets slow apps
+/// keep up.
+#[cfg(target_os = "macos")]
+pub fn paste_text_direct(enigo: &mut Enigo, text: &str) -> Result<(), String> {
+    for segment in split_typed_segments(text) {
+        match segment {
+            TypedSegment::Text(run) => {
+                enigo
+                    .text(&run)
+                    .map_err(|e| format!("Failed to send text directly: {e}"))?;
+            }
+            TypedSegment::Return => {
+                enigo
+                    .key(Key::Return, enigo::Direction::Click)
+                    .map_err(|e| format!("Failed to type Return: {e}"))?;
+            }
+            TypedSegment::Tab => {
+                enigo
+                    .key(Key::Tab, enigo::Direction::Click)
+                    .map_err(|e| format!("Failed to type Tab: {e}"))?;
+            }
+        }
+        std::thread::sleep(MACOS_TYPED_EVENT_GAP);
+    }
+    Ok(())
+}
+
+/// Gap between injected events. enigo assumes the OS needs ~20ms per event
+/// but never sleeps between them; 10ms keeps a 48-char streamed chunk well
+/// under 50ms of main-thread time while letting IME-heavy apps keep up.
+#[cfg(target_os = "macos")]
+const MACOS_TYPED_EVENT_GAP: std::time::Duration = std::time::Duration::from_millis(10);
+
+/// One piece of typed output after splitting for reliable injection.
+#[cfg(target_os = "macos")]
+#[derive(Debug, PartialEq, Eq)]
+enum TypedSegment {
+    /// A run of visible text: at most 20 UTF-16 units, no control characters,
+    /// and never starting with a newline or tab.
+    Text(String),
+    /// A line break, typed as a real Return keystroke.
+    Return,
+    /// A horizontal tab, typed as a real Tab keystroke.
+    Tab,
+}
+
+/// Splits text into [`TypedSegment`]s (see the `paste_text_direct` docs for
+/// why each guarantee exists). Pure, so the boundary rules are testable
+/// without posting events.
+#[cfg(target_os = "macos")]
+fn split_typed_segments(text: &str) -> Vec<TypedSegment> {
+    /// CGEventKeyboardSetUnicodeString truncates beyond 20 UTF-16 units.
+    const MAX_UTF16_PER_EVENT: usize = 20;
+
+    fn push_run(segments: &mut Vec<TypedSegment>, run: &mut String, units: &mut usize) {
+        if !run.is_empty() {
+            segments.push(TypedSegment::Text(std::mem::take(run)));
+        }
+        *units = 0;
+    }
+
+    let mut segments = Vec::new();
+    let mut run = String::new();
+    let mut units = 0usize;
+
+    let mut chars = text.chars().peekable();
+    while let Some(ch) = chars.next() {
+        match ch {
+            '\r' => {
+                // A CRLF pair is one line break, not two.
+                if chars.peek() == Some(&'\n') {
+                    chars.next();
+                }
+                push_run(&mut segments, &mut run, &mut units);
+                segments.push(TypedSegment::Return);
+            }
+            '\n' => {
+                push_run(&mut segments, &mut run, &mut units);
+                segments.push(TypedSegment::Return);
+            }
+            '\t' => {
+                push_run(&mut segments, &mut run, &mut units);
+                segments.push(TypedSegment::Tab);
+            }
+            // Zero-width characters and BOMs never belong in typed output
+            // (enigo itself injects U+200B as a newline workaround), and a
+            // null byte is rejected outright by the Windows backend.
+            '\u{200B}' | '\u{200C}' | '\u{200D}' | '\u{FEFF}' | '\0' => {}
+            _ => {
+                if units + ch.len_utf16() > MAX_UTF16_PER_EVENT {
+                    push_run(&mut segments, &mut run, &mut units);
+                }
+                run.push(ch);
+                units += ch.len_utf16();
+            }
+        }
+    }
+    push_run(&mut segments, &mut run, &mut units);
+    segments
+}
+
 /// Pastes text directly using the enigo text method.
 /// This tries to use system input methods if possible, otherwise simulates keystrokes one by one.
+#[cfg(not(target_os = "macos"))]
 pub fn paste_text_direct(enigo: &mut Enigo, text: &str) -> Result<(), String> {
     enigo
         .text(text)
-        .map_err(|e| format!("Failed to send text directly: {}", e))?;
+        .map_err(|e| format!("Failed to send text directly: {e}"))?;
 
     Ok(())
+}
+
+#[cfg(all(test, target_os = "macos"))]
+mod tests {
+    use super::{split_typed_segments, TypedSegment};
+
+    fn utf16_len(s: &str) -> usize {
+        s.chars().map(char::len_utf16).sum()
+    }
+
+    fn text_runs(segments: &[TypedSegment]) -> Vec<&str> {
+        segments
+            .iter()
+            .filter_map(|s| match s {
+                TypedSegment::Text(t) => Some(t.as_str()),
+                _ => None,
+            })
+            .collect()
+    }
+
+    #[test]
+    fn plain_text_is_a_single_run() {
+        assert_eq!(
+            split_typed_segments("hello 世界"),
+            vec![TypedSegment::Text("hello 世界".to_string())]
+        );
+        assert_eq!(split_typed_segments(""), Vec::<TypedSegment>::new());
+    }
+
+    #[test]
+    fn cjk_runs_respect_the_utf16_event_limit() {
+        let text = "字".repeat(45);
+        let segments = split_typed_segments(&text);
+        let runs = text_runs(&segments);
+        assert_eq!(runs.len(), 3, "45 CJK chars split at 20/20/5");
+        assert!(runs.iter().all(|t| utf16_len(t) <= 20));
+        assert_eq!(runs.concat(), text);
+    }
+
+    #[test]
+    fn surrogate_pairs_are_never_split() {
+        // 11 emoji = 22 UTF-16 units: 10 in the first event, 1 in the next,
+        // each pair intact.
+        let text = "😀".repeat(11);
+        let segments = split_typed_segments(&text);
+        let runs = text_runs(&segments);
+        assert_eq!(runs.len(), 2);
+        assert!(runs.iter().all(|t| utf16_len(t) <= 20));
+        assert_eq!(runs.concat(), text);
+    }
+
+    #[test]
+    fn newlines_and_tabs_become_keystrokes() {
+        assert_eq!(
+            split_typed_segments("one\ntwo\r\nthree\tend"),
+            vec![
+                TypedSegment::Text("one".to_string()),
+                TypedSegment::Return,
+                TypedSegment::Text("two".to_string()),
+                TypedSegment::Return,
+                TypedSegment::Text("three".to_string()),
+                TypedSegment::Tab,
+                TypedSegment::Text("end".to_string()),
+            ]
+        );
+    }
+
+    #[test]
+    fn a_leading_newline_types_before_any_text() {
+        // enigo drops events whose string starts with a newline, so the
+        // very first segment must be the keystroke, never text.
+        assert_eq!(
+            split_typed_segments("\npara"),
+            vec![TypedSegment::Return, TypedSegment::Text("para".to_string())]
+        );
+    }
+
+    #[test]
+    fn invisible_characters_are_dropped() {
+        assert_eq!(
+            split_typed_segments("a\u{200B}\u{FEFF}b\u{200D}c\u{0}"),
+            vec![TypedSegment::Text("abc".to_string())]
+        );
+    }
 }
