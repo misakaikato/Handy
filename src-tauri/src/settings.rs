@@ -106,6 +106,26 @@ pub enum PostProcessApiFormat {
     Anthropic,
 }
 
+/// How forcefully the post-processing model is asked to think before
+/// answering. Applied to OpenAI-compatible (including custom) providers;
+/// `Default` sends no thinking-related request fields at all.
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, Default, PartialEq, Eq, Type)]
+#[serde(rename_all = "lowercase")]
+pub enum PostProcessThinking {
+    /// Let the endpoint decide; no thinking fields are sent.
+    #[default]
+    Default,
+    /// Disable thinking: `chat_template_kwargs: {enable_thinking: false}`
+    /// (the Qwen3/vLLM/SGLang switch).
+    Off,
+    /// `reasoning_effort: "low"`
+    Low,
+    /// `reasoning_effort: "medium"`
+    Medium,
+    /// `reasoning_effort: "high"`
+    High,
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone, Type)]
 pub struct PostProcessProvider {
     pub id: String,
@@ -558,6 +578,9 @@ pub struct AppSettings {
     /// LLM, instead of waiting for the full response and pasting.
     #[serde(default)]
     pub stream_post_process: bool,
+    /// How forcefully the post-processing model is asked to think.
+    #[serde(default)]
+    pub post_process_thinking: PostProcessThinking,
 }
 
 fn default_model() -> String {
@@ -1071,6 +1094,7 @@ pub fn get_default_settings() -> AppSettings {
         use_cursor_context: false,
         cursor_context_chars: default_cursor_context_chars(),
         stream_post_process: false,
+        post_process_thinking: PostProcessThinking::default(),
     }
 }
 

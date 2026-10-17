@@ -455,10 +455,24 @@
         "selectToEdit": "Selecione um prompt acima para visualizar e editar seus detalhes.",
         "createFirst": "Clique em 'Criar Novo Prompt' acima para criar seu primeiro prompt de pós-processamento."
       },
+      "output": {
+        "groupTitle": "Saída"
+      },
       "streaming": {
         "groupTitle": "Streaming",
         "title": "Transmitir o resultado da reescrita",
         "description": "Digita o texto reescrito no cursor enquanto ele é gerado, em vez de colá-lo quando a resposta completa chega. Em caso de erro, retorna à colagem. Requer um provedor compatível com OpenAI."
+      },
+      "thinking": {
+        "title": "Raciocínio",
+        "description": "Controla quanto o modelo raciocina antes de reescrever. Padrão não envia parâmetros de raciocínio; Desligado desativa o raciocínio; Baixo/Médio/Alto solicitam um nível de esforço. Aplica-se a provedores compatíveis com OpenAI (incluindo o personalizado).",
+        "options": {
+          "default": "Padrão",
+          "off": "Desligado",
+          "low": "Baixo",
+          "medium": "Médio",
+          "high": "Alto"
+        }
       }
     },
     "history": {

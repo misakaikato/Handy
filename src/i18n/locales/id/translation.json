@@ -455,10 +455,24 @@
         "selectToEdit": "Pilih prompt di atas untuk melihat dan mengedit detailnya.",
         "createFirst": "Klik 'Buat Prompt Baru' di atas untuk membuat prompt pascaproses pertama Anda."
       },
+      "output": {
+        "groupTitle": "Keluaran"
+      },
       "streaming": {
         "groupTitle": "Streaming",
         "title": "Streaming hasil penulisan ulang",
         "description": "Mengetik teks yang ditulis ulang di kursor saat sedang dibuat, alih-alih menempelkannya setelah respons lengkap tiba. Kembali ke menempel jika terjadi kesalahan. Memerlukan penyedia yang kompatibel dengan OpenAI."
+      },
+      "thinking": {
+        "title": "Mode berpikir",
+        "description": "Mengontrol seberapa banyak model berpikir sebelum menulis ulang. Default tidak mengirim parameter berpikir; Nonaktif mematikan berpikir; Rendah/Sedang/Tinggi meminta tingkat upaya penalaran. Berlaku untuk penyedia yang kompatibel dengan OpenAI (termasuk kustom).",
+        "options": {
+          "default": "Default",
+          "off": "Nonaktif",
+          "low": "Rendah",
+          "medium": "Sedang",
+          "high": "Tinggi"
+        }
       }
     },
     "history": {

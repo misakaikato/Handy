@@ -21,6 +21,7 @@ import { ModelSelect } from "../PostProcessingSettingsApi/ModelSelect";
 import { usePostProcessProviderState } from "../PostProcessingSettingsApi/usePostProcessProviderState";
 import { ShortcutInput } from "../ShortcutInput";
 import { StreamPostProcess } from "../StreamPostProcess";
+import { ThinkingControl } from "../ThinkingControl";
 import { useSettings } from "../../../hooks/useSettings";
 
 const PostProcessingSettingsApiComponent: React.FC = () => {
@@ -480,8 +481,9 @@ export const PostProcessingSettings: React.FC = () => {
         <PostProcessingSettingsApi />
       </SettingsGroup>
 
-      <SettingsGroup title={t("settings.postProcessing.streaming.groupTitle")}>
+      <SettingsGroup title={t("settings.postProcessing.output.groupTitle")}>
         <StreamPostProcess descriptionMode="tooltip" grouped={true} />
+        <ThinkingControl descriptionMode="tooltip" grouped={true} />
       </SettingsGroup>
 
       <SettingsGroup title={t("settings.postProcessing.prompts.title")}>

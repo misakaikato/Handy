@@ -5,6 +5,7 @@ import type {
   AppSettings as Settings,
   AudioDevice,
   PostProcessApiFormat,
+  PostProcessThinking,
   ChineseScript,
   TranscribeAcceleratorSetting,
   ShortcutActivation,
@@ -153,6 +154,8 @@ const settingUpdaters: {
     commands.changeCursorContextCharsSetting(value as number),
   stream_post_process: (value) =>
     commands.changeStreamPostProcessSetting(value as boolean),
+  post_process_thinking: (value) =>
+    commands.changePostProcessThinkingSetting(value as PostProcessThinking),
   word_correction_threshold: (value) =>
     commands.changeWordCorrectionThresholdSetting(value as number),
   paste_delay_ms: (value) =>

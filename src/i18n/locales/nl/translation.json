@@ -455,10 +455,24 @@
         "selectToEdit": "Selecteer hierboven een prompt om de details te bekijken en te bewerken.",
         "createFirst": "Klik hierboven op 'Nieuwe prompt maken' om je eerste naverwerkingsprompt aan te maken."
       },
+      "output": {
+        "groupTitle": "Uitvoer"
+      },
       "streaming": {
         "groupTitle": "Streaming",
         "title": "Herschrijvingsresultaat streamen",
         "description": "Typt de herschreven tekst al bij de cursor terwijl deze wordt gegenereerd, in plaats van te plakken wanneer het volledige antwoord binnenkomt. Valt bij fouten terug op plakken. Vereist een OpenAI-compatibele aanbieder."
+      },
+      "thinking": {
+        "title": "Denkmodus",
+        "description": "Bepaalt hoeveel het model nadenkt vóór het herschrijven. Standaard worden geen denkparameters verzonden; Uit schakelt denken uit; Laag/Medium/Hoog vragen een reasoning-inspanning. Geldt voor OpenAI-compatibele (ook eigen) aanbieders.",
+        "options": {
+          "default": "Standaard",
+          "off": "Uit",
+          "low": "Laag",
+          "medium": "Gemiddeld",
+          "high": "Hoog"
+        }
       }
     },
     "history": {

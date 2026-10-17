@@ -455,10 +455,24 @@
         "selectToEdit": "Seleccioneu una indicació more amunt per veure'n i editar-ne els detalls.",
         "createFirst": "Feu clic a «Creeu una indicació nova» més amunt per crear la primera indicació de postprocessament."
       },
+      "output": {
+        "groupTitle": "Sortida"
+      },
       "streaming": {
         "groupTitle": "Transmissió en directe",
         "title": "Transmet el resultat del postprocessat",
         "description": "Escriu el text reescrit al cursor mentre es genera, en lloc de enganxar-lo quan arriba la resposta completa. En cas d'error, torna a l'enganxat. Requereix un proveïdor compatible amb OpenAI."
+      },
+      "thinking": {
+        "title": "Raonament",
+        "description": "Controla quant raona el model abans de reescriure. Per defecte no envia cap paràmetre de raonament; Desactivat inhabilita el raonament; Baix/Mitjà/Alt demanen un nivell d'esforç. S'aplica a proveïdors compatibles amb OpenAI (incloent-hi el personalitzat).",
+        "options": {
+          "default": "Per defecte",
+          "off": "Desactivat",
+          "low": "Baix",
+          "medium": "Mitjà",
+          "high": "Alt"
+        }
       }
     },
     "history": {

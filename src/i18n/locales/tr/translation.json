@@ -455,10 +455,24 @@
         "selectToEdit": "Ayrıntılarını görüntülemek ve düzenlemek için yukarıdan bir prompt seçin.",
         "createFirst": "İlk son işlem promptunuzu oluşturmak için yukarıdaki “Yeni Prompt Oluştur” seçeneğine tıklayın."
       },
+      "output": {
+        "groupTitle": "Çıktı"
+      },
       "streaming": {
         "groupTitle": "Akış",
         "title": "Yeniden yazma sonucunu akışla yaz",
         "description": "Yeniden yazılan metni, tam yanıt geldiğinde yapıştırmak yerine oluşturulurken imleç konumunda yazar. Hata durumunda yapıştırmaya geri döner. OpenAI uyumlu bir sağlayıcı gerektirir."
+      },
+      "thinking": {
+        "title": "Düşünme modu",
+        "description": "Modelin yeniden yazmadan önce ne kadar düşüneceğini denetler. Varsayılan hiçbir düşünme parametresi göndermez; Kapalı düşünmeyi devre dışı bırakır; Düşük/Orta/Yüksek bir akıl yürütme çabası ister. OpenAI uyumlu (özel dahil) sağlayıcılara uygulanır.",
+        "options": {
+          "default": "Varsayılan",
+          "off": "Kapalı",
+          "low": "Düşük",
+          "medium": "Orta",
+          "high": "Yüksek"
+        }
       }
     },
     "history": {

@@ -455,10 +455,24 @@
         "selectToEdit": "選擇上方的提示詞以檢視和編輯其詳細資訊",
         "createFirst": "點選上方的「建立新提示詞」來建立您的第一個後處理提示詞"
       },
+      "output": {
+        "groupTitle": "輸出方式"
+      },
       "streaming": {
         "groupTitle": "串流輸出",
         "title": "串流輸出改寫結果",
         "description": "改寫結果邊生成邊輸入到游標處，而不是等全部完成後再一次性貼上。出錯時回退為貼上。需要 OpenAI 相容介面。"
+      },
+      "thinking": {
+        "title": "思考模式",
+        "description": "控制模型改寫前的思考程度。預設不傳送任何思考參數；「關閉」停用思考；低/中/高要求對應的思考力度。適用於 OpenAI 相容（含自訂）介面。",
+        "options": {
+          "default": "預設",
+          "off": "關閉",
+          "low": "低",
+          "medium": "中",
+          "high": "高"
+        }
       }
     },
     "history": {

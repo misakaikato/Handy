@@ -455,10 +455,24 @@
         "selectToEdit": "Wähle oben einen Prompt aus, um dessen Details anzuzeigen und zu bearbeiten.",
         "createFirst": "Klicke oben auf 'Neuen Prompt erstellen', um deinen ersten Nachbearbeitungs-Prompt zu erstellen."
       },
+      "output": {
+        "groupTitle": "Ausgabe"
+      },
       "streaming": {
         "groupTitle": "Streaming",
         "title": "Umschreibung streamen",
         "description": "Tippt den umgeschriebenen Text bereits während der Generierung am Cursor ein, statt ihn erst nach der vollständigen Antwort einzufügen. Fällt bei Fehlern auf Einfügen zurück. Erfordert einen OpenAI-kompatiblen Anbieter."
+      },
+      "thinking": {
+        "title": "Denkmodus",
+        "description": "Steuert, wie viel das Modell vor dem Umschreiben nachdenkt. Standard sendet keine Denk-Parameter; Aus schaltet Denken ab; Niedrig/Mittel/Hoch fordern einen Reasoning-Aufwand. Gilt für OpenAI-kompatible (auch eigene) Anbieter.",
+        "options": {
+          "default": "Standard",
+          "off": "Aus",
+          "low": "Niedrig",
+          "medium": "Mittel",
+          "high": "Hoch"
+        }
       }
     },
     "history": {

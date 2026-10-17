@@ -455,10 +455,24 @@
         "selectToEdit": "Wybierz prompt powyżej, aby zobaczyć i edytować jego szczegóły.",
         "createFirst": "Kliknij 'Utwórz nowy prompt' powyżej, aby utworzyć pierwszy prompt postprocessingu."
       },
+      "output": {
+        "groupTitle": "Wynik"
+      },
       "streaming": {
         "groupTitle": "Strumieniowanie",
         "title": "Strumieniuj wynik przepisania",
         "description": "Wpisuje przepisany tekst przy kursorze w trakcie generowania, zamiast wklejać go po otrzymaniu pełnej odpowiedzi. Przy błędzie wraca do wklejania. Wymaga dostawcy zgodnego z OpenAI."
+      },
+      "thinking": {
+        "title": "Tryb myślenia",
+        "description": "Kontroluje, ile model myśli przed przepisaniem. Domyślnie nie wysyła parametrów myślenia; Wyłączone wyłącza myślenie; Niski/Średni/Wysoki żądają poziomu wysiłku. Dotyczy dostawców zgodnych z OpenAI (w tym własnego).",
+        "options": {
+          "default": "Domyślnie",
+          "off": "Wyłączone",
+          "low": "Niski",
+          "medium": "Średni",
+          "high": "Wysoki"
+        }
       }
     },
     "history": {

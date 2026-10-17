@@ -380,6 +380,14 @@ async changeStreamPostProcessSetting(enabled: boolean) : Promise<Result<null, st
     else return { status: "error", error: e  as any };
 }
 },
+async changePostProcessThinkingSetting(thinking: PostProcessThinking) : Promise<Result<null, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("change_post_process_thinking_setting", { thinking }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
 /**
  * Temporarily unregister all bindings while the user is recording a
  * shortcut in the UI. This avoids firing actions while keys are recorded.
@@ -1131,7 +1139,11 @@ cursor_context_chars?: number;
  * Type the post-processing rewrite at the cursor as it streams from the
  * LLM, instead of waiting for the full response and pasting.
  */
-stream_post_process?: boolean }
+stream_post_process?: boolean; 
+/**
+ * How forcefully the post-processing model is asked to think.
+ */
+post_process_thinking?: PostProcessThinking }
 export type AudioDevice = { index: string; name: string; is_default: boolean }
 export type AutoSubmitKey = "enter" | "ctrl_enter" | "cmd_enter"
 export type AvailableAccelerators = { transcribe: string[]; gpu_devices: GpuDeviceOption[] }
@@ -1218,6 +1230,33 @@ export type PostProcessApiFormat =
  */
 "anthropic"
 export type PostProcessProvider = { id: string; label: string; base_url: string; allow_base_url_edit?: boolean; models_endpoint?: string | null; supports_structured_output?: boolean; api_format?: PostProcessApiFormat }
+/**
+ * How forcefully the post-processing model is asked to think before
+ * answering. Applied to OpenAI-compatible (including custom) providers;
+ * `Default` sends no thinking-related request fields at all.
+ */
+export type PostProcessThinking = 
+/**
+ * Let the endpoint decide; no thinking fields are sent.
+ */
+"default" | 
+/**
+ * Disable thinking: `chat_template_kwargs: {enable_thinking: false}`
+ * (the Qwen3/vLLM/SGLang switch).
+ */
+"off" | 
+/**
+ * `reasoning_effort: "low"`
+ */
+"low" | 
+/**
+ * `reasoning_effort: "medium"`
+ */
+"medium" | 
+/**
+ * `reasoning_effort: "high"`
+ */
+"high"
 export type RecordingRetentionPeriod = "never" | "preserve_limit" | "days_3" | "weeks_2" | "months_3"
 /**
  * A retired ONNX model found on disk.

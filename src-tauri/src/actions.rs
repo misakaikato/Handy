@@ -112,17 +112,41 @@ fn strip_invisible_chars(s: &str) -> String {
     s.replace(['\u{200B}', '\u{200C}', '\u{200D}', '\u{FEFF}'], "")
 }
 
-/// Strip a leading `<think>...</think>` block. Some endpoints can't disable
-/// reasoning, and some local servers put the reasoning text into `content`
-/// instead of a separate field — without this the user would get the model's
-/// chain of thought pasted along with the cleaned transcription.
-fn strip_think_block(s: &str) -> &str {
-    if let Some(rest) = s.trim_start().strip_prefix("<think>") {
-        if let Some(end) = rest.find("</think>") {
-            return rest[end + "</think>".len()..].trim_start();
+/// Strip every complete `<think>...</think>` block. Some endpoints can't
+/// disable reasoning, and some local servers put the reasoning text into
+/// `content` instead of a separate field — without this the user would get the
+/// model's chain of thought pasted along with the cleaned transcription.
+/// Blocks may also appear mid-text (models that think again after starting to
+/// answer), so all of them go, wherever they sit. An unterminated block is
+/// left verbatim rather than guessed at.
+fn strip_think_blocks(s: &str) -> String {
+    if !s.contains("<think>") {
+        return s.to_string();
+    }
+    let mut visible = String::with_capacity(s.len());
+    let mut rest = s;
+    let mut stripped_any = false;
+    while let Some(start) = rest.find("<think>") {
+        visible.push_str(&rest[..start]);
+        match rest[start..].find("</think>") {
+            Some(end) => {
+                rest = &rest[start + end + "</think>".len()..];
+                stripped_any = true;
+            }
+            None => {
+                // Unclosed block: leave the remainder untouched rather than guess.
+                visible.push_str(&rest[start..]);
+                rest = "";
+                break;
+            }
         }
     }
-    s
+    visible.push_str(rest);
+    if stripped_any {
+        visible.trim_start().to_string()
+    } else {
+        visible
+    }
 }
 
 /// Build a system prompt from the user's prompt template.
@@ -201,7 +225,7 @@ struct PostProcessRequest {
     model: String,
     prompt: String,
     api_key: String,
-    disable_reasoning: bool,
+    thinking: crate::settings::PostProcessThinking,
 }
 
 fn resolve_post_process_request(settings: &AppSettings) -> Option<PostProcessRequest> {
@@ -261,17 +285,12 @@ fn resolve_post_process_request(settings: &AppSettings) -> Option<PostProcessReq
         .cloned()
         .unwrap_or_default();
 
-    // Ask these providers to skip reasoning/thinking — post-processing rarely
-    // benefits from it and it adds seconds of latency. llm_client picks the
-    // field the endpoint understands and retries without it if rejected.
-    let disable_reasoning = matches!(provider.id.as_str(), "custom" | "openrouter");
-
     Some(PostProcessRequest {
         provider,
         model,
         prompt,
         api_key,
-        disable_reasoning,
+        thinking: settings.post_process_thinking,
     })
 }
 
@@ -297,7 +316,7 @@ async fn post_process_transcription(settings: &AppSettings, transcription: &str)
         model,
         prompt,
         api_key,
-        disable_reasoning,
+        thinking,
     }) = resolve_post_process_request(settings)
     else {
         return None;
@@ -394,13 +413,13 @@ async fn post_process_transcription(settings: &AppSettings, transcription: &str)
             user_content,
             Some(system_prompt),
             Some(json_schema),
-            disable_reasoning,
+            thinking,
         )
         .await
         {
             Ok(Some(content)) => {
                 // Parse the JSON response to extract the transcription field
-                let content = strip_think_block(&content);
+                let content = &strip_think_blocks(&content);
                 match serde_json::from_str::<serde_json::Value>(content) {
                     Ok(json) => {
                         if let Some(transcription_value) =
@@ -454,12 +473,12 @@ async fn post_process_transcription(settings: &AppSettings, transcription: &str)
         api_key,
         &model,
         processed_prompt,
-        disable_reasoning,
+        thinking,
     )
     .await
     {
         Ok(Some(content)) => {
-            let content = strip_invisible_chars(strip_think_block(&content));
+            let content = strip_invisible_chars(&strip_think_blocks(&content));
             debug!(
                 "LLM post-processing succeeded for provider '{}'. Output length: {} chars",
                 provider.id,
@@ -743,7 +762,7 @@ async fn stream_post_process_and_type(
         &request.model,
         Some(system_prompt),
         transcription.to_string(),
-        request.disable_reasoning,
+        request.thinking,
         |delta| typer.receive(delta),
         is_cancelled,
     )
@@ -1367,7 +1386,7 @@ pub static ACTION_MAP: Lazy<HashMap<String, Arc<dyn ShortcutAction>>> = Lazy::ne
 mod tests {
     use super::{
         complete_unless_cancelled, custom_words_glossary, is_blank_transcription,
-        should_flush_stream_buffer, should_use_streaming_overlay, strip_think_block,
+        should_flush_stream_buffer, should_use_streaming_overlay, strip_think_blocks,
     };
     use crate::settings::OverlayStyle;
     use std::future;
@@ -1447,25 +1466,37 @@ mod tests {
     #[test]
     fn leading_think_block_is_stripped() {
         assert_eq!(
-            strip_think_block("<think>pondering...</think>Cleaned text."),
+            strip_think_blocks("<think>pondering...</think>Cleaned text."),
             "Cleaned text."
         );
         assert_eq!(
-            strip_think_block("  \n<think>multi\nline</think>\n  Cleaned text."),
+            strip_think_blocks("  \n<think>multi\nline</think>\n  Cleaned text."),
             "Cleaned text."
         );
     }
 
     #[test]
-    fn content_without_think_block_is_unchanged() {
-        assert_eq!(strip_think_block("Cleaned text."), "Cleaned text.");
+    fn think_blocks_anywhere_are_stripped() {
         assert_eq!(
-            strip_think_block("Mentions <think> mid-sentence."),
+            strip_think_blocks("Answer<think>reconsider</think> continued."),
+            "Answer continued."
+        );
+        assert_eq!(
+            strip_think_blocks("<think>first</think>A<think>second</think>B<think>third</think>"),
+            "AB"
+        );
+    }
+
+    #[test]
+    fn content_without_think_block_is_unchanged() {
+        assert_eq!(strip_think_blocks("Cleaned text."), "Cleaned text.");
+        assert_eq!(
+            strip_think_blocks("Mentions <think> mid-sentence."),
             "Mentions <think> mid-sentence."
         );
         // Unclosed block: leave untouched rather than guess
         assert_eq!(
-            strip_think_block("<think>never closed"),
+            strip_think_blocks("<think>never closed"),
             "<think>never closed"
         );
     }

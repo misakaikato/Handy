@@ -455,10 +455,24 @@
         "selectToEdit": "Selecciona un prompt arriba para ver y editar sus detalles.",
         "createFirst": "Haz clic en 'Crear nuevo prompt' arriba para crear tu primer prompt de post procesamiento."
       },
+      "output": {
+        "groupTitle": "Salida"
+      },
       "streaming": {
         "groupTitle": "Transmisión en directo",
         "title": "Transmitir el resultado del posprocesado",
         "description": "Escribe el texto reescrito en el cursor mientras se genera, en lugar de pegarlo cuando llega la respuesta completa. Ante errores, vuelve al pegado. Requiere un proveedor compatible con OpenAI."
+      },
+      "thinking": {
+        "title": "Razonamiento",
+        "description": "Controla cuánto razona el modelo antes de reescribir. Predeterminado no envía parámetros de razonamiento; Desactivado lo desactiva; Bajo/Medio/Alto solicitan un nivel de esfuerzo. Se aplica a proveedores compatibles con OpenAI (incluido el personalizado).",
+        "options": {
+          "default": "Predeterminado",
+          "off": "Desactivado",
+          "low": "Bajo",
+          "medium": "Medio",
+          "high": "Alto"
+        }
       }
     },
     "history": {

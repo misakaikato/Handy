@@ -455,10 +455,24 @@
         "selectToEdit": "Chọn một prompt ở trên để xem và chỉnh sửa chi tiết.",
         "createFirst": "Nhấn 'Tạo Prompt mới' ở trên để tạo prompt xử lý sau đầu tiên của bạn."
       },
+      "output": {
+        "groupTitle": "Đầu ra"
+      },
       "streaming": {
         "groupTitle": "Truyền phát",
         "title": "Truyền phát kết quả viết lại",
         "description": "Gõ văn bản đã viết lại tại con trỏ trong khi nó đang được tạo, thay vì dán khi toàn bộ phản hồi đến. Khi lỗi sẽ chuyển về dán. Yêu cầu nhà cung cấp tương thích OpenAI."
+      },
+      "thinking": {
+        "title": "Chế độ suy luận",
+        "description": "Kiểm soát mức độ mô hình suy luận trước khi viết lại. Mặc định không gửi tham số suy luận; Tắt vô hiệu hóa suy luận; Thấp/Trung bình/Cao yêu cầu mức nỗ lực tương ứng. Áp dụng cho nhà cung cấp tương thích OpenAI (kể cả tùy chỉnh).",
+        "options": {
+          "default": "Mặc định",
+          "off": "Tắt",
+          "low": "Thấp",
+          "medium": "Trung bình",
+          "high": "Cao"
+        }
       }
     },
     "history": {

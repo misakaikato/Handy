@@ -455,10 +455,24 @@
         "selectToEdit": "Select a prompt above to view and edit its details.",
         "createFirst": "Click 'Create New Prompt' above to create your first post-processing prompt."
       },
+      "output": {
+        "groupTitle": "Output"
+      },
       "streaming": {
         "groupTitle": "Streaming",
         "title": "Stream Rewrite Output",
         "description": "Type the rewritten text at the cursor while it is being generated, instead of pasting it once the full response arrives. Falls back to pasting on error. Requires an OpenAI-compatible provider."
+      },
+      "thinking": {
+        "title": "Thinking",
+        "description": "Controls how much the model thinks before rewriting. Default sends no thinking parameters; Off disables thinking; Low/Medium/High request a reasoning effort. Applies to OpenAI-compatible (including custom) providers.",
+        "options": {
+          "default": "Default",
+          "off": "Off",
+          "low": "Low",
+          "medium": "Medium",
+          "high": "High"
+        }
       }
     },
     "history": {

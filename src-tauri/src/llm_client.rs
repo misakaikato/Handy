@@ -1,4 +1,4 @@
-use crate::settings::{PostProcessApiFormat, PostProcessProvider};
+use crate::settings::{PostProcessApiFormat, PostProcessProvider, PostProcessThinking};
 use futures_util::StreamExt;
 use log::{debug, error, info};
 use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION, CONTENT_TYPE, REFERER, USER_AGENT};
@@ -33,59 +33,73 @@ struct ResponseFormat {
     json_schema: JsonSchema,
 }
 
-#[derive(Debug, Serialize, Clone, Default, PartialEq)]
-struct ReasoningConfig {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    effort: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    exclude: Option<bool>,
-}
-
-/// Request fields used to ask an endpoint to skip reasoning/thinking.
-/// Providers disagree on the field name and accepted values, so at most one of
-/// these is set per request (see `reasoning_disable_params`).
+/// Reasoning-effort request fields for endpoints that understand them.
 #[derive(Debug, Serialize, Clone, Default, PartialEq)]
 struct ReasoningParams {
     #[serde(skip_serializing_if = "Option::is_none")]
     reasoning_effort: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    reasoning: Option<ReasoningConfig>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    thinking: Option<Value>,
 }
 
 impl ReasoningParams {
     fn is_empty(&self) -> bool {
-        self.reasoning_effort.is_none() && self.reasoning.is_none() && self.thinking.is_none()
+        self.reasoning_effort.is_none()
     }
 }
 
-/// Pick the reasoning-disable request fields an endpoint understands.
-/// Unknown endpoints get the common OpenAI-style field; if they reject it,
-/// the request is retried without it (see `send_chat_completion_with_schema`).
-fn reasoning_disable_params(provider: &PostProcessProvider) -> ReasoningParams {
-    let base_url = provider.base_url.to_lowercase();
-    if base_url.contains("api.deepseek.com") {
-        // DeepSeek rejects reasoning_effort "none" and uses its own field:
-        // https://api-docs.deepseek.com/guides/thinking_mode
-        ReasoningParams {
-            thinking: Some(serde_json::json!({ "type": "disabled" })),
-            ..Default::default()
+/// The thinking-control request fields for one post-processing call: the
+/// flattened `reasoning_effort` field plus any extra body such as
+/// `chat_template_kwargs: {enable_thinking: false}`.
+///
+/// `Default` sends nothing - the endpoint decides. `Off` uses the
+/// Qwen3/vLLM/SGLang `enable_thinking` switch (no empty-`<think>` prompt hint
+/// is needed on endpoints that honor it). `Low`/`Medium`/`High` map onto
+/// `reasoning_effort`.
+#[derive(Debug, Clone, PartialEq, Default)]
+struct ThinkingRequestFields {
+    reasoning: ReasoningParams,
+    extra_body: Option<serde_json::Map<String, Value>>,
+}
+
+impl ThinkingRequestFields {
+    fn is_empty(&self) -> bool {
+        self.reasoning.is_empty() && self.extra_body.is_none()
+    }
+
+    fn clear(&mut self) {
+        self.reasoning = ReasoningParams::default();
+        self.extra_body = None;
+    }
+}
+
+fn thinking_request_fields(thinking: PostProcessThinking) -> ThinkingRequestFields {
+    match thinking {
+        PostProcessThinking::Default => ThinkingRequestFields::default(),
+        PostProcessThinking::Off => {
+            let mut extra_body = serde_json::Map::new();
+            extra_body.insert(
+                "chat_template_kwargs".to_string(),
+                serde_json::json!({ "enable_thinking": false }),
+            );
+            ThinkingRequestFields {
+                reasoning: ReasoningParams::default(),
+                extra_body: Some(extra_body),
+            }
         }
-    } else if provider.id == "openrouter" {
-        // OpenRouter nested object; exclude:true also keeps reasoning text out
-        // of the response so it can't pollute structured-output JSON parsing
-        ReasoningParams {
-            reasoning: Some(ReasoningConfig {
-                effort: Some("none".to_string()),
-                exclude: Some(true),
-            }),
-            ..Default::default()
-        }
-    } else {
-        ReasoningParams {
-            reasoning_effort: Some("none".to_string()),
-            ..Default::default()
+        PostProcessThinking::Low | PostProcessThinking::Medium | PostProcessThinking::High => {
+            let effort = match thinking {
+                PostProcessThinking::Low => "low",
+                PostProcessThinking::Medium => "medium",
+                PostProcessThinking::High => "high",
+                PostProcessThinking::Default | PostProcessThinking::Off => {
+                    unreachable!("handled in the arms above")
+                }
+            };
+            ThinkingRequestFields {
+                reasoning: ReasoningParams {
+                    reasoning_effort: Some(effort.to_string()),
+                },
+                extra_body: None,
+            }
         }
     }
 }
@@ -122,6 +136,9 @@ struct ChatCompletionRequest {
     stream: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     response_format: Option<ResponseFormat>,
+    /// Additional top-level request fields (e.g. chat_template_kwargs).
+    #[serde(skip_serializing_if = "Option::is_none", flatten)]
+    extra_body: Option<serde_json::Map<String, Value>>,
     #[serde(flatten)]
     reasoning: ReasoningParams,
 }
@@ -351,34 +368,25 @@ pub async fn send_chat_completion(
     api_key: String,
     model: &str,
     prompt: String,
-    disable_reasoning: bool,
+    thinking: PostProcessThinking,
 ) -> Result<Option<String>, String> {
     if provider.api_format == PostProcessApiFormat::Anthropic {
         return send_anthropic_message(provider, api_key, model, prompt).await;
     }
 
-    send_chat_completion_with_schema(
-        provider,
-        api_key,
-        model,
-        prompt,
-        None,
-        None,
-        disable_reasoning,
-    )
-    .await
+    send_chat_completion_with_schema(provider, api_key, model, prompt, None, None, thinking).await
 }
 
 /// Send a chat completion request with structured output support.
 /// When json_schema is provided, uses structured outputs mode.
 /// system_prompt is used as the system message when provided.
 ///
-/// When disable_reasoning is set, the request carries the reasoning-disable
-/// fields the endpoint is expected to understand. Not every OpenAI-compatible
-/// endpoint accepts them (DeepSeek, Gemini's compat layer, and some OpenRouter
-/// upstreams reject with 400), so a 400/422 answer to such a request triggers
-/// one retry without the fields, and the rejection is remembered per
-/// (base_url, model) so later requests skip the failing attempt entirely.
+/// `thinking` controls the reasoning-related request fields (see
+/// [`thinking_request_fields`]). Not every OpenAI-compatible endpoint accepts
+/// them (Gemini's compat layer and various self-hosted servers reject unknown
+/// fields with 400), so a 400/422 answer to such a request triggers one retry
+/// without the fields, and the rejection is remembered per (base_url, model)
+/// so later requests skip the failing attempt entirely.
 pub async fn send_chat_completion_with_schema(
     provider: &PostProcessProvider,
     api_key: String,
@@ -386,7 +394,7 @@ pub async fn send_chat_completion_with_schema(
     user_content: String,
     system_prompt: Option<String>,
     json_schema: Option<Value>,
-    disable_reasoning: bool,
+    thinking: PostProcessThinking,
 ) -> Result<Option<String>, String> {
     let base_url = provider.base_url.trim_end_matches('/');
     let url = format!("{}/chat/completions", base_url);
@@ -426,10 +434,12 @@ pub async fn send_chat_completion_with_schema(
     });
 
     let key = endpoint_key(provider, model);
-    let reasoning = if disable_reasoning && !is_known_rejected(&key) {
-        reasoning_disable_params(provider)
+    let mut thinking_fields = if thinking == PostProcessThinking::Default {
+        ThinkingRequestFields::default()
+    } else if is_known_rejected(&key) {
+        ThinkingRequestFields::default()
     } else {
-        ReasoningParams::default()
+        thinking_request_fields(thinking)
     };
 
     let mut request_body = ChatCompletionRequest {
@@ -437,7 +447,8 @@ pub async fn send_chat_completion_with_schema(
         messages,
         stream: false,
         response_format,
-        reasoning,
+        extra_body: thinking_fields.extra_body.take(),
+        reasoning: thinking_fields.reasoning,
     };
 
     let response = send_with_reasoning_retry(&client, &url, &mut request_body).await?;
@@ -496,11 +507,11 @@ async fn send_with_reasoning_retry(
         sanitized_url(response.url())
     );
 
-    // A 400/422 on a request carrying reasoning-disable fields is almost always
+    // A 400/422 on a request carrying thinking-control fields is almost always
     // the endpoint rejecting those fields — retry once without them.
     if !status.is_success()
         && matches!(status.as_u16(), 400 | 422)
-        && !request_body.reasoning.is_empty()
+        && (!request_body.reasoning.is_empty() || request_body.extra_body.is_some())
     {
         let error_text = response.text().await.unwrap_or_else(|e| {
             report_reqwest_error("Failed to read reasoning rejection response", &e)
@@ -511,6 +522,7 @@ async fn send_with_reasoning_retry(
         );
 
         request_body.reasoning = ReasoningParams::default();
+        request_body.extra_body = None;
         response = client
             .post(url)
             .json(&request_body)
@@ -802,7 +814,7 @@ pub(crate) async fn send_chat_completion_streaming(
     model: &str,
     system_prompt: Option<String>,
     user_content: String,
-    disable_reasoning: bool,
+    thinking: PostProcessThinking,
     mut on_text: impl FnMut(&str),
     is_cancelled: impl Fn() -> bool,
 ) -> Result<Option<StreamingOutcome>, String> {
@@ -832,10 +844,12 @@ pub(crate) async fn send_chat_completion_streaming(
     });
 
     let key = endpoint_key(provider, model);
-    let reasoning = if disable_reasoning && !is_known_rejected(&key) {
-        reasoning_disable_params(provider)
+    let mut thinking_fields = if thinking == PostProcessThinking::Default {
+        ThinkingRequestFields::default()
+    } else if is_known_rejected(&key) {
+        ThinkingRequestFields::default()
     } else {
-        ReasoningParams::default()
+        thinking_request_fields(thinking)
     };
 
     let mut request_body = ChatCompletionRequest {
@@ -843,7 +857,8 @@ pub(crate) async fn send_chat_completion_streaming(
         messages,
         stream: true,
         response_format: None,
-        reasoning,
+        extra_body: thinking_fields.extra_body.take(),
+        reasoning: thinking_fields.reasoning,
     };
 
     let started = Instant::now();
@@ -1082,7 +1097,8 @@ mod tests {
         }
     }
 
-    fn request_json(reasoning: ReasoningParams) -> Value {
+    fn request_json(thinking: PostProcessThinking) -> Value {
+        let fields = thinking_request_fields(thinking);
         let request = ChatCompletionRequest {
             model: "test-model".to_string(),
             messages: vec![ChatMessage {
@@ -1091,7 +1107,8 @@ mod tests {
             }],
             stream: false,
             response_format: None,
-            reasoning,
+            extra_body: fields.extra_body,
+            reasoning: fields.reasoning,
         };
         serde_json::to_value(&request).unwrap()
     }
@@ -1182,60 +1199,78 @@ mod tests {
 
     #[test]
     fn requests_explicitly_disable_streaming() {
-        let json = request_json(ReasoningParams::default());
+        let json = request_json(PostProcessThinking::Default);
         assert_eq!(json["stream"], false);
     }
 
     #[test]
-    fn default_reasoning_params_serialize_to_no_fields() {
-        let json = request_json(ReasoningParams::default());
+    fn default_thinking_sends_no_fields() {
+        let json = request_json(PostProcessThinking::Default);
         assert!(json.get("reasoning_effort").is_none());
-        assert!(json.get("reasoning").is_none());
-        assert!(json.get("thinking").is_none());
+        assert!(json.get("chat_template_kwargs").is_none());
     }
 
     #[test]
-    fn custom_provider_uses_top_level_reasoning_effort() {
-        let params = reasoning_disable_params(&provider("custom", "http://localhost:11434/v1"));
-        let json = request_json(params);
-        assert_eq!(json["reasoning_effort"], "none");
-        assert!(json.get("reasoning").is_none());
-        assert!(json.get("thinking").is_none());
-    }
-
-    #[test]
-    fn openrouter_uses_nested_reasoning_object() {
-        let params =
-            reasoning_disable_params(&provider("openrouter", "https://openrouter.ai/api/v1"));
-        let json = request_json(params);
+    fn off_thinking_uses_the_enable_thinking_switch() {
+        let json = request_json(PostProcessThinking::Off);
         assert!(json.get("reasoning_effort").is_none());
-        assert_eq!(json["reasoning"]["effort"], "none");
-        assert_eq!(json["reasoning"]["exclude"], true);
-        assert!(json.get("thinking").is_none());
+        assert_eq!(json["chat_template_kwargs"]["enable_thinking"], false);
     }
 
     #[test]
-    fn deepseek_base_url_uses_thinking_disabled() {
-        let params = reasoning_disable_params(&provider("custom", "https://api.deepseek.com"));
-        let json = request_json(params);
-        assert!(json.get("reasoning_effort").is_none());
-        assert!(json.get("reasoning").is_none());
-        assert_eq!(json["thinking"]["type"], "disabled");
-    }
-
-    #[test]
-    fn reasoning_params_is_empty_tracks_all_fields() {
-        assert!(ReasoningParams::default().is_empty());
-        assert!(!ReasoningParams {
-            reasoning_effort: Some("none".to_string()),
-            ..Default::default()
+    fn effort_levels_map_onto_reasoning_effort() {
+        for (setting, effort) in [
+            (PostProcessThinking::Low, "low"),
+            (PostProcessThinking::Medium, "medium"),
+            (PostProcessThinking::High, "high"),
+        ] {
+            let json = request_json(setting);
+            assert_eq!(json["reasoning_effort"], effort, "for {setting:?}");
+            assert!(json.get("chat_template_kwargs").is_none());
         }
-        .is_empty());
-        assert!(!ReasoningParams {
-            thinking: Some(serde_json::json!({ "type": "disabled" })),
-            ..Default::default()
-        }
-        .is_empty());
+    }
+
+    #[test]
+    fn thinking_request_fields_is_empty_only_for_default() {
+        assert!(thinking_request_fields(PostProcessThinking::Default).is_empty());
+        assert!(!thinking_request_fields(PostProcessThinking::Off).is_empty());
+        assert!(!thinking_request_fields(PostProcessThinking::Low).is_empty());
+    }
+
+    #[tokio::test]
+    async fn rejected_thinking_fields_are_retried_without_them() {
+        // First server answers 400 to the enable_thinking request; the retry
+        // (a second connection) succeeds.
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let address = listener.local_addr().unwrap();
+        let ok_body = r#"{"choices":[{"message":{"content":"ok"}}"#;
+        let ok_body = format!("{ok_body}]}}");
+        tokio::spawn(async move {
+            let responses = [
+                "HTTP/1.1 400 Bad Request\r\nContent-Length: 9\r\nConnection: close\r\n\r\nbad field"
+                    .to_string(),
+                format!(
+                    "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{ok_body}",
+                    ok_body.len()
+                ),
+            ];
+            for response in responses {
+                let (mut stream, _) = listener.accept().await.unwrap();
+                let mut request = [0_u8; 4096];
+                let _ = stream.read(&mut request).await.unwrap();
+                stream.write_all(response.as_bytes()).await.unwrap();
+            }
+        });
+
+        let result = send_chat_completion(
+            &provider("custom", &format!("http://{address}")),
+            "key".to_string(),
+            "test-model",
+            "raw text".to_string(),
+            PostProcessThinking::Off,
+        )
+        .await;
+        assert_eq!(result, Ok(Some("ok".to_string())));
     }
 
     #[test]
@@ -1412,6 +1447,7 @@ mod tests {
             messages: vec![],
             stream: true,
             response_format: None,
+            extra_body: None,
             reasoning: ReasoningParams::default(),
         };
         assert_eq!(serde_json::to_value(&request).unwrap()["stream"], true);
@@ -1435,7 +1471,7 @@ mod tests {
             "test-model",
             None,
             "raw text".to_string(),
-            false,
+            PostProcessThinking::Default,
             |delta| seen.push_str(delta),
             || false,
         )
@@ -1464,7 +1500,7 @@ mod tests {
             "test-model",
             None,
             "raw text".to_string(),
-            false,
+            PostProcessThinking::Default,
             |delta| seen.push_str(delta),
             || false,
         )
@@ -1490,7 +1526,7 @@ mod tests {
             "test-model",
             None,
             "raw text".to_string(),
-            false,
+            PostProcessThinking::Default,
             |delta| {
                 let _ = delta;
             },
@@ -1514,7 +1550,7 @@ mod tests {
             "test-model",
             None,
             "raw text".to_string(),
-            false,
+            PostProcessThinking::Default,
             |delta| seen.push_str(delta),
             || true,
         )
@@ -1535,7 +1571,7 @@ mod tests {
             "test-model",
             None,
             "raw text".to_string(),
-            false,
+            PostProcessThinking::Default,
             |delta| {
                 let _ = delta;
             },
@@ -1570,7 +1606,7 @@ mod tests {
             "key".to_string(),
             "claude-haiku",
             "raw text".to_string(),
-            true,
+            PostProcessThinking::Default,
         )
         .await;
         assert_eq!(result, Ok(Some("Cleaned text".to_string())));
@@ -1588,7 +1624,7 @@ mod tests {
             "key".to_string(),
             "test-model",
             "raw text".to_string(),
-            false,
+            PostProcessThinking::Default,
         )
         .await;
         assert!(result.unwrap_err().contains("truncated"));
@@ -1606,7 +1642,7 @@ mod tests {
             "key".to_string(),
             "claude-haiku",
             "raw text".to_string(),
-            true,
+            PostProcessThinking::Default,
         )
         .await;
         assert!(result.unwrap_err().contains("truncated"));

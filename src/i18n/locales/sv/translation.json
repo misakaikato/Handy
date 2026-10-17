@@ -455,10 +455,24 @@
         "selectToEdit": "Välj en prompt ovan för att visa och redigera dess detaljer.",
         "createFirst": "Klicka på 'Skapa ny prompt' ovan för att skapa din första prompt för efterbearbetning."
       },
+      "output": {
+        "groupTitle": "Utdata"
+      },
       "streaming": {
         "groupTitle": "Strömning",
         "title": "Strömma omskrivningsresultatet",
         "description": "Skriver den omskrivna texten vid markören medan den genereras, i stället för att klistra in den när hela svaret kommit. Faller tillbaka på inklistring vid fel. Kräver en OpenAI-kompatibel leverantör."
+      },
+      "thinking": {
+        "title": "Tänkeläge",
+        "description": "Styr hur mycket modellen tänker före omskrivningen. Standard skickar inga tänkparametrar; Av stänger av tänkandet; Låg/Medel/Hög begär en resonemangsnivå. Gäller OpenAI-kompatibla (även egna) leverantörer.",
+        "options": {
+          "default": "Standard",
+          "off": "Av",
+          "low": "Låg",
+          "medium": "Medel",
+          "high": "Hög"
+        }
       }
     },
     "history": {

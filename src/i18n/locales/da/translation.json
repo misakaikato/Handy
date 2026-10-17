@@ -455,10 +455,24 @@
         "selectToEdit": "Vælg en prompt ovenfor for at se og redigere dens detaljer.",
         "createFirst": "Klik på 'Opret ny prompt' ovenfor for at oprette din første efterbehandlingsprompt."
       },
+      "output": {
+        "groupTitle": "Output"
+      },
       "streaming": {
         "groupTitle": "Streaming",
         "title": "Stream omskrivningsresultatet",
         "description": "Skriver den omskrevne tekst ved markøren, mens den genereres, i stedet for at indsætte den, når hele svaret ankommer. Falder tilbage til indsætning ved fejl. Kræver en OpenAI-kompatibel udbyder."
+      },
+      "thinking": {
+        "title": "Tænkning",
+        "description": "Styrer, hvor meget modellen tænker før omskrivningen. Standard sender ingen tænkeparametre; Fra deaktiverer tænkning; Lav/Mellem/Høj anmoder om en ræsonnementsindsats. Gælder OpenAI-kompatible (også egne) udbydere.",
+        "options": {
+          "default": "Standard",
+          "off": "Fra",
+          "low": "Lav",
+          "medium": "Mellem",
+          "high": "Høj"
+        }
       }
     },
     "history": {

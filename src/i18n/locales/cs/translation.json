@@ -455,10 +455,24 @@
         "selectToEdit": "Vyberte výše prompt, abyste zobrazili a upravili jeho podrobnosti.",
         "createFirst": "Klikněte nahoře na 'Vytvořit nový prompt' a vytvořte svůj první prompt pro následné zpracování."
       },
+      "output": {
+        "groupTitle": "Výstup"
+      },
       "streaming": {
         "groupTitle": "Streamování",
         "title": "Streamovat výsledek přepisu",
         "description": "Zapisuje přepsaný text u kurzoru během generování, místo aby jej vkládal po doračení celé odpovědi. Při chybě se vrátí k vložení. Vyžaduje poskytovatele kompatibilního s OpenAI."
+      },
+      "thinking": {
+        "title": "Režim uvažování",
+        "description": "Řídí, jak moc model uvažuje před přepsáním. Výchozí neodesílá žádné parametry uvažování; Vypnuto uvažování zakáže; Nízké/Střední/Vysoké vyžadují úroveň úsilí. Platí pro poskytovatele kompatibilní s OpenAI (včetně vlastního).",
+        "options": {
+          "default": "Výchozí",
+          "off": "Vypnuto",
+          "low": "Nízké",
+          "medium": "Střední",
+          "high": "Vysoké"
+        }
       }
     },
     "history": {
