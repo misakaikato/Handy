@@ -437,6 +437,10 @@ pub fn init_shortcuts(app: &AppHandle) -> Result<(), String> {
         if id == "transcribe_with_post_process" && !user_settings.post_process_enabled {
             continue;
         }
+        // Skip the voice-edit shortcut when the feature is disabled
+        if id == "voice_edit" && !user_settings.voice_edit_enabled {
+            continue;
+        }
 
         let binding = user_settings
             .bindings

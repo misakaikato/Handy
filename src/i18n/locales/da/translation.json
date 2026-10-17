@@ -144,6 +144,10 @@
           "transcribe_with_post_process": {
             "name": "Genvej til efterbehandling",
             "description": "Valgfrit: En dedikeret genvej, der altid anvender AI-efterbehandling på din transskription."
+          },
+          "voice_edit": {
+            "name": "Genvej til stemmeredigering",
+            "description": "Omskriver den markerede tekst i det fokuserede program ud fra en dikteret instruktion."
           }
         },
         "errors": {
@@ -472,6 +476,22 @@
           "low": "Lav",
           "medium": "Mellem",
           "high": "Høj"
+        }
+      },
+      "voiceEdit": {
+        "groupTitle": "Stemmeredigering",
+        "title": "Rediger markeret tekst med stemmen",
+        "description": "Tilføjer en genvej, der omskriver det, der er markeret i det fokuserede program: markér tekst, udløs den, dikter en instruktion (f.eks. \"gør den mere høflig\"), og det AI-redigerede resultat erstatter markeringen. Bruger efterbehandlingsudbyderen.",
+        "shortcut": {
+          "title": "Genvej til stemmeredigering",
+          "description": "Tryk med markeret tekst i det fokuserede program for at optage en redigeringsinstruktion."
+        },
+        "prompt": {
+          "title": "Stemmeredigeringsprompt",
+          "description": "Sendes til modellen med den markerede tekst og den dikterede instruktion. Understøtter pladsholderne ${selected} og ${instruction}; manglende tilføjes automatisk.",
+          "placeholder": "Instruktioner til modellen…",
+          "save": "Gem prompt",
+          "reset": "Nulstil stemmeredigeringsprompten til standard"
         }
       }
     },

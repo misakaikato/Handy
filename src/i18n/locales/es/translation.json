@@ -171,6 +171,10 @@
           "transcribe_with_post_process": {
             "name": "Tecla de post procesamiento",
             "description": "Opcional: Una tecla de acceso rápido dedicada que siempre aplica post procesamiento con IA a tu transcripción."
+          },
+          "voice_edit": {
+            "name": "Atajo de edición por voz",
+            "description": "Reescribe el texto seleccionado en la aplicación enfocada a partir de una instrucción dictada."
           }
         },
         "errors": {
@@ -472,6 +476,22 @@
           "low": "Bajo",
           "medium": "Medio",
           "high": "Alto"
+        }
+      },
+      "voiceEdit": {
+        "groupTitle": "Edición por voz",
+        "title": "Editar el texto seleccionado por voz",
+        "description": "Añade un atajo que reescribe lo seleccionado en la aplicación enfocada: selecciona texto, actívalo, dicta una instrucción (p. ej., «hazlo más cortés») y el resultado editado por la IA reemplaza la selección. Usa el proveedor de posprocesado.",
+        "shortcut": {
+          "title": "Atajo de edición por voz",
+          "description": "Púlsalo con texto seleccionado en la aplicación enfocada para grabar una instrucción de edición."
+        },
+        "prompt": {
+          "title": "Instrucción de edición por voz",
+          "description": "Se envía al modelo con el texto seleccionado y la instrucción dictada. Admite los marcadores ${selected} e ${instruction}; los que falten se añaden automáticamente.",
+          "placeholder": "Instrucciones para el modelo…",
+          "save": "Guardar instrucción",
+          "reset": "Restablecer la instrucción de edición por voz al valor predeterminado"
         }
       }
     },

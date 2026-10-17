@@ -29,6 +29,7 @@ mod transcription_coordinator;
 mod tray;
 mod tray_i18n;
 mod utils;
+mod voice_edit;
 
 pub use cli::CliArgs;
 #[cfg(debug_assertions)]
@@ -700,6 +701,8 @@ pub fn run(cli_args: CliArgs) {
             shortcut::change_cursor_context_chars_setting,
             shortcut::change_stream_post_process_setting,
             shortcut::change_post_process_thinking_setting,
+            shortcut::change_voice_edit_enabled_setting,
+            shortcut::change_voice_edit_prompt_setting,
             shortcut::suspend_all_bindings,
             shortcut::resume_all_bindings,
             shortcut::change_mute_while_recording_setting,

@@ -144,6 +144,10 @@
           "transcribe_with_post_process": {
             "name": "Pintasan Pascaproses",
             "description": "Opsional: pintasan khusus yang selalu menerapkan pascaproses AI pada transkripsi Anda."
+          },
+          "voice_edit": {
+            "name": "Pintasan edit suara",
+            "description": "Menulis ulang teks yang dipilih di aplikasi yang difokuskan berdasarkan instruksi yang diktekan."
           }
         },
         "errors": {
@@ -472,6 +476,22 @@
           "low": "Rendah",
           "medium": "Sedang",
           "high": "Tinggi"
+        }
+      },
+      "voiceEdit": {
+        "groupTitle": "Edit suara",
+        "title": "Edit teks yang dipilih dengan suara",
+        "description": "Menambahkan pintasan yang menulis ulang apa pun yang dipilih di aplikasi yang difokuskan: pilih teks, picu, diktekan instruksi (mis. \"buat lebih sopan\"), dan hasil yang diedit AI menggantikan pilihan tersebut. Menggunakan penyedia pascapemrosesan.",
+        "shortcut": {
+          "title": "Pintasan edit suara",
+          "description": "Tekan dengan teks yang dipilih di aplikasi yang difokuskan untuk merekam instruksi pengeditan."
+        },
+        "prompt": {
+          "title": "Prompt edit suara",
+          "description": "Dikirim ke model bersama teks yang dipilih dan instruksi yang diktekan. Mendukung placeholder ${selected} dan ${instruction}; yang hilang ditambahkan otomatis.",
+          "placeholder": "Instruksi untuk model…",
+          "save": "Simpan prompt",
+          "reset": "Atur ulang prompt edit suara ke bawaan"
         }
       }
     },

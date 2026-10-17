@@ -171,6 +171,10 @@
           "transcribe_with_post_process": {
             "name": "Klávesa pro následné zpracování",
             "description": "Volitelné: Vyhrazená klávesová zkratka, která vždy použije AI následné zpracování na váš přepis."
+          },
+          "voice_edit": {
+            "name": "Zkratka hlasové úpravy",
+            "description": "Přepíše vybraný text v aktivní aplikaci podle diktované instrukce."
           }
         },
         "errors": {
@@ -472,6 +476,22 @@
           "low": "Nízké",
           "medium": "Střední",
           "high": "Vysoké"
+        }
+      },
+      "voiceEdit": {
+        "groupTitle": "Hlasová úprava",
+        "title": "Upravit vybraný text hlasem",
+        "description": "Přidá zkratku, která přepíše vybraný text v aktivní aplikaci: vyberte text, spusťte ji, diktujte instrukci (např. \"udělej to zdvořilejší\") a výsledek upravený AI nahradí výběr. Používá poskytovatele postprocessingu.",
+        "shortcut": {
+          "title": "Zkratka hlasové úpravy",
+          "description": "Stiskněte s vybraným textem v aktivní aplikaci a nahrajte instrukci k úpravě."
+        },
+        "prompt": {
+          "title": "Prompt hlasové úpravy",
+          "description": "Odesílá se modelu s vybraným textem a diktovanou instrukcí. Podporuje placeholdery ${selected} a ${instruction}; chybějící se přidají automaticky.",
+          "placeholder": "Pokyny pro model…",
+          "save": "Uložit prompt",
+          "reset": "Obnovit výchozí prompt hlasové úpravy"
         }
       }
     },

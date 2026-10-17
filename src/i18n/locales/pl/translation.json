@@ -171,6 +171,10 @@
           "transcribe_with_post_process": {
             "name": "Skrót postprocessingu",
             "description": "Opcjonalnie: Dedykowany skrót klawiszowy, który zawsze stosuje postprocessing AI do transkrypcji."
+          },
+          "voice_edit": {
+            "name": "Skrót edycji głosowej",
+            "description": "Przepisuje zaznaczony tekst w aktywnej aplikacji na podstawie wydyktowanego polecenia."
           }
         },
         "errors": {
@@ -472,6 +476,22 @@
           "low": "Niski",
           "medium": "Średni",
           "high": "Wysoki"
+        }
+      },
+      "voiceEdit": {
+        "groupTitle": "Edycja głosowa",
+        "title": "Edytuj zaznaczony tekst głosem",
+        "description": "Dodaje skrót przepisujący zaznaczenie w aktywnej aplikacji: zaznacz tekst, uruchom go, wydyktuj polecenie (np. „zrób to uprzejmiej”), a wynik edytowany przez AI zastąpi zaznaczenie. Korzysta z dostawcy postprocessingu.",
+        "shortcut": {
+          "title": "Skrót edycji głosowej",
+          "description": "Naciśnij przy zaznaczonym tekście w aktywnej aplikacji, aby nagrać polecenie edycji."
+        },
+        "prompt": {
+          "title": "Prompt edycji głosowej",
+          "description": "Wysyłany do modelu wraz z zaznaczonym tekstem i wydyktowanym poleceniem. Obsługuje placeholdery ${selected} i ${instruction}; brakujące są dodawane automatycznie.",
+          "placeholder": "Instrukcje dla modelu…",
+          "save": "Zapisz prompt",
+          "reset": "Przywróć domyślny prompt edycji głosowej"
         }
       }
     },

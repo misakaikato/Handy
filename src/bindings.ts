@@ -388,6 +388,22 @@ async changePostProcessThinkingSetting(thinking: PostProcessThinking) : Promise<
     else return { status: "error", error: e  as any };
 }
 },
+async changeVoiceEditEnabledSetting(enabled: boolean) : Promise<Result<null, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("change_voice_edit_enabled_setting", { enabled }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async changeVoiceEditPromptSetting(prompt: string) : Promise<Result<null, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("change_voice_edit_prompt_setting", { prompt }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
 /**
  * Temporarily unregister all bindings while the user is recording a
  * shortcut in the UI. This avoids firing actions while keys are recorded.
@@ -1143,7 +1159,17 @@ stream_post_process?: boolean;
 /**
  * How forcefully the post-processing model is asked to think.
  */
-post_process_thinking?: PostProcessThinking }
+post_process_thinking?: PostProcessThinking; 
+/**
+ * Enable the voice-edit shortcut: select text, dictate an instruction,
+ * and let the post-processing LLM rewrite the selection in place.
+ */
+voice_edit_enabled?: boolean; 
+/**
+ * Prompt template used for voice edits. Supports the ${selected} and
+ * ${instruction} placeholders.
+ */
+voice_edit_prompt?: string }
 export type AudioDevice = { index: string; name: string; is_default: boolean }
 export type AutoSubmitKey = "enter" | "ctrl_enter" | "cmd_enter"
 export type AvailableAccelerators = { transcribe: string[]; gpu_devices: GpuDeviceOption[] }

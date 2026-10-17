@@ -144,6 +144,10 @@
           "transcribe_with_post_process": {
             "name": "Sneltoets voor naverwerking",
             "description": "Optioneel: Een specifieke sneltoets die altijd AI-naverwerking toepast op je transcriptie."
+          },
+          "voice_edit": {
+            "name": "Spraakbewerkingssneltoets",
+            "description": "Herschrijft de geselecteerde tekst in de actieve app aan de hand van een gedicteerde instructie."
           }
         },
         "errors": {
@@ -472,6 +476,22 @@
           "low": "Laag",
           "medium": "Gemiddeld",
           "high": "Hoog"
+        }
+      },
+      "voiceEdit": {
+        "groupTitle": "Spraakbewerking",
+        "title": "Geselecteerde tekst met spraak bewerken",
+        "description": "Voegt een sneltoets toe die de selectie in de actieve app herschrijft: selecteer tekst, activeer hem, dicteer een instructie (bijv. \"maak het beleefder\") en het door AI bewerkte resultaat vervangt de selectie. Gebruikt de nabewerkingsaanbieder.",
+        "shortcut": {
+          "title": "Spraakbewerkingssneltoets",
+          "description": "Druk met geselecteerde tekst in de actieve app om een bewerkingsinstructie op te nemen."
+        },
+        "prompt": {
+          "title": "Spraakbewerkingsprompt",
+          "description": "Wordt met de geselecteerde tekst en de gedicteerde instructie naar het model gestuurd. Ondersteunt de placeholders ${selected} en ${instruction}; ontbrekende worden automatisch toegevoegd.",
+          "placeholder": "Instructies voor het model…",
+          "save": "Prompt opslaan",
+          "reset": "Spraakbewerkingsprompt terugzetten naar de standaard"
         }
       }
     },

@@ -171,6 +171,10 @@
           "transcribe_with_post_process": {
             "name": "Phím tắt xử lý sau",
             "description": "Tùy chọn: Phím tắt chuyên dụng luôn áp dụng xử lý sau bằng AI cho bản chuyển đổi của bạn."
+          },
+          "voice_edit": {
+            "name": "Phím tắt chỉnh sửa bằng giọng nói",
+            "description": "Viết lại văn bản đã chọn trong ứng dụng đang tập trung theo chỉ dẫn được đọc."
           }
         },
         "errors": {
@@ -472,6 +476,22 @@
           "low": "Thấp",
           "medium": "Trung bình",
           "high": "Cao"
+        }
+      },
+      "voiceEdit": {
+        "groupTitle": "Chỉnh sửa bằng giọng nói",
+        "title": "Chỉnh sửa văn bản đã chọn bằng giọng nói",
+        "description": "Thêm phím tắt viết lại phần đã chọn trong ứng dụng đang tập trung: chọn văn bản, kích hoạt nó, đọc một chỉ dẫn (ví dụ: \"làm lịch sự hơn\") và kết quả do AI chỉnh sửa sẽ thay thế phần chọn. Dùng nhà cung cấp hậu xử lý.",
+        "shortcut": {
+          "title": "Phím tắt chỉnh sửa bằng giọng nói",
+          "description": "Nhấn khi có văn bản được chọn trong ứng dụng đang tập trung để ghi âm chỉ dẫn chỉnh sửa."
+        },
+        "prompt": {
+          "title": "Prompt chỉnh sửa bằng giọng nói",
+          "description": "Được gửi đến mô hình cùng văn bản đã chọn và chỉ dẫn được đọc. Hỗ trợ các chỗ giữ chỗ ${selected} và ${instruction}; chỗ nào thiếu sẽ tự động được thêm vào.",
+          "placeholder": "Chỉ dẫn cho mô hình…",
+          "save": "Lưu prompt",
+          "reset": "Đặt lại prompt chỉnh sửa bằng giọng nói về mặc định"
         }
       }
     },

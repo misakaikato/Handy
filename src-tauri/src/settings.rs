@@ -581,6 +581,14 @@ pub struct AppSettings {
     /// How forcefully the post-processing model is asked to think.
     #[serde(default)]
     pub post_process_thinking: PostProcessThinking,
+    /// Enable the voice-edit shortcut: select text, dictate an instruction,
+    /// and let the post-processing LLM rewrite the selection in place.
+    #[serde(default)]
+    pub voice_edit_enabled: bool,
+    /// Prompt template used for voice edits. Supports the ${selected} and
+    /// ${instruction} placeholders.
+    #[serde(default = "default_voice_edit_prompt")]
+    pub voice_edit_prompt: String,
 }
 
 fn default_model() -> String {
@@ -696,6 +704,13 @@ fn default_auto_learn_notification_duration_ms() -> u64 {
 /// to the rewrite endpoint.
 fn default_cursor_context_chars() -> u32 {
     500
+}
+
+/// Default voice-edit prompt: apply the dictated instruction to the selected
+/// text, output only the result, and keep the original language unless the
+/// instruction says otherwise.
+pub(crate) fn default_voice_edit_prompt() -> String {
+    "You are a text editing assistant. The user selected some text in another application and dictated an editing instruction by voice.\n\nApply the instruction to the selected text and output ONLY the edited result - no explanations, no quotes, no markdown fencing, do not repeat the instruction.\nKeep the selected text's original language, tone, and formatting unless the instruction explicitly asks otherwise.\n\n<selected_text>\n${selected}\n</selected_text>\n\n<instruction>\n${instruction}\n</instruction>".to_string()
 }
 
 fn default_paste_delay_after_ms() -> u64 {
@@ -1024,6 +1039,21 @@ pub fn get_default_settings() -> AppSettings {
         },
     );
 
+    #[cfg(target_os = "macos")]
+    let default_voice_edit_shortcut = "option+shift+e";
+    #[cfg(not(target_os = "macos"))]
+    let default_voice_edit_shortcut = "ctrl+shift+e";
+    bindings.insert(
+        "voice_edit".to_string(),
+        ShortcutBinding {
+            id: "voice_edit".to_string(),
+            name: "Voice Edit".to_string(),
+            description: "Selects text, then rewrites it from a dictated instruction.".to_string(),
+            default_binding: default_voice_edit_shortcut.to_string(),
+            current_binding: default_voice_edit_shortcut.to_string(),
+        },
+    );
+
     AppSettings {
         settings_schema_version: default_settings_schema_version(),
         bindings,
@@ -1095,6 +1125,8 @@ pub fn get_default_settings() -> AppSettings {
         cursor_context_chars: default_cursor_context_chars(),
         stream_post_process: false,
         post_process_thinking: PostProcessThinking::default(),
+        voice_edit_enabled: false,
+        voice_edit_prompt: default_voice_edit_prompt(),
     }
 }
 

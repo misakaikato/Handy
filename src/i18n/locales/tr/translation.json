@@ -171,6 +171,10 @@
           "transcribe_with_post_process": {
             "name": "Son İşlem Kısayolu",
             "description": "İsteğe bağlı: Transkripsiyonunuza her zaman yapay zekâ ile son işlem uygulayan özel bir kısayol tuşu."
+          },
+          "voice_edit": {
+            "name": "Sesle düzenleme kısayolu",
+            "description": "Dikte edilen bir talimata göre odaklanmış uygulamadaki seçili metni yeniden yazar."
           }
         },
         "errors": {
@@ -472,6 +476,22 @@
           "low": "Düşük",
           "medium": "Orta",
           "high": "Yüksek"
+        }
+      },
+      "voiceEdit": {
+        "groupTitle": "Sesle düzenleme",
+        "title": "Seçili metni sesle düzenle",
+        "description": "Odaklanmış uygulamada seçili metni yeniden yazan bir kısayol ekler: metni seçin, tetikleyin, bir talimat dikte edin (örn. \"daha kibar yap\") ve yapay zekâ tarafından düzenlenen sonuç seçimin yerini alır. Son işleme sağlayıcısını kullanır.",
+        "shortcut": {
+          "title": "Sesle düzenleme kısayolu",
+          "description": "Odaklanmış uygulamada metin seçiliyken basınca bir düzenleme talimatı kaydedilir."
+        },
+        "prompt": {
+          "title": "Sesle düzenleme istemi",
+          "description": "Seçili metin ve dikte edilen talimatla birlikte modele gönderilir. ${selected} ve ${instruction} yer tutucularını destekler; eksik olanlar otomatik olarak eklenir.",
+          "placeholder": "Model için talimatlar…",
+          "save": "İstemi kaydet",
+          "reset": "Sesle düzenleme istemini varsayılana sıfırla"
         }
       }
     },

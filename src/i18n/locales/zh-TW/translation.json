@@ -144,6 +144,10 @@
           "transcribe_with_post_process": {
             "name": "後處理快捷鍵",
             "description": "可選：專用快捷鍵，使用時一律對轉錄結果套用 AI 後處理"
+          },
+          "voice_edit": {
+            "name": "語音編輯快捷鍵",
+            "description": "根據口述指令改寫焦點應用程式中選取的文字。"
           }
         },
         "errors": {
@@ -472,6 +476,22 @@
           "low": "低",
           "medium": "中",
           "high": "高"
+        }
+      },
+      "voiceEdit": {
+        "groupTitle": "語音編輯",
+        "title": "語音編輯選取文字",
+        "description": "新增一個快捷鍵，用於改寫焦點應用程式中選取的文字：選取一段文字後觸發，口述一條指令（如「改得禮貌一點」），AI 編輯後的結果會取代選取內容。使用後處理模型。",
+        "shortcut": {
+          "title": "語音編輯快捷鍵",
+          "description": "在焦點應用程式中選取文字後按下，開始錄製編輯指令。"
+        },
+        "prompt": {
+          "title": "語音編輯提示詞",
+          "description": "與選取文字和口述指令一起傳送給模型。支援 ${selected} 和 ${instruction} 佔位符；缺少的會自動附加。",
+          "placeholder": "給模型的指令…",
+          "save": "儲存提示詞",
+          "reset": "將語音編輯提示詞重設為預設值"
         }
       }
     },

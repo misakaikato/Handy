@@ -171,6 +171,10 @@
           "transcribe_with_post_process": {
             "name": "后处理快捷键",
             "description": "可选：一个专用快捷键，始终对您的转录应用 AI 后处理。"
+          },
+          "voice_edit": {
+            "name": "语音编辑快捷键",
+            "description": "根据口述指令改写焦点应用中选中的文字。"
           }
         },
         "errors": {
@@ -472,6 +476,22 @@
           "low": "低",
           "medium": "中",
           "high": "高"
+        }
+      },
+      "voiceEdit": {
+        "groupTitle": "语音编辑",
+        "title": "语音编辑选中文本",
+        "description": "新增一个快捷键，用于改写焦点应用中选中的文字：选中一段文字后触发，口述一条指令（如“改得礼貌一点”），AI 编辑后的结果会替换选中内容。使用后处理模型。",
+        "shortcut": {
+          "title": "语音编辑快捷键",
+          "description": "在焦点应用中选中文字后按下，开始录制编辑指令。"
+        },
+        "prompt": {
+          "title": "语音编辑提示词",
+          "description": "与选中文本和口述指令一起发送给模型。支持 ${selected} 和 ${instruction} 占位符；缺失的会自动追加。",
+          "placeholder": "给模型的指令…",
+          "save": "保存提示词",
+          "reset": "将语音编辑提示词重置为默认值"
         }
       }
     },

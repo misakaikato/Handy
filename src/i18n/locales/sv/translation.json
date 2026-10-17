@@ -144,6 +144,10 @@
           "transcribe_with_post_process": {
             "name": "Snabbkommando för efterbearbetning",
             "description": "Valfritt: En dedikerad snabbknapp som alltid tillämpar AI-efterbearbetning på din transkription."
+          },
+          "voice_edit": {
+            "name": "Genväg för röstredigering",
+            "description": "Skriver om den markerade texten i det fokuserade programmet utifrån en dikterad instruktion."
           }
         },
         "errors": {
@@ -472,6 +476,22 @@
           "low": "Låg",
           "medium": "Medel",
           "high": "Hög"
+        }
+      },
+      "voiceEdit": {
+        "groupTitle": "Röstredigering",
+        "title": "Redigera markerad text med rösten",
+        "description": "Lägger till en genväg som skriver om det som markerats i det fokuserade programmet: markera text, utlös den, diktera en instruktion (t.ex. \"gör den artigare\") och det AI-redigerade resultatet ersätter markeringen. Använder efterbehandlingsleverantören.",
+        "shortcut": {
+          "title": "Genväg för röstredigering",
+          "description": "Tryck med text markerad i det fokuserade programmet för att spela in en redigeringsinstruktion."
+        },
+        "prompt": {
+          "title": "Röstredigeringsprompt",
+          "description": "Skickas till modellen med den markerade texten och den dikterade instruktionen. Stöder platshållarna ${selected} och ${instruction}; saknade läggs till automatiskt.",
+          "placeholder": "Instruktioner för modellen…",
+          "save": "Spara prompt",
+          "reset": "Återställ röstredigeringsprompten till standard"
         }
       }
     },

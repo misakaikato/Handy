@@ -171,6 +171,10 @@
           "transcribe_with_post_process": {
             "name": "Tasto di post-elaborazione",
             "description": "Facoltativo: Un tasto di scelta rapida dedicato che applica sempre la post-elaborazione IA alla trascrizione."
+          },
+          "voice_edit": {
+            "name": "Collegamento di modifica vocale",
+            "description": "Riscrive il testo selezionato nell'app attiva a partire da un'istruzione dettata."
           }
         },
         "errors": {
@@ -472,6 +476,22 @@
           "low": "Basso",
           "medium": "Medio",
           "high": "Alto"
+        }
+      },
+      "voiceEdit": {
+        "groupTitle": "Modifica vocale",
+        "title": "Modifica il testo selezionato a voce",
+        "description": "Aggiunge un collegamento che riscrive la selezione nell'app attiva: seleziona il testo, attivalo, detta un'istruzione (es. \"rendilo più cortese\") e il risultato modificato dall'IA sostituisce la selezione. Usa il provider di post-elaborazione.",
+        "shortcut": {
+          "title": "Collegamento di modifica vocale",
+          "description": "Premilo con testo selezionato nell'app attiva per registrare un'istruzione di modifica."
+        },
+        "prompt": {
+          "title": "Prompt di modifica vocale",
+          "description": "Inviato al modello con il testo selezionato e l'istruzione dettata. Supporta i segnaposto ${selected} e ${instruction}; quelli mancanti vengono aggiunti automaticamente.",
+          "placeholder": "Istruzioni per il modello…",
+          "save": "Salva prompt",
+          "reset": "Ripristina il prompt di modifica vocale predefinito"
         }
       }
     },

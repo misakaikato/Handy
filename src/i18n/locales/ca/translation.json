@@ -144,6 +144,10 @@
           "transcribe_with_post_process": {
             "name": "Drecera de postprocessament",
             "description": "Opcional: una drecera específica que sempre aplica postprocessament amb IA a la transcripció."
+          },
+          "voice_edit": {
+            "name": "Drecera d'edició per veu",
+            "description": "Reescriu el text seleccionat a l'aplicació enfocada a partir d'una instrucció dictada."
           }
         },
         "errors": {
@@ -472,6 +476,22 @@
           "low": "Baix",
           "medium": "Mitjà",
           "high": "Alt"
+        }
+      },
+      "voiceEdit": {
+        "groupTitle": "Edició per veu",
+        "title": "Edita el text seleccionat amb la veu",
+        "description": "Afegeix una drecera que reescriu el que està seleccionat a l'aplicació enfocada: seleccioneu text, activeu-la, dicteu una instrucció (p. ex. \"fes-ho més cortès\") i el resultat editat per la IA substitueix la selecció. Utilitza el proveïdor de postprocessat.",
+        "shortcut": {
+          "title": "Drecera d'edició per veu",
+          "description": "Premeu amb text seleccionat a l'aplicació enfocada per enregistrar una instrucció d'edició."
+        },
+        "prompt": {
+          "title": "Prompt d'edició per veu",
+          "description": "S'envia al model amb el text seleccionat i la instrucció dictada. Admet els marcadors ${selected} i ${instruction}; els que faltin s'afegeixen automàticament.",
+          "placeholder": "Instruccions per al model…",
+          "save": "Desa el prompt",
+          "reset": "Restableix el prompt d'edició per veu al valor predeterminat"
         }
       }
     },

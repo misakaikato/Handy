@@ -144,6 +144,10 @@
           "transcribe_with_post_process": {
             "name": "Post-Processing Hotkey",
             "description": "Optional: A dedicated hotkey that always applies AI post-processing to your transcription."
+          },
+          "voice_edit": {
+            "name": "Voice Edit Shortcut",
+            "description": "Rewrites the selected text in the focused app from a dictated instruction."
           }
         },
         "errors": {
@@ -472,6 +476,22 @@
           "low": "Low",
           "medium": "Medium",
           "high": "High"
+        }
+      },
+      "voiceEdit": {
+        "groupTitle": "Voice Edit",
+        "title": "Edit Selected Text by Voice",
+        "description": "Adds a shortcut that rewrites whatever is selected in the focused app: select text, trigger it, dictate an instruction (e.g. \"make it more polite\"), and the AI-edited result replaces the selection. Uses the post-processing provider.",
+        "shortcut": {
+          "title": "Voice Edit Shortcut",
+          "description": "Press with text selected in the focused app to record an editing instruction."
+        },
+        "prompt": {
+          "title": "Voice Edit Prompt",
+          "description": "Sent to the model with the selected text and the dictated instruction. Supports the ${selected} and ${instruction} placeholders; missing ones are appended automatically.",
+          "placeholder": "Instructions for the model…",
+          "save": "Save Prompt",
+          "reset": "Reset voice edit prompt to the default"
         }
       }
     },

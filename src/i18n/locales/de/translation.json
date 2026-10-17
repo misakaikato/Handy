@@ -171,6 +171,10 @@
           "transcribe_with_post_process": {
             "name": "Nachbearbeitungs-Tastenkürzel",
             "description": "Optional: Ein dediziertes Tastenkürzel, das immer die KI-Nachbearbeitung auf deine Transkription anwendet."
+          },
+          "voice_edit": {
+            "name": "Sprachbearbeitungs-Kürzel",
+            "description": "Schreibt den markierten Text in der fokussierten App anhand einer diktierten Anweisung um."
           }
         },
         "errors": {
@@ -472,6 +476,22 @@
           "low": "Niedrig",
           "medium": "Mittel",
           "high": "Hoch"
+        }
+      },
+      "voiceEdit": {
+        "groupTitle": "Sprachbearbeitung",
+        "title": "Markierten Text per Sprachbefehl bearbeiten",
+        "description": "Fügt ein Kürzel hinzu, das markierten Text in der fokussierten App umschreibt: Text markieren, auslösen, eine Anweisung diktieren (z. B. „mach es höflicher“) – das KI-bearbeitete Ergebnis ersetzt die Markierung. Nutzt den Nachbearbeitungs-Anbieter.",
+        "shortcut": {
+          "title": "Sprachbearbeitungs-Kürzel",
+          "description": "Drücken Sie mit markiertem Text in der fokussierten App, um eine Bearbeitungsanweisung aufzunehmen."
+        },
+        "prompt": {
+          "title": "Sprachbearbeitungs-Prompt",
+          "description": "Wird mit dem markierten Text und der diktierten Anweisung an das Modell gesendet. Unterstützt die Platzhalter ${selected} und ${instruction}; fehlende werden automatisch angehängt.",
+          "placeholder": "Anweisungen für das Modell…",
+          "save": "Prompt speichern",
+          "reset": "Sprachbearbeitungs-Prompt auf Standard zurücksetzen"
         }
       }
     },

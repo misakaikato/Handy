@@ -156,6 +156,10 @@ const settingUpdaters: {
     commands.changeStreamPostProcessSetting(value as boolean),
   post_process_thinking: (value) =>
     commands.changePostProcessThinkingSetting(value as PostProcessThinking),
+  voice_edit_enabled: (value) =>
+    commands.changeVoiceEditEnabledSetting(value as boolean),
+  voice_edit_prompt: (value) =>
+    commands.changeVoiceEditPromptSetting(value as string),
   word_correction_threshold: (value) =>
     commands.changeWordCorrectionThresholdSetting(value as number),
   paste_delay_ms: (value) =>

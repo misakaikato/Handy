@@ -308,6 +308,9 @@ pub fn resume_all_shortcuts(app: &AppHandle) {
         if id == "transcribe_with_post_process" && !settings.post_process_enabled {
             continue;
         }
+        if id == "voice_edit" && !settings.voice_edit_enabled {
+            continue;
+        }
         if let Err(e) = register_shortcut(app, binding.clone()) {
             debug!("resume_all_shortcuts: could not register '{}': {}", id, e);
         }
@@ -498,6 +501,11 @@ fn register_all_shortcuts_for_implementation(
 
         // Skip post-processing shortcut when the feature is disabled
         if id == "transcribe_with_post_process" && !current_settings.post_process_enabled {
+            continue;
+        }
+
+        // Skip the voice-edit shortcut when the feature is disabled
+        if id == "voice_edit" && !current_settings.voice_edit_enabled {
             continue;
         }
 
@@ -930,6 +938,40 @@ pub fn change_use_cursor_context_setting(app: AppHandle, enabled: bool) -> Resul
 pub fn change_stream_post_process_setting(app: AppHandle, enabled: bool) -> Result<(), String> {
     let mut settings = settings::get_settings(&app);
     settings.stream_post_process = enabled;
+    settings::write_settings(&app, settings);
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn change_voice_edit_enabled_setting(app: AppHandle, enabled: bool) -> Result<(), String> {
+    let mut settings = settings::get_settings(&app);
+    settings.voice_edit_enabled = enabled;
+    settings::write_settings(&app, settings.clone());
+
+    // Register or unregister the voice-edit shortcut
+    if let Some(binding) = settings.bindings.get("voice_edit").cloned() {
+        if enabled {
+            let _ = register_shortcut(&app, binding);
+        } else {
+            let _ = unregister_shortcut(&app, binding);
+        }
+    }
+
+    crate::secure_input::reconcile_fallback(&app);
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn change_voice_edit_prompt_setting(app: AppHandle, prompt: String) -> Result<(), String> {
+    let mut settings = settings::get_settings(&app);
+    let prompt = prompt.trim().to_string();
+    settings.voice_edit_prompt = if prompt.is_empty() {
+        settings::default_voice_edit_prompt()
+    } else {
+        prompt
+    };
     settings::write_settings(&app, settings);
     Ok(())
 }

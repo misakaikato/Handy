@@ -786,6 +786,32 @@ pub(crate) fn send_auto_submit_key(app_handle: &AppHandle) -> Result<(), String>
     with_enigo(app_handle, |enigo| send_return_key(enigo, auto_submit_key))
 }
 
+/// Simulates the platform's copy shortcut (Cmd+C / Ctrl+C) so the caller can
+/// read the focused app's selection from the clipboard. Main-thread
+/// convention as above; callers restore the clipboard afterwards.
+pub(crate) fn send_copy_key(app_handle: &AppHandle) -> Result<(), String> {
+    #[cfg(target_os = "macos")]
+    let (modifier, key) = (Key::Meta, Key::Unicode('c'));
+    #[cfg(target_os = "windows")]
+    let (modifier, key) = (Key::Control, Key::Other(0x43)); // VK_C
+    #[cfg(target_os = "linux")]
+    let (modifier, key) = (Key::Control, Key::Unicode('c'));
+
+    with_enigo(app_handle, |enigo| {
+        enigo
+            .key(modifier, Direction::Press)
+            .map_err(|e| format!("Failed to press copy modifier key: {e}"))?;
+        enigo
+            .key(key, Direction::Click)
+            .map_err(|e| format!("Failed to click copy key: {e}"))?;
+        std::thread::sleep(Duration::from_millis(80));
+        enigo
+            .key(modifier, Direction::Release)
+            .map_err(|e| format!("Failed to release copy modifier key: {e}"))?;
+        Ok(())
+    })
+}
+
 pub fn paste(text: String, app_handle: AppHandle) -> Result<(), String> {
     let settings = get_settings(&app_handle);
     let paste_method = settings.paste_method;

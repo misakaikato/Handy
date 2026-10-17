@@ -171,6 +171,10 @@
           "transcribe_with_post_process": {
             "name": "Raccourci de post-traitement",
             "description": "Facultatif : Un raccourci dédié qui applique toujours le post-traitement IA à votre transcription."
+          },
+          "voice_edit": {
+            "name": "Raccourci d'édition vocale",
+            "description": "Réécrit le texte sélectionné dans l'application active à partir d'une instruction dictée."
           }
         },
         "errors": {
@@ -472,6 +476,22 @@
           "low": "Faible",
           "medium": "Moyen",
           "high": "Élevé"
+        }
+      },
+      "voiceEdit": {
+        "groupTitle": "Édition vocale",
+        "title": "Modifier le texte sélectionné à la voix",
+        "description": "Ajoute un raccourci qui réécrit la sélection de l'application active : sélectionnez du texte, déclenchez-le, dictez une instruction (par ex. « rends-le plus poli ») et le résultat modifié par l'IA remplace la sélection. Utilise le fournisseur de post-traitement.",
+        "shortcut": {
+          "title": "Raccourci d'édition vocale",
+          "description": "Appuyez avec du texte sélectionné dans l'application active pour enregistrer une instruction de modification."
+        },
+        "prompt": {
+          "title": "Invite d'édition vocale",
+          "description": "Envoyée au modèle avec le texte sélectionné et l'instruction dictée. Prend en charge les paramètres ${selected} et ${instruction} ; les manquants sont ajoutés automatiquement.",
+          "placeholder": "Instructions pour le modèle…",
+          "save": "Enregistrer l'invite",
+          "reset": "Réinitialiser l'invite d'édition vocale par défaut"
         }
       }
     },

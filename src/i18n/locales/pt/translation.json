@@ -144,6 +144,10 @@
           "transcribe_with_post_process": {
             "name": "Tecla de Pós-Processamento",
             "description": "Opcional: Uma tecla de atalho dedicada que sempre aplica pós-processamento com IA à sua transcrição."
+          },
+          "voice_edit": {
+            "name": "Atalho de edição por voz",
+            "description": "Reescreve o texto selecionado no aplicativo em foco a partir de uma instrução ditada."
           }
         },
         "errors": {
@@ -472,6 +476,22 @@
           "low": "Baixo",
           "medium": "Médio",
           "high": "Alto"
+        }
+      },
+      "voiceEdit": {
+        "groupTitle": "Edição por voz",
+        "title": "Editar o texto selecionado por voz",
+        "description": "Adicion um atalho que reescreve o que está selecionado no aplicativo em foco: selecione texto, acione-o, dite uma instrução (ex.: \"deixe mais educado\") e o resultado editado pela IA substitui a seleção. Usa o provedor de pós-processamento.",
+        "shortcut": {
+          "title": "Atalho de edição por voz",
+          "description": "Pressione com texto selecionado no aplicativo em foco para gravar uma instrução de edição."
+        },
+        "prompt": {
+          "title": "Prompt de edição por voz",
+          "description": "Enviado ao modelo com o texto selecionado e a instrução ditada. Suporta os marcadores ${selected} e ${instruction}; os que faltarem são acrescentados automaticamente.",
+          "placeholder": "Instruções para o modelo…",
+          "save": "Salvar prompt",
+          "reset": "Redefinir o prompt de edição por voz para o padrão"
         }
       }
     },
