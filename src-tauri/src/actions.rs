@@ -140,15 +140,143 @@ struct TranscribeAction {
 const TRANSCRIPTION_FIELD: &str = "transcription";
 
 /// Clean an LLM's final text output for use as paste/typed content: strip
-/// every complete `<think>` block, then invisible characters some models
-/// insert.
+/// every complete `<think>` block, then invisible characters and Markdown
+/// emphasis markers some models insert.
 pub(crate) fn clean_llm_output(content: &str) -> String {
-    strip_invisible_chars(&strip_think_blocks(content))
+    strip_markdown_emphasis(&strip_invisible_chars(&strip_think_blocks(content)))
 }
 
 /// Strip invisible Unicode characters that some LLMs may insert
 fn strip_invisible_chars(s: &str) -> String {
     s.replace(['\u{200B}', '\u{200C}', '\u{200D}', '\u{FEFF}'], "")
+}
+
+/// Stateful Markdown-emphasis stripper for streamed rewrites.
+///
+/// Rewrite models scatter `**bold**` / `__underline__` markers over cleaned
+/// dictations even when told not to; typed or pasted into a plain text field
+/// they are noise. A run of two or three `*` or `_` followed by text opens
+/// emphasis and the matching run closes it; both are removed. Single markers
+/// (`2*3`, `snake_case`), `_` runs inside words (`a__b__c`), digit-to-digit
+/// `*` runs (`2**3`), and runs longer than three stay literal. A trailing run
+/// whose role depends on the character after it is held back until the next
+/// chunk (or [`EmphasisFilter::finish`]) resolves it, so markers split across
+/// stream chunk boundaries are still recognized.
+#[derive(Debug, Default)]
+struct EmphasisFilter {
+    /// The open emphasis run whose opening markers were already withheld
+    /// from the output.
+    open: Option<(char, usize)>,
+    /// The last consumed character of any kind, for boundary decisions.
+    last_char: Option<char>,
+    /// A trailing marker run awaiting the character after it.
+    held: String,
+}
+
+impl EmphasisFilter {
+    fn push(&mut self, chunk: &str) -> String {
+        let mut chars: Vec<char> = self.held.chars().collect();
+        self.held.clear();
+        chars.extend(chunk.chars());
+
+        let mut out = String::new();
+        let mut i = 0;
+        while i < chars.len() {
+            let c = chars[i];
+            if c != '*' && c != '_' {
+                out.push(c);
+                self.last_char = Some(c);
+                i += 1;
+                continue;
+            }
+            let mut end = i;
+            while end < chars.len() && chars[end] == c {
+                end += 1;
+            }
+            let run_len = end - i;
+            let next = chars.get(end).copied();
+
+            // Closing markers of the run we are inside: suppress them.
+            if self.open == Some((c, run_len)) && self.last_char.is_some_and(|p| !p.is_whitespace())
+            {
+                self.open = None;
+                self.last_char = Some(c);
+                i = end;
+                continue;
+            }
+
+            // Opening markers: 2-3 markers followed by non-whitespace.
+            // `*` opens intraword too (CommonMark allows it, and CJK text
+            // abuts its emphasis directly), except between two ASCII digits
+            // (`2**3` stays literal). `_` requires a boundary so
+            // snake_case stays intact. Whether a run opens can depend on
+            // the next character; if it has not arrived yet, hold the run.
+            let boundary_ok = if c == '*' {
+                !(self.last_char.is_some_and(|p| p.is_ascii_digit())
+                    && next.is_some_and(|n| n.is_ascii_digit()))
+            } else {
+                self.last_char.is_none_or(|p| !p.is_alphanumeric())
+            };
+            if self.open.is_none() && (2..=3).contains(&run_len) && boundary_ok {
+                match next {
+                    Some(n) if !n.is_whitespace() => {
+                        self.open = Some((c, run_len));
+                        self.last_char = Some(c);
+                        i = end;
+                        continue;
+                    }
+                    Some(_) => {}
+                    None => {
+                        self.held = chars[i..].iter().collect();
+                        return out;
+                    }
+                }
+            }
+
+            // Any other short trailing run could still extend into opening
+            // or closing markers once the next chunk arrives; hold it back
+            // rather than commit it as literal text.
+            if next.is_none() && run_len <= 3 {
+                self.held = chars[i..].iter().collect();
+                return out;
+            }
+
+            // Literal markers: single ones, long runs, intraword runs.
+            for _ in 0..run_len {
+                out.push(c);
+            }
+            self.last_char = Some(c);
+            i = end;
+        }
+        out
+    }
+
+    /// Resolves a held trailing run once no more text will arrive: markers
+    /// closing the open run are suppressed, everything else was literal.
+    fn finish(&mut self) -> String {
+        let held = std::mem::take(&mut self.held);
+        let markers: Vec<char> = held.chars().collect();
+        let closer = (2..=3).contains(&markers.len())
+            && markers
+                .first()
+                .is_some_and(|&c| self.open == Some((c, markers.len())))
+            && self.last_char.is_some_and(|p| !p.is_whitespace());
+        if closer {
+            self.open = None;
+            String::new()
+        } else {
+            held
+        }
+    }
+}
+
+/// Strips Markdown emphasis markers (see [`EmphasisFilter`]) from complete
+/// post-processing output.
+pub(crate) fn strip_markdown_emphasis(s: &str) -> String {
+    let mut filter = EmphasisFilter::default();
+    let mut out = filter.push(s);
+    out.push_str(&filter.finish());
+    out
 }
 
 /// Strip every complete `<think>...</think>` block. Some endpoints can't
@@ -478,7 +606,7 @@ async fn post_process_transcription(settings: &AppSettings, transcription: &str)
                             debug!("Apple Intelligence returned an empty response");
                             None
                         } else {
-                            let result = strip_invisible_chars(&result);
+                            let result = strip_markdown_emphasis(&strip_invisible_chars(&result));
                             debug!(
                                 "Apple Intelligence post-processing succeeded. Output length: {} chars",
                                 result.len()
@@ -532,7 +660,9 @@ async fn post_process_transcription(settings: &AppSettings, transcription: &str)
                         if let Some(transcription_value) =
                             json.get(TRANSCRIPTION_FIELD).and_then(|t| t.as_str())
                         {
-                            let result = strip_invisible_chars(transcription_value);
+                            let result = strip_markdown_emphasis(&strip_invisible_chars(
+                                transcription_value,
+                            ));
                             debug!(
                                 "Structured output post-processing succeeded for provider '{}'. Output length: {} chars",
                                 provider.id,
@@ -541,7 +671,7 @@ async fn post_process_transcription(settings: &AppSettings, transcription: &str)
                             return Some(result);
                         } else {
                             error!("Structured output response missing 'transcription' field");
-                            return Some(strip_invisible_chars(content));
+                            return Some(strip_markdown_emphasis(&strip_invisible_chars(content)));
                         }
                     }
                     Err(e) => {
@@ -549,7 +679,7 @@ async fn post_process_transcription(settings: &AppSettings, transcription: &str)
                             "Failed to parse structured output JSON: {}. Returning raw content.",
                             e
                         );
-                        return Some(strip_invisible_chars(content));
+                        return Some(strip_markdown_emphasis(&strip_invisible_chars(content)));
                     }
                 }
             }
@@ -588,7 +718,7 @@ async fn post_process_transcription(settings: &AppSettings, transcription: &str)
     .await
     {
         Ok(Some(content)) => {
-            let content = strip_invisible_chars(&strip_think_blocks(&content));
+            let content = clean_llm_output(&content);
             debug!(
                 "LLM post-processing succeeded for provider '{}'. Output length: {} chars",
                 provider.id,
@@ -677,12 +807,15 @@ fn should_flush_stream_buffer(pending: &str) -> bool {
 /// typed output always matches `received` up to `typed_chars`.
 struct StreamTyper {
     app: AppHandle,
-    /// All visible text received so far (invisible chars already stripped).
+    /// All visible text received so far (invisible chars and Markdown
+    /// emphasis markers already stripped).
     received: String,
     /// How many chars of `received` have been dispatched for typing.
     typed_chars: usize,
     /// Received but not yet dispatched.
     pending: String,
+    /// Strips Markdown emphasis markers across chunk boundaries.
+    emphasis: EmphasisFilter,
     /// When the first dispatch happened, to measure the typing window.
     typing_started: Option<Instant>,
 }
@@ -694,6 +827,7 @@ impl StreamTyper {
             received: String::new(),
             typed_chars: 0,
             pending: String::new(),
+            emphasis: EmphasisFilter::default(),
             typing_started: None,
         }
     }
@@ -703,11 +837,27 @@ impl StreamTyper {
         if delta.is_empty() {
             return;
         }
-        self.received.push_str(&delta);
-        self.pending.push_str(&delta);
+        let visible = self.emphasis.push(&delta);
+        if visible.is_empty() {
+            return;
+        }
+        self.received.push_str(&visible);
+        self.pending.push_str(&visible);
         if should_flush_stream_buffer(&self.pending) {
             self.flush();
         }
+    }
+
+    /// Drains markers the emphasis filter is still holding back. Call once
+    /// the stream has ended, before the final flush, so the canonical text
+    /// is complete and a dangling closer is not typed.
+    fn finish_stream(&mut self) {
+        let tail = self.emphasis.finish();
+        if tail.is_empty() {
+            return;
+        }
+        self.received.push_str(&tail);
+        self.pending.push_str(&tail);
     }
 
     /// Dispatches buffered text to the main thread for typing. A failed
@@ -881,7 +1031,9 @@ async fn stream_post_process_and_type(
     match result {
         Ok(Some(_outcome)) => {
             // The canonical text is what the typer received (already
-            // invisible-char-stripped, think-stripped by the client).
+            // invisible-char and emphasis stripped, think-stripped by the
+            // client).
+            typer.finish_stream();
             typer.flush();
             let text = typer.received_text().to_string();
             if text.is_empty() {
@@ -908,6 +1060,7 @@ async fn stream_post_process_and_type(
                 // Keep the partial rewrite: paste whatever was received but
                 // not yet typed, so the user ends up with the full partial.
                 warn!("Streamed rewrite failed mid-output: {e}; pasting the remainder");
+                typer.finish_stream();
                 let text = typer.received_text().to_string();
                 let typing = typer.typing_duration();
                 let remainder = typer.untyped_text();
@@ -1680,9 +1833,10 @@ pub static ACTION_MAP: Lazy<HashMap<String, Arc<dyn ShortcutAction>>> = Lazy::ne
 #[cfg(test)]
 mod tests {
     use super::{
-        build_legacy_prompt, build_system_prompt, complete_unless_cancelled, custom_words_glossary,
-        is_blank_transcription, should_flush_stream_buffer, should_use_streaming_overlay,
-        strip_think_blocks, wrap_transcript, TRANSCRIPT_GUARD,
+        build_legacy_prompt, build_system_prompt, clean_llm_output, complete_unless_cancelled,
+        custom_words_glossary, is_blank_transcription, should_flush_stream_buffer,
+        should_use_streaming_overlay, strip_markdown_emphasis, strip_think_blocks, wrap_transcript,
+        EmphasisFilter, TRANSCRIPT_GUARD,
     };
     use crate::settings::OverlayStyle;
     use std::future;
@@ -1818,6 +1972,89 @@ mod tests {
         assert!(prompt.starts_with("Clean up dictation errors."));
         assert!(prompt.contains("<transcript>\nhello world\n</transcript>"));
         assert!(prompt.contains(TRANSCRIPT_GUARD));
+    }
+
+    #[test]
+    fn markdown_emphasis_runs_are_stripped() {
+        assert_eq!(strip_markdown_emphasis("**bold** text"), "bold text");
+        assert_eq!(strip_markdown_emphasis("这是**重点**内容"), "这是重点内容");
+        assert_eq!(strip_markdown_emphasis("__under__ it"), "under it");
+        assert_eq!(strip_markdown_emphasis("***both***"), "both");
+        assert_eq!(strip_markdown_emphasis("a **b** c **d** e"), "a b c d e");
+    }
+
+    #[test]
+    fn literal_marker_runs_are_untouched() {
+        // Single markers: arithmetic, wildcards, snake_case.
+        assert_eq!(strip_markdown_emphasis("2*3*4"), "2*3*4");
+        assert_eq!(
+            strip_markdown_emphasis("snake_case_name"),
+            "snake_case_name"
+        );
+        // Intraword double runs are not emphasis (CommonMark intraword rule).
+        assert_eq!(strip_markdown_emphasis("a__b__c"), "a__b__c");
+        // Exponent-style digit**digit stays literal.
+        assert_eq!(strip_markdown_emphasis("2**3"), "2**3");
+        // Runs longer than three markers stay literal.
+        assert_eq!(strip_markdown_emphasis("****"), "****");
+        // Emphasis followed by whitespace is not an opener.
+        assert_eq!(strip_markdown_emphasis("** text **"), "** text **");
+    }
+
+    #[test]
+    fn unclosed_emphasis_loses_only_its_markers() {
+        assert_eq!(strip_markdown_emphasis("**never closed"), "never closed");
+    }
+
+    #[test]
+    fn emphasis_filter_recognizes_markers_split_across_chunks() {
+        let mut filter = EmphasisFilter::default();
+        let mut out = filter.push("这是**");
+        out.push_str(&filter.push("重点**内容"));
+        out.push_str(&filter.finish());
+        assert_eq!(out, "这是重点内容");
+    }
+
+    #[test]
+    fn emphasis_filter_holds_partial_runs_until_resolved() {
+        let mut filter = EmphasisFilter::default();
+        let mut out = filter.push("price: *");
+        assert_eq!(out, "price: ");
+        out.push_str(&filter.push("*sharp** rise"));
+        out.push_str(&filter.finish());
+        assert_eq!(out, "price: sharp rise");
+    }
+
+    #[test]
+    fn emphasis_filter_emits_literal_trailing_markers_at_finish() {
+        let mut filter = EmphasisFilter::default();
+        let mut out = filter.push("5 * plus **");
+        out.push_str(&filter.finish());
+        assert_eq!(out, "5 * plus **");
+    }
+
+    #[test]
+    fn emphasis_filter_splits_at_every_chunk_boundary() {
+        // For every split of this text, feeding it in two chunks must
+        // reconstruct the same output as the one-shot strip.
+        let full = "a **bold** b __u__ 2*3 a__b **** c";
+        let expected = strip_markdown_emphasis(full);
+        for split in 0..full.len() {
+            let (head, tail) = full.split_at(split);
+            let mut filter = EmphasisFilter::default();
+            let mut out = filter.push(head);
+            out.push_str(&filter.push(tail));
+            out.push_str(&filter.finish());
+            assert_eq!(out, expected, "split at {split}");
+        }
+    }
+
+    #[test]
+    fn cleaned_output_strips_think_invisible_and_emphasis() {
+        assert_eq!(
+            clean_llm_output("<think>x</think>**Done**\u{200B} ok"),
+            "Done ok"
+        );
     }
 
     #[test]
