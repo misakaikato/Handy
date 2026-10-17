@@ -16,7 +16,8 @@
     "postProcessing": "Následné zpracování",
     "history": "Historie",
     "debug": "Ladění",
-    "about": "O aplikaci"
+    "about": "O aplikaci",
+    "stats": "Statistiky"
   },
   "onboarding": {
     "subtitle": "Pro začátek vyberte model pro přepis",
@@ -689,6 +690,48 @@
         "label": "Zobrazovat novinky",
         "description": "Zobrazovat poznámky k vydání po aktualizacích Handy"
       }
+    },
+    "stats": {
+      "title": "Statistiky diktování",
+      "periods": {
+        "today": "Dnes",
+        "week": "Posledních 7 dní",
+        "month": "Posledních 30 dní"
+      },
+      "dictations": "Diktáty",
+      "characters": "Znaky",
+      "avgTotalLatency": "Prům. celková latence",
+      "noData": "V tomto období zatím nejsou žádné diktáty.",
+      "loadError": "Statistiky se nepodařilo načíst.",
+      "stageTimings": {
+        "title": "Časování fází",
+        "stage": "Fáze",
+        "avg": "Prům.",
+        "p50": "p50",
+        "p90": "p90"
+      },
+      "stages": {
+        "transcribe": "Přepis",
+        "postProcess": "Následné zpracování",
+        "firstToken": "První token",
+        "output": "Výstup (vložení/psaní)",
+        "total": "Celkem"
+      },
+      "streamedCount": "streamovaných: {{count}}",
+      "postProcessedCount": "zpracovaných: {{count}}",
+      "chart": {
+        "title": "Denní aktivita",
+        "characters": "Znaky za den",
+        "latency": "Prům. latence (ms)"
+      },
+      "learnedWords": {
+        "title": "Nedávno naučená slova",
+        "empty": "Zatím žádná naučená slova."
+      },
+      "export": "Exportovat CSV",
+      "exportSuccess": "Exportováno záznamů: {{count}}.",
+      "exportError": "Export selhal.",
+      "exportCancelled": "Export zrušen."
     }
   },
   "footer": {

@@ -16,7 +16,8 @@
     "postProcessing": "Postprocessament",
     "history": "Historial",
     "debug": "Depuració",
-    "about": "Quant a"
+    "about": "Quant a",
+    "stats": "Estadístiques"
   },
   "onboarding": {
     "subtitle": "Per començar, trieu un model de transcripció",
@@ -689,6 +690,48 @@
           "details": "La transcripció local de veu a text del Handy es basa en el transcribe.cpp i el ggml. Gràcies a la gran feina de Georgi Gerganov i dels col·laboradors."
         }
       }
+    },
+    "stats": {
+      "title": "Estadístiques de dictat",
+      "periods": {
+        "today": "Avui",
+        "week": "Últims 7 dies",
+        "month": "Últims 30 dies"
+      },
+      "dictations": "Dictats",
+      "characters": "Caràcters",
+      "avgTotalLatency": "Latència total mitjana",
+      "noData": "Encara no hi ha dictats en aquest període.",
+      "loadError": "No s'han pogut carregar les estadístiques.",
+      "stageTimings": {
+        "title": "Temps per etapa",
+        "stage": "Etapa",
+        "avg": "Mitjana",
+        "p50": "p50",
+        "p90": "p90"
+      },
+      "stages": {
+        "transcribe": "Transcripció",
+        "postProcess": "Postprocessat",
+        "firstToken": "Primer token",
+        "output": "Sortida (enganxar/escriptura)",
+        "total": "Total"
+      },
+      "streamedCount": "{{count}} en continu",
+      "postProcessedCount": "{{count}} postprocessats",
+      "chart": {
+        "title": "Activitat diària",
+        "characters": "Caràcters per dia",
+        "latency": "Latència total mitjana (ms)"
+      },
+      "learnedWords": {
+        "title": "Paraules apreses recentment",
+        "empty": "Encara no hi ha paraules apreses."
+      },
+      "export": "Exporta CSV",
+      "exportSuccess": "S'han exportat {{count}} registres.",
+      "exportError": "L'exportació ha fallat.",
+      "exportCancelled": "Exportació cancel·lada."
     }
   },
   "footer": {

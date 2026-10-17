@@ -16,7 +16,8 @@
     "postProcessing": "後処理",
     "history": "履歴",
     "debug": "デバッグ",
-    "about": "概要"
+    "about": "概要",
+    "stats": "統計"
   },
   "onboarding": {
     "subtitle": "開始するには、文字起こしのモデルを選択してください",
@@ -689,6 +690,48 @@
         "label": "新機能を表示",
         "description": "Handy のアップデート後にリリースノートを表示"
       }
+    },
+    "stats": {
+      "title": "ディクテーション統計",
+      "periods": {
+        "today": "今日",
+        "week": "過去7日間",
+        "month": "過去30日間"
+      },
+      "dictations": "ディクテーション回数",
+      "characters": "文字数",
+      "avgTotalLatency": "平均合計レイテンシ",
+      "noData": "この期間のディクテーションはまだありません。",
+      "loadError": "統計の読み込みに失敗しました。",
+      "stageTimings": {
+        "title": "ステージ別所要時間",
+        "stage": "ステージ",
+        "avg": "平均",
+        "p50": "p50",
+        "p90": "p90"
+      },
+      "stages": {
+        "transcribe": "文字起こし",
+        "postProcess": "後処理",
+        "firstToken": "最初のトークン",
+        "output": "出力（貼り付け/入力）",
+        "total": "合計"
+      },
+      "streamedCount": "ストリーミング {{count}} 回",
+      "postProcessedCount": "後処理済み {{count}} 回",
+      "chart": {
+        "title": "日別アクティビティ",
+        "characters": "日別文字数",
+        "latency": "平均合計レイテンシ（ミリ秒）"
+      },
+      "learnedWords": {
+        "title": "最近学習した単語",
+        "empty": "学習した単語はまだありません。"
+      },
+      "export": "CSV をエクスポート",
+      "exportSuccess": "{{count}} 件をエクスポートしました。",
+      "exportError": "エクスポートに失敗しました。",
+      "exportCancelled": "エクスポートをキャンセルしました。"
     }
   },
   "footer": {

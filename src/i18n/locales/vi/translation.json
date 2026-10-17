@@ -16,7 +16,8 @@
     "postProcessing": "Xử lý sau",
     "history": "Lịch sử",
     "debug": "Gỡ lỗi",
-    "about": "Giới thiệu"
+    "about": "Giới thiệu",
+    "stats": "Thống kê"
   },
   "onboarding": {
     "subtitle": "Để bắt đầu, hãy chọn một mô hình chuyển đổi giọng nói",
@@ -689,6 +690,48 @@
         "label": "Hiển thị điểm mới",
         "description": "Hiển thị ghi chú phát hành sau khi Handy cập nhật"
       }
+    },
+    "stats": {
+      "title": "Thống kê đọc chính tả",
+      "periods": {
+        "today": "Hôm nay",
+        "week": "7 ngày qua",
+        "month": "30 ngày qua"
+      },
+      "dictations": "Lượt đọc chính tả",
+      "characters": "Ký tự",
+      "avgTotalLatency": "Độ trễ tổng trung bình",
+      "noData": "Chưa có lượt đọc chính tả nào trong giai đoạn này.",
+      "loadError": "Không thể tải thống kê.",
+      "stageTimings": {
+        "title": "Thời lượng theo giai đoạn",
+        "stage": "Giai đoạn",
+        "avg": "Trung bình",
+        "p50": "p50",
+        "p90": "p90"
+      },
+      "stages": {
+        "transcribe": "Chuyển ngữ",
+        "postProcess": "Hậu xử lý",
+        "firstToken": "Token đầu tiên",
+        "output": "Đầu ra (dán/gõ)",
+        "total": "Tổng"
+      },
+      "streamedCount": "{{count}} phát trực tiếp",
+      "postProcessedCount": "{{count}} đã hậu xử lý",
+      "chart": {
+        "title": "Hoạt động hằng ngày",
+        "characters": "Ký tự mỗi ngày",
+        "latency": "Độ trễ trung bình (ms)"
+      },
+      "learnedWords": {
+        "title": "Từ mới học gần đây",
+        "empty": "Chưa có từ nào được học."
+      },
+      "export": "Xuất CSV",
+      "exportSuccess": "Đã xuất {{count}} bản ghi.",
+      "exportError": "Xuất thất bại.",
+      "exportCancelled": "Đã hủy xuất."
     }
   },
   "footer": {

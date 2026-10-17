@@ -16,7 +16,8 @@
     "postProcessing": "후처리",
     "history": "히스토리",
     "debug": "디버그",
-    "about": "정보"
+    "about": "정보",
+    "stats": "통계"
   },
   "onboarding": {
     "subtitle": "시작하려면 음성 인식 모델을 선택하세요",
@@ -689,6 +690,48 @@
         "label": "새 소식 표시",
         "description": "Handy 업데이트 후 릴리스 노트를 표시합니다"
       }
+    },
+    "stats": {
+      "title": "받아쓰기 통계",
+      "periods": {
+        "today": "오늘",
+        "week": "최근 7일",
+        "month": "최근 30일"
+      },
+      "dictations": "받아쓰기 횟수",
+      "characters": "문자 수",
+      "avgTotalLatency": "평균 총 지연 시간",
+      "noData": "이 기간에는 아직 받아쓰기가 없습니다.",
+      "loadError": "통계를 불러오지 못했습니다.",
+      "stageTimings": {
+        "title": "단계별 소요 시간",
+        "stage": "단계",
+        "avg": "평균",
+        "p50": "p50",
+        "p90": "p90"
+      },
+      "stages": {
+        "transcribe": "전사",
+        "postProcess": "후처리",
+        "firstToken": "첫 토큰",
+        "output": "출력(붙여넣기/입력)",
+        "total": "전체"
+      },
+      "streamedCount": "스트리밍 {{count}}회",
+      "postProcessedCount": "후처리 {{count}}회",
+      "chart": {
+        "title": "일일 활동",
+        "characters": "일일 문자 수",
+        "latency": "평균 지연 시간(ms)"
+      },
+      "learnedWords": {
+        "title": "최근 학습한 단어",
+        "empty": "아직 학습한 단어가 없습니다."
+      },
+      "export": "CSV 내보내기",
+      "exportSuccess": "{{count}}개 항목을 내보냈습니다.",
+      "exportError": "내보내기 실패.",
+      "exportCancelled": "내보내기가 취소되었습니다."
     }
   },
   "footer": {

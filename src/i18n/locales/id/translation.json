@@ -16,7 +16,8 @@
     "postProcessing": "Pascaproses",
     "history": "Riwayat",
     "debug": "Debug",
-    "about": "Tentang"
+    "about": "Tentang",
+    "stats": "Statistik"
   },
   "onboarding": {
     "subtitle": "Untuk memulai, pilih model transkripsi",
@@ -689,6 +690,48 @@
           "details": "Fitur ucapan-ke-teks lokal Handy dibangun menggunakan transcribe.cpp dan ggml. Terima kasih kepada Georgi Gerganov dan para kontributor atas karya luar biasa mereka."
         }
       }
+    },
+    "stats": {
+      "title": "Statistik dikte",
+      "periods": {
+        "today": "Hari ini",
+        "week": "7 hari terakhir",
+        "month": "30 hari terakhir"
+      },
+      "dictations": "Dikte",
+      "characters": "Karakter",
+      "avgTotalLatency": "Rata-rata latensi total",
+      "noData": "Belum ada dikte pada periode ini.",
+      "loadError": "Gagal memuat statistik.",
+      "stageTimings": {
+        "title": "Waktu per tahap",
+        "stage": "Tahap",
+        "avg": "Rata-rata",
+        "p50": "p50",
+        "p90": "p90"
+      },
+      "stages": {
+        "transcribe": "Transkripsi",
+        "postProcess": "Pasca-proses",
+        "firstToken": "Token pertama",
+        "output": "Keluaran (tempel/ketik)",
+        "total": "Total"
+      },
+      "streamedCount": "{{count}} mengalir",
+      "postProcessedCount": "{{count}} pasca-proses",
+      "chart": {
+        "title": "Aktivitas harian",
+        "characters": "Karakter per hari",
+        "latency": "Latensi total rata-rata (ms)"
+      },
+      "learnedWords": {
+        "title": "Kata yang baru dipelajari",
+        "empty": "Belum ada kata yang dipelajari."
+      },
+      "export": "Ekspor CSV",
+      "exportSuccess": "{{count}} entri diekspor.",
+      "exportError": "Ekspor gagal.",
+      "exportCancelled": "Ekspor dibatalkan."
     }
   },
   "footer": {

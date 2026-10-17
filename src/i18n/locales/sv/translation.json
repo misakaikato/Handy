@@ -16,7 +16,8 @@
     "postProcessing": "Efterbearbetning",
     "history": "Historik",
     "debug": "Felsökning",
-    "about": "Om"
+    "about": "Om",
+    "stats": "Statistik"
   },
   "onboarding": {
     "subtitle": "För att komma igång, välj en transkriptionsmodell",
@@ -689,6 +690,48 @@
         "label": "Visa nyheter",
         "description": "Visa versionsinformation efter Handy-uppdateringar"
       }
+    },
+    "stats": {
+      "title": "Dikteringsstatistik",
+      "periods": {
+        "today": "Idag",
+        "week": "Senaste 7 dagarna",
+        "month": "Senaste 30 dagarna"
+      },
+      "dictations": "Dikteringar",
+      "characters": "Tecken",
+      "avgTotalLatency": "Snitt total latens",
+      "noData": "Inga dikteringar under perioden ännu.",
+      "loadError": "Kunde inte läsa in statistiken.",
+      "stageTimings": {
+        "title": "Tider per steg",
+        "stage": "Steg",
+        "avg": "Snitt",
+        "p50": "p50",
+        "p90": "p90"
+      },
+      "stages": {
+        "transcribe": "Transkribering",
+        "postProcess": "Efterbearbetning",
+        "firstToken": "Första token",
+        "output": "Utmatning (klistra in/skriva)",
+        "total": "Totalt"
+      },
+      "streamedCount": "{{count}} strömmade",
+      "postProcessedCount": "{{count}} efterbearbetade",
+      "chart": {
+        "title": "Dagsaktivitet",
+        "characters": "Tecken per dag",
+        "latency": "Snitt latens (ms)"
+      },
+      "learnedWords": {
+        "title": "Nyligen lärda ord",
+        "empty": "Inga ord inlärda ännu."
+      },
+      "export": "Exportera CSV",
+      "exportSuccess": "Exporterade {{count}} poster.",
+      "exportError": "Exporten misslyckades.",
+      "exportCancelled": "Exporten avbröts."
     }
   },
   "footer": {

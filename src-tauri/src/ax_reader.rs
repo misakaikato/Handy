@@ -139,6 +139,39 @@ pub(crate) fn focused_element_snapshot() -> Option<FocusedElementSnapshot> {
     None
 }
 
+/// Title of the frontmost application (e.g. "Safari"), read from the AX
+/// focused-application element. Used for dictation statistics; every failure
+/// maps to `None` and is silently skipped.
+#[cfg(target_os = "macos")]
+pub(crate) fn focused_application_title() -> Option<String> {
+    // SAFETY: mirrors focused_element_snapshot - each block releases what it
+    // acquired; pointers are only passed to CF/AX calls.
+    unsafe {
+        let system_wide = ffi::AXUIElementCreateSystemWide();
+        if system_wide.is_null() {
+            return None;
+        }
+        let _ = ffi::AXUIElementSetMessagingTimeout(system_wide, 1.0);
+
+        let app = copy_attribute(system_wide, "AXFocusedApplication")?;
+        let title = copy_attribute(app as ffi::AXUIElementRef, "AXTitle").and_then(|value| {
+            let title = coerce_string(value);
+            ffi::CFRelease(value);
+            title
+        });
+        ffi::CFRelease(app);
+        ffi::CFRelease(system_wide);
+        title.filter(|t| !t.is_empty())
+    }
+}
+
+/// No app-name source outside macOS (the AX reader only exists there);
+/// statistics simply record no application.
+#[cfg(not(target_os = "macos"))]
+pub(crate) fn focused_application_title() -> Option<String> {
+    None
+}
+
 // ------------------------------------------------------------- macOS glue
 
 /// Reads every attribute the snapshot describes from one focused element.

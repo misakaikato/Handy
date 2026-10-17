@@ -16,7 +16,8 @@
     "postProcessing": "Nachbearbeitung",
     "history": "Verlauf",
     "debug": "Debug",
-    "about": "Info"
+    "about": "Info",
+    "stats": "Statistik"
   },
   "onboarding": {
     "subtitle": "Wähle ein Transkriptionsmodell, um loszulegen",
@@ -689,6 +690,48 @@
         "label": "Neuerungen anzeigen",
         "description": "Versionshinweise nach Handy-Updates anzeigen"
       }
+    },
+    "stats": {
+      "title": "Diktat-Statistik",
+      "periods": {
+        "today": "Heute",
+        "week": "Letzte 7 Tage",
+        "month": "Letzte 30 Tage"
+      },
+      "dictations": "Diktate",
+      "characters": "Zeichen",
+      "avgTotalLatency": "Ø Gesamtlatenz",
+      "noData": "In diesem Zeitraum gibt es noch keine Diktate.",
+      "loadError": "Statistiken konnten nicht geladen werden.",
+      "stageTimings": {
+        "title": "Zeiten pro Phase",
+        "stage": "Phase",
+        "avg": "Ø",
+        "p50": "p50",
+        "p90": "p90"
+      },
+      "stages": {
+        "transcribe": "Transkription",
+        "postProcess": "Nachbearbeitung",
+        "firstToken": "Erstes Token",
+        "output": "Ausgabe (Einfügen/Eingeben)",
+        "total": "Gesamt"
+      },
+      "streamedCount": "{{count}} gestreamt",
+      "postProcessedCount": "{{count}} nachbearbeitet",
+      "chart": {
+        "title": "Tagesaktivität",
+        "characters": "Zeichen pro Tag",
+        "latency": "Ø Gesamtlatenz (ms)"
+      },
+      "learnedWords": {
+        "title": "Kürzlich gelernte Wörter",
+        "empty": "Noch keine gelernten Wörter."
+      },
+      "export": "CSV exportieren",
+      "exportSuccess": "{{count}} Einträge exportiert.",
+      "exportError": "Export fehlgeschlagen.",
+      "exportCancelled": "Export abgebrochen."
     }
   },
   "footer": {

@@ -1027,6 +1027,40 @@ async updateRecordingRetentionPeriod(period: string) : Promise<Result<null, stri
 }
 },
 /**
+ * Aggregated statistics for the last `range_days` calendar days (1 = today).
+ */
+async getDictationStats(rangeDays: number) : Promise<Result<StatsSummary, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_dictation_stats", { rangeDays }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+/**
+ * The most recent words learned from user corrections (not undone).
+ */
+async getRecentLearnedWords(limit: number | null) : Promise<Result<LearnedWordEvent[], string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_recent_learned_words", { limit }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+/**
+ * Writes every recorded metric row to `path` as CSV (the frontend picks the
+ * path with a save dialog). Returns the number of exported rows.
+ */
+async exportStatsCsv(path: string) : Promise<Result<number, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("export_stats_csv", { path }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+/**
  * Checks if the Mac is a laptop by detecting battery presence
  * 
  * This uses pmset to check for battery information.
@@ -1200,6 +1234,14 @@ export type ChineseScript =
 "as_transcribed" | "simplified" | "traditional"
 export type ClipboardHandling = "dont_modify" | "copy_to_clipboard"
 export type CustomSounds = { start: boolean; stop: boolean }
+/**
+ * One day of activity, bucketed in the user's local timezone.
+ */
+export type DailyStat = { 
+/**
+ * Local date, `YYYY-MM-DD`.
+ */
+date: string; dictations: number; characters: number; avg_total_ms: number }
 export type GpuDeviceOption = { id: string; name: string; total_vram_mb: number }
 export type HistoryEntry = { id: number; file_name: string; timestamp: number; saved: boolean; title: string; transcription_text: string; post_processed_text: string | null; post_process_prompt: string | null; post_process_requested: boolean }
 export type HistoryUpdatePayload = { action: "added"; entry: HistoryEntry } | { action: "updated"; entry: HistoryEntry } | { action: "deleted"; id: number } | { action: "toggled"; id: number }
@@ -1218,6 +1260,14 @@ export type KeyboardDiagnosticReport = { secure_input_enabled: boolean; culprit_
 key_down: number; key_up: number; flags_changed: number; mouse: number; duration_ms: number }
 export type KeyboardImplementation = "tauri" | "handy_keys"
 export type LLMPrompt = { id: string; name: string; prompt: string }
+/**
+ * A learned-words event row, for the "recently learned" list.
+ */
+export type LearnedWordEvent = { word: string; 
+/**
+ * Unix timestamp (seconds) when the word was learned.
+ */
+timestamp: number }
 export type LogLevel = "trace" | "debug" | "info" | "warn" | "error"
 export type ModelInfo = { id: string; name: string; description: string; filename: string; source: ModelSource; size_mb: number; is_downloaded: boolean; is_downloading: boolean; partial_size: number; accuracy_score: number; speed_score: number; supports_translation: boolean; is_recommended: boolean; supported_languages: string[]; supports_language_selection: boolean; is_custom: boolean; supports_streaming: boolean; supports_language_detection: boolean }
 export type ModelLoadStatus = { is_loaded: boolean; current_model: string | null }
@@ -1356,6 +1406,22 @@ export type ShortcutActivation =
 "hold_or_toggle"
 export type ShortcutBinding = { id: string; name: string; description: string; default_binding: string; current_binding: string }
 export type SoundTheme = "marimba" | "pop" | "custom"
+/**
+ * Average and percentile latencies of one pipeline stage.
+ */
+export type StageStats = { 
+/**
+ * Number of dictations contributing to this stage.
+ */
+count: number; avg_ms: number; p50_ms: number; p90_ms: number }
+/**
+ * Everything the Stats page shows for one range.
+ */
+export type StatsSummary = { range_days: number; dictations: number; characters: number; streamed: number; post_processed: number; transcribe: StageStats; post_process: StageStats; first_token: StageStats; output: StageStats; total: StageStats; 
+/**
+ * One bucket per day of the range, oldest first (empty days included).
+ */
+daily: DailyStat[] }
 /**
  * Phase of the streaming overlay card, emitted to drive its UI state.
  */

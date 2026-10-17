@@ -25,7 +25,7 @@ mod notify;
 use crate::settings::{get_settings, write_settings, PasteMethod};
 #[cfg(target_os = "macos")]
 use log::{debug, info};
-use tauri::AppHandle;
+use tauri::{AppHandle, Manager};
 
 #[cfg(target_os = "macos")]
 use tauri::Emitter;
@@ -79,13 +79,26 @@ fn learn_from_correction(app: &AppHandle, pasted: &str) {
     settings.custom_words.extend(learned.clone());
     write_settings(app, settings);
 
+    // Persist the learn event for the Stats page. Row ids travel with the
+    // undo payload so an undo marks exactly these rows.
+    let row_ids = app
+        .try_state::<std::sync::Arc<crate::managers::history::HistoryManager>>()
+        .and_then(|hm| {
+            hm.record_learned_words(&learned)
+                .map_err(|e| {
+                    log::warn!("Failed to record learned words: {e}");
+                })
+                .ok()
+        })
+        .unwrap_or_default();
+
     // Let an open settings window pick up the new words.
     let _ = app.emit(
         "settings-changed",
         serde_json::json!({ "setting": "custom_words" }),
     );
 
-    notify::show_learned_toast(app, learned);
+    notify::show_learned_toast(app, learned, row_ids);
 }
 
 /// Creates the learned-words toast window (hidden). No-op outside macOS,

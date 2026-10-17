@@ -40,9 +40,11 @@ const TOAST_HEIGHT: f64 = 44.0;
 
 /// The most recent learn event, addressable by id so a stale Undo (from a
 /// toast already replaced by a newer event) cannot remove the wrong words.
+/// `stat_row_ids` are the learned_words rows persisted for the Stats page.
 struct PendingUndo {
     id: u64,
     words: Vec<String>,
+    stat_row_ids: Vec<i64>,
 }
 
 static PENDING_UNDO: Lazy<Mutex<Option<PendingUndo>>> = Lazy::new(|| Mutex::new(None));
@@ -99,7 +101,7 @@ pub fn create_learned_toast(app_handle: &AppHandle) {
 ///
 /// Called from the learn thread; hops to the main thread for the panel and
 /// monitor work.
-pub(crate) fn show_learned_toast(app: &AppHandle, words: Vec<String>) {
+pub(crate) fn show_learned_toast(app: &AppHandle, words: Vec<String>, stat_row_ids: Vec<i64>) {
     let duration_ms = crate::settings::get_settings(app)
         .auto_learn_notification_duration_ms
         .clamp(500, 60_000);
@@ -107,6 +109,7 @@ pub(crate) fn show_learned_toast(app: &AppHandle, words: Vec<String>) {
     lock_pending(&PENDING_UNDO).replace(PendingUndo {
         id,
         words: words.clone(),
+        stat_row_ids,
     });
 
     let handle = app.clone();
@@ -135,6 +138,13 @@ pub(crate) fn undo_last_learned(app: &AppHandle, event_id: u64) -> bool {
             serde_json::json!({ "setting": "custom_words" }),
         );
         debug!("Auto-learn undo removed {removed} word(s)");
+    }
+    // Mirror the undo in the stats history so "recently learned" no longer
+    // lists the undone words.
+    if let Some(hm) = app.try_state::<std::sync::Arc<crate::managers::history::HistoryManager>>() {
+        if let Err(e) = hm.mark_learned_words_undone(&pending.stat_row_ids) {
+            debug!("Auto-learn undo could not update stats rows: {e}");
+        }
     }
     hide_toast(app);
     true

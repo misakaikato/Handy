@@ -16,7 +16,8 @@
     "postProcessing": "Naverwerking",
     "history": "Geschiedenis",
     "debug": "Probleemoplossing",
-    "about": "Over Handy"
+    "about": "Over Handy",
+    "stats": "Statistieken"
   },
   "onboarding": {
     "subtitle": "Kies een transcriptiemodel om aan de slag te gaan",
@@ -689,6 +690,48 @@
           "details": "Handy's lokale spraak-naar-tekst is gebouwd op transcribe.cpp en ggml. Met dank aan het geweldige werk van Georgi Gerganov en alle bijdragers."
         }
       }
+    },
+    "stats": {
+      "title": "Dicteerstatistieken",
+      "periods": {
+        "today": "Vandaag",
+        "week": "Afgelopen 7 dagen",
+        "month": "Afgelopen 30 dagen"
+      },
+      "dictations": "Dicteersessies",
+      "characters": "Tekens",
+      "avgTotalLatency": "Gem. totale vertraging",
+      "noData": "Nog geen dicteersessies in deze periode.",
+      "loadError": "Statistieken laden mislukt.",
+      "stageTimings": {
+        "title": "Tijden per fase",
+        "stage": "Fase",
+        "avg": "Gem.",
+        "p50": "p50",
+        "p90": "p90"
+      },
+      "stages": {
+        "transcribe": "Transcriptie",
+        "postProcess": "Nabewerking",
+        "firstToken": "Eerste token",
+        "output": "Uitvoer (plakken/typen)",
+        "total": "Totaal"
+      },
+      "streamedCount": "{{count}} gestreamd",
+      "postProcessedCount": "{{count}} nagebewerkt",
+      "chart": {
+        "title": "Dagelijkse activiteit",
+        "characters": "Tekens per dag",
+        "latency": "Gem. vertraging (ms)"
+      },
+      "learnedWords": {
+        "title": "Recent geleerde woorden",
+        "empty": "Nog geen woorden geleerd."
+      },
+      "export": "CSV exporteren",
+      "exportSuccess": "{{count}} items geëxporteerd.",
+      "exportError": "Exporteren mislukt.",
+      "exportCancelled": "Export geannuleerd."
     }
   },
   "footer": {

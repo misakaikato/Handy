@@ -16,7 +16,8 @@
     "postProcessing": "Постобробка",
     "history": "Історія",
     "debug": "Дебаг",
-    "about": "Інфо"
+    "about": "Інфо",
+    "stats": "Статистика"
   },
   "onboarding": {
     "subtitle": "Для початку оберіть модель транскрипції",
@@ -689,6 +690,48 @@
         "label": "Показувати новини",
         "description": "Показувати примітки до випуску після оновлень Handy"
       }
+    },
+    "stats": {
+      "title": "Статистика диктування",
+      "periods": {
+        "today": "Сьогодні",
+        "week": "7 днів",
+        "month": "30 днів"
+      },
+      "dictations": "Диктування",
+      "characters": "Символи",
+      "avgTotalLatency": "Середня затримка",
+      "noData": "За цей період диктувань ще немає.",
+      "loadError": "Не вдалося завантажити статистику.",
+      "stageTimings": {
+        "title": "Час за етапами",
+        "stage": "Етап",
+        "avg": "Сер.",
+        "p50": "p50",
+        "p90": "p90"
+      },
+      "stages": {
+        "transcribe": "Розпізнавання",
+        "postProcess": "Постобробка",
+        "firstToken": "Перший токен",
+        "output": "Виведення (вставлення/ввід)",
+        "total": "Разом"
+      },
+      "streamedCount": "потокових: {{count}}",
+      "postProcessedCount": "з постобробкою: {{count}}",
+      "chart": {
+        "title": "Активність за днями",
+        "characters": "Символів на день",
+        "latency": "Середня затримка (мс)"
+      },
+      "learnedWords": {
+        "title": "Нещодавно вивчені слова",
+        "empty": "Вивчених слів ще немає."
+      },
+      "export": "Експорт CSV",
+      "exportSuccess": "Експортовано записів: {{count}}.",
+      "exportError": "Помилка експорту.",
+      "exportCancelled": "Експорт скасовано."
     }
   },
   "footer": {

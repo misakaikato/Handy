@@ -16,7 +16,8 @@
     "postProcessing": "后处理",
     "history": "历史记录",
     "debug": "调试",
-    "about": "关于"
+    "about": "关于",
+    "stats": "统计"
   },
   "onboarding": {
     "subtitle": "请选择一个转录模型以开始使用",
@@ -689,6 +690,48 @@
         "label": "显示新功能",
         "description": "Handy 更新后显示发行说明"
       }
+    },
+    "stats": {
+      "title": "听写统计",
+      "periods": {
+        "today": "今天",
+        "week": "最近 7 天",
+        "month": "最近 30 天"
+      },
+      "dictations": "听写次数",
+      "characters": "字符数",
+      "avgTotalLatency": "平均总延迟",
+      "noData": "该时间段还没有听写记录。",
+      "loadError": "统计加载失败。",
+      "stageTimings": {
+        "title": "各阶段耗时",
+        "stage": "阶段",
+        "avg": "平均",
+        "p50": "p50",
+        "p90": "p90"
+      },
+      "stages": {
+        "transcribe": "转写",
+        "postProcess": "后处理",
+        "firstToken": "首字符",
+        "output": "输出（粘贴/打字）",
+        "total": "总计"
+      },
+      "streamedCount": "流式输出 {{count}} 次",
+      "postProcessedCount": "后处理 {{count}} 次",
+      "chart": {
+        "title": "每日活动",
+        "characters": "每日字符数",
+        "latency": "平均总延迟（毫秒）"
+      },
+      "learnedWords": {
+        "title": "最近学到的词",
+        "empty": "还没有学到的词。"
+      },
+      "export": "导出 CSV",
+      "exportSuccess": "已导出 {{count}} 条记录。",
+      "exportError": "导出失败。",
+      "exportCancelled": "已取消导出。"
     }
   },
   "footer": {

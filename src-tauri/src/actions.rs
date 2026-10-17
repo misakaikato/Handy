@@ -91,6 +91,38 @@ impl PipelineTimings {
             );
         }
     }
+
+    /// Persists this run as a dictation metric for the Stats page. Runs on a
+    /// background thread: the frontmost-app lookup talks to the AX API
+    /// (macOS) and the insert hits SQLite, and neither belongs on the paste
+    /// path. Failures are logged and forgotten - statistics must never
+    /// disturb the pipeline.
+    fn record(&self, app: &AppHandle, char_count: u64, post_processed: bool, output: Duration) {
+        let metric = crate::stats::DictationMetric {
+            timestamp: chrono::Utc::now().timestamp(),
+            app_name: None,
+            char_count,
+            transcribe_ms: self.transcribe.as_millis() as u64,
+            post_process_ms: self.post_process.as_millis() as u64,
+            first_token_ms: self.first_token.map(|d| d.as_millis() as u64),
+            output_ms: output.as_millis() as u64,
+            total_ms: self.started.elapsed().as_millis() as u64,
+            streamed: self.streamed,
+            post_processed,
+        };
+        let app = app.clone();
+        std::thread::spawn(move || {
+            let mut metric = metric;
+            metric.app_name = crate::ax_reader::focused_application_title();
+            let Some(hm) = app.try_state::<Arc<HistoryManager>>() else {
+                debug!("Stats: history manager unavailable; metric dropped");
+                return;
+            };
+            if let Err(err) = hm.record_dictation_metric(&metric) {
+                debug!("Stats: failed to record dictation metric: {err}");
+            }
+        });
+    }
 }
 
 // Shortcut Action Trait
@@ -1240,6 +1272,12 @@ fn stop_and_process_transcription(app: &AppHandle, binding_id: &str, post_proces
                             // while the rewrite streamed (or pasted as a
                             // mid-stream fallback); nothing left to emit.
                             timings.log(streamed.typing);
+                            timings.record(
+                                &ah,
+                                processed.final_text.chars().count() as u64,
+                                post_process,
+                                streamed.typing,
+                            );
                             utils::hide_recording_overlay(&ah);
                             set_tray_state(&ah, TrayIconState::Idle);
                         } else {
@@ -1256,6 +1294,7 @@ fn stop_and_process_transcription(app: &AppHandle, binding_id: &str, post_proces
 
                                 let paste_started = Instant::now();
                                 let pasted_text = final_text.clone();
+                                let pasted_chars = final_text.chars().count() as u64;
                                 match utils::paste(final_text, ah_clone.clone()) {
                                     Ok(()) => {
                                         debug!(
@@ -1275,7 +1314,14 @@ fn stop_and_process_transcription(app: &AppHandle, binding_id: &str, post_proces
                                         let _ = ah_clone.emit("paste-error", ());
                                     }
                                 }
-                                timings.log(paste_started.elapsed());
+                                let output_elapsed = paste_started.elapsed();
+                                timings.log(output_elapsed);
+                                timings.record(
+                                    &ah_clone,
+                                    pasted_chars,
+                                    post_process,
+                                    output_elapsed,
+                                );
                                 utils::hide_recording_overlay(&ah_clone);
                                 set_tray_state(&ah_clone, TrayIconState::Idle);
                             })

@@ -16,7 +16,8 @@
     "postProcessing": "Efterbehandling",
     "history": "Historik",
     "debug": "Fejlfinding",
-    "about": "Om"
+    "about": "Om",
+    "stats": "Statistik"
   },
   "onboarding": {
     "subtitle": "For at komme i gang skal du vælge en transskriptionsmodel",
@@ -689,6 +690,48 @@
           "details": "Handys lokale tale-til-tekst funktionalitet er bygget på transcribe.cpp og ggml. Tak for det fantastiske arbejde af Georgi Gerganov og bidragyderne."
         }
       }
+    },
+    "stats": {
+      "title": "Dikteringsstatistik",
+      "periods": {
+        "today": "I dag",
+        "week": "Sidste 7 dage",
+        "month": "Sidste 30 dage"
+      },
+      "dictations": "Dikteringer",
+      "characters": "Tegn",
+      "avgTotalLatency": "Gnsn. samlet ventetid",
+      "noData": "Ingen dikteringer i denne periode endnu.",
+      "loadError": "Statistikken kunne ikke indlæses.",
+      "stageTimings": {
+        "title": "Tider pr. fase",
+        "stage": "Fase",
+        "avg": "Gnsn.",
+        "p50": "p50",
+        "p90": "p90"
+      },
+      "stages": {
+        "transcribe": "Transskription",
+        "postProcess": "Efterbehandling",
+        "firstToken": "Første token",
+        "output": "Output (indsæt/skriv)",
+        "total": "I alt"
+      },
+      "streamedCount": "{{count}} streamet",
+      "postProcessedCount": "{{count}} efterbehandlet",
+      "chart": {
+        "title": "Daglig aktivitet",
+        "characters": "Tegn pr. dag",
+        "latency": "Gnsn. ventetid (ms)"
+      },
+      "learnedWords": {
+        "title": "Senest lærte ord",
+        "empty": "Ingen ord lært endnu."
+      },
+      "export": "Eksportér CSV",
+      "exportSuccess": "Eksporteret {{count}} poster.",
+      "exportError": "Eksport mislykkedes.",
+      "exportCancelled": "Eksport annulleret."
     }
   },
   "footer": {

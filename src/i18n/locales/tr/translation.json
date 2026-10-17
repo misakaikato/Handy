@@ -16,7 +16,8 @@
     "postProcessing": "Son İşlem",
     "history": "Geçmiş",
     "debug": "Hata Ayıklama",
-    "about": "Hakkında"
+    "about": "Hakkında",
+    "stats": "İstatistikler"
   },
   "onboarding": {
     "subtitle": "Başlamak için bir transkripsiyon modeli seçin",
@@ -689,6 +690,48 @@
         "label": "Yenilikleri Göster",
         "description": "Handy güncellemelerinden sonra sürüm notlarını göster"
       }
+    },
+    "stats": {
+      "title": "Dikte İstatistikleri",
+      "periods": {
+        "today": "Bugün",
+        "week": "Son 7 gün",
+        "month": "Son 30 gün"
+      },
+      "dictations": "Dikte sayısı",
+      "characters": "Karakter",
+      "avgTotalLatency": "Ort. toplam gecikme",
+      "noData": "Bu dönemde henüz dikte yok.",
+      "loadError": "İstatistikler yüklenemedi.",
+      "stageTimings": {
+        "title": "Aşama süreleri",
+        "stage": "Aşama",
+        "avg": "Ort.",
+        "p50": "p50",
+        "p90": "p90"
+      },
+      "stages": {
+        "transcribe": "Deşifre",
+        "postProcess": "Son işlem",
+        "firstToken": "İlk jeton",
+        "output": "Çıktı (yapıştır/yazma)",
+        "total": "Toplam"
+      },
+      "streamedCount": "{{count}} akış",
+      "postProcessedCount": "{{count}} son işlemden geçmiş",
+      "chart": {
+        "title": "Günlük etkinlik",
+        "characters": "Günlük karakter",
+        "latency": "Ort. gecikme (ms)"
+      },
+      "learnedWords": {
+        "title": "Son öğrenilen kelimeler",
+        "empty": "Henüz öğrenilen kelime yok."
+      },
+      "export": "CSV dışa aktar",
+      "exportSuccess": "{{count}} kayıt dışa aktarıldı.",
+      "exportError": "Dışa aktarma başarısız.",
+      "exportCancelled": "Dışa aktarma iptal edildi."
     }
   },
   "footer": {

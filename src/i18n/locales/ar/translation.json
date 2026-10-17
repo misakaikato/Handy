@@ -16,7 +16,8 @@
     "history": "السجل",
     "debug": "تصحيح الأخطاء",
     "about": "حول",
-    "models": "النماذج"
+    "models": "النماذج",
+    "stats": "الإحصائيات"
   },
   "onboarding": {
     "subtitle": "للبدء، اختر نموذج التفريغ الصوتي",
@@ -689,6 +690,48 @@
         "label": "إعادة الفحص",
         "tooltip": "إعادة الفحص بحثًا عن النماذج المضافة إلى مجلد النماذج أو ذاكرة Hugging Face التخزينية المؤقتة خارج Handy"
       }
+    },
+    "stats": {
+      "title": "إحصائيات الإملاء",
+      "periods": {
+        "today": "اليوم",
+        "week": "آخر 7 أيام",
+        "month": "آخر 30 يومًا"
+      },
+      "dictations": "عمليات الإملاء",
+      "characters": "الأحرف",
+      "avgTotalLatency": "متوسط زمن الاستجابة الكلي",
+      "noData": "لا توجد عمليات إملاء في هذه الفترة بعد.",
+      "loadError": "تعذر تحميل الإحصائيات.",
+      "stageTimings": {
+        "title": "أزمنة المراحل",
+        "stage": "المرحلة",
+        "avg": "المتوسط",
+        "p50": "p50",
+        "p90": "p90"
+      },
+      "stages": {
+        "transcribe": "التفريغ",
+        "postProcess": "المعالجة اللاحقة",
+        "firstToken": "أول رمز",
+        "output": "الإخراج (لصق/كتابة)",
+        "total": "الإجمالي"
+      },
+      "streamedCount": "{{count}} ببث مباشر",
+      "postProcessedCount": "{{count}} بمعالجة لاحقة",
+      "chart": {
+        "title": "النشاط اليومي",
+        "characters": "الأحرف يوميًا",
+        "latency": "متوسط زمن الاستجابة (ms)"
+      },
+      "learnedWords": {
+        "title": "كلمات تم تعلمها مؤخرًا",
+        "empty": "لم تتعلم أي كلمات بعد."
+      },
+      "export": "تصدير CSV",
+      "exportSuccess": "تم تصدير {{count}} سجلاً.",
+      "exportError": "فشل التصدير.",
+      "exportCancelled": "ألغي التصدير."
     }
   },
   "footer": {

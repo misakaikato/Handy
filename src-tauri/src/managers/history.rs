@@ -10,6 +10,8 @@ use std::path::PathBuf;
 use tauri::AppHandle;
 use tauri_specta::Event;
 
+use crate::stats::{DictationMetric, LearnedWordEvent};
+
 /// Database migrations for transcription history.
 /// Each migration is applied in order. The library tracks which migrations
 /// have been applied using SQLite's user_version pragma.
@@ -31,6 +33,30 @@ static MIGRATIONS: &[M] = &[
     M::up("ALTER TABLE transcription_history ADD COLUMN post_processed_text TEXT;"),
     M::up("ALTER TABLE transcription_history ADD COLUMN post_process_prompt TEXT;"),
     M::up("ALTER TABLE transcription_history ADD COLUMN post_process_requested BOOLEAN NOT NULL DEFAULT 0;"),
+    // Per-dictation performance metrics for the Stats page. Independent of
+    // transcription_history on purpose: metrics survive history cleanup and
+    // are recorded even when no WAV was saved.
+    M::up("CREATE TABLE IF NOT EXISTS dictation_metrics (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp INTEGER NOT NULL,
+            app_name TEXT,
+            char_count INTEGER NOT NULL,
+            transcribe_ms INTEGER NOT NULL,
+            post_process_ms INTEGER NOT NULL,
+            first_token_ms INTEGER,
+            output_ms INTEGER NOT NULL,
+            total_ms INTEGER NOT NULL,
+            streamed BOOLEAN NOT NULL DEFAULT 0,
+            post_processed BOOLEAN NOT NULL DEFAULT 0
+        );"),
+    M::up("CREATE TABLE IF NOT EXISTS learned_words (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp INTEGER NOT NULL,
+            word TEXT NOT NULL,
+            undone BOOLEAN NOT NULL DEFAULT 0
+        );"),
+    M::up("CREATE INDEX IF NOT EXISTS idx_dictation_metrics_timestamp ON dictation_metrics(timestamp);"),
+    M::up("CREATE INDEX IF NOT EXISTS idx_learned_words_timestamp ON learned_words(timestamp);"),
 ];
 
 #[derive(Clone, Debug, Serialize, Deserialize, Type)]
@@ -207,6 +233,21 @@ impl HistoryManager {
             post_processed_text: row.get("post_processed_text")?,
             post_process_prompt: row.get("post_process_prompt")?,
             post_process_requested: row.get("post_process_requested")?,
+        })
+    }
+
+    fn map_dictation_metric(row: &rusqlite::Row<'_>) -> rusqlite::Result<DictationMetric> {
+        Ok(DictationMetric {
+            timestamp: row.get("timestamp")?,
+            app_name: row.get("app_name")?,
+            char_count: row.get::<_, i64>("char_count")?.max(0) as u64,
+            transcribe_ms: row.get::<_, i64>("transcribe_ms")?.max(0) as u64,
+            post_process_ms: row.get::<_, i64>("post_process_ms")?.max(0) as u64,
+            first_token_ms: row.get("first_token_ms")?,
+            output_ms: row.get::<_, i64>("output_ms")?.max(0) as u64,
+            total_ms: row.get::<_, i64>("total_ms")?.max(0) as u64,
+            streamed: row.get("streamed")?,
+            post_processed: row.get("post_processed")?,
         })
     }
 
@@ -585,6 +626,95 @@ impl HistoryManager {
         self.recordings_dir.join(file_name)
     }
 
+    /// Persists one per-dictation metric row (Stats page).
+    pub fn record_dictation_metric(&self, metric: &DictationMetric) -> Result<()> {
+        let conn = self.get_connection()?;
+        conn.execute(
+            "INSERT INTO dictation_metrics (
+                timestamp, app_name, char_count, transcribe_ms, post_process_ms,
+                first_token_ms, output_ms, total_ms, streamed, post_processed
+            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
+            params![
+                metric.timestamp,
+                metric.app_name,
+                metric.char_count,
+                metric.transcribe_ms,
+                metric.post_process_ms,
+                metric.first_token_ms,
+                metric.output_ms,
+                metric.total_ms,
+                metric.streamed,
+                metric.post_processed,
+            ],
+        )?;
+        Ok(())
+    }
+
+    /// Persists one row per newly learned word and returns their row ids so a
+    /// later undo can mark exactly these rows undone.
+    pub fn record_learned_words(&self, words: &[String]) -> Result<Vec<i64>> {
+        if words.is_empty() {
+            return Ok(Vec::new());
+        }
+        let timestamp = Utc::now().timestamp();
+        let conn = self.get_connection()?;
+        let mut ids = Vec::with_capacity(words.len());
+        for word in words {
+            conn.execute(
+                "INSERT INTO learned_words (timestamp, word, undone) VALUES (?1, ?2, 0)",
+                params![timestamp, word],
+            )?;
+            ids.push(conn.last_insert_rowid());
+        }
+        Ok(ids)
+    }
+
+    /// Marks the given learned-word rows as undone (their words were removed
+    /// from the custom words again).
+    pub fn mark_learned_words_undone(&self, row_ids: &[i64]) -> Result<()> {
+        if row_ids.is_empty() {
+            return Ok(());
+        }
+        let conn = self.get_connection()?;
+        let placeholders = row_ids.iter().map(|_| "?").collect::<Vec<_>>().join(",");
+        let sql = format!("UPDATE learned_words SET undone = 1 WHERE id IN ({placeholders})");
+        conn.execute(&sql, rusqlite::params_from_iter(row_ids.iter()))?;
+        Ok(())
+    }
+
+    /// Metrics recorded at or after `since_ts` (unix seconds), any order.
+    pub fn get_metrics_since(&self, since_ts: i64) -> Result<Vec<DictationMetric>> {
+        let conn = self.get_connection()?;
+        let mut stmt = conn.prepare(
+            "SELECT timestamp, app_name, char_count, transcribe_ms, post_process_ms,
+                    first_token_ms, output_ms, total_ms, streamed, post_processed
+             FROM dictation_metrics
+             WHERE timestamp >= ?1",
+        )?;
+        let rows = stmt.query_map(params![since_ts], Self::map_dictation_metric)?;
+        Ok(rows.collect::<std::result::Result<Vec<_>, _>>()?)
+    }
+
+    /// All metric rows (for CSV export).
+    pub fn get_all_metrics(&self) -> Result<Vec<DictationMetric>> {
+        self.get_metrics_since(0)
+    }
+
+    /// The most recent learned words that were not undone.
+    pub fn get_recent_learned_words(&self, limit: usize) -> Result<Vec<LearnedWordEvent>> {
+        let conn = self.get_connection()?;
+        let mut stmt = conn.prepare(
+            "SELECT word, timestamp FROM learned_words WHERE undone = 0 ORDER BY id DESC LIMIT ?1",
+        )?;
+        let rows = stmt.query_map(params![limit as i64], |row| {
+            Ok(LearnedWordEvent {
+                word: row.get("word")?,
+                timestamp: row.get("timestamp")?,
+            })
+        })?;
+        Ok(rows.collect::<std::result::Result<Vec<_>, _>>()?)
+    }
+
     pub async fn get_entry_by_id(&self, id: i64) -> Result<Option<HistoryEntry>> {
         let conn = self.get_connection()?;
         let mut stmt = conn.prepare(
@@ -733,5 +863,78 @@ mod tests {
 
         assert_eq!(entry.timestamp, 100);
         assert_eq!(entry.transcription_text, "completed");
+    }
+
+    #[test]
+    fn migrations_create_stats_tables_and_metric_rows_roundtrip() {
+        use rusqlite_migration::Migrations;
+
+        let mut conn = Connection::open_in_memory().expect("open in-memory db");
+        Migrations::new(MIGRATIONS.to_vec())
+            .to_latest(&mut conn)
+            .expect("run migrations");
+
+        conn.execute(
+            "INSERT INTO dictation_metrics (
+                timestamp, app_name, char_count, transcribe_ms, post_process_ms,
+                first_token_ms, output_ms, total_ms, streamed, post_processed
+            ) VALUES (1000, 'Notes', 12, 300, 40, NULL, 60, 420, 0, 1)",
+            [],
+        )
+        .expect("insert metric");
+        conn.execute(
+            "INSERT INTO dictation_metrics (
+                timestamp, app_name, char_count, transcribe_ms, post_process_ms,
+                first_token_ms, output_ms, total_ms, streamed, post_processed
+            ) VALUES (900, NULL, 3, 100, 0, 25, 10, 140, 1, 0)",
+            [],
+        )
+        .expect("insert streamed metric");
+
+        let mut stmt = conn
+            .prepare(
+                "SELECT timestamp, app_name, char_count, transcribe_ms, post_process_ms,
+                        first_token_ms, output_ms, total_ms, streamed, post_processed
+                 FROM dictation_metrics WHERE timestamp >= ?1",
+            )
+            .expect("prepare metric select");
+        let metrics = stmt
+            .query_map([950], HistoryManager::map_dictation_metric)
+            .expect("query metrics")
+            .collect::<std::result::Result<Vec<_>, _>>()
+            .expect("collect metrics");
+
+        assert_eq!(metrics.len(), 1);
+        assert_eq!(metrics[0].app_name.as_deref(), Some("Notes"));
+        assert_eq!(metrics[0].char_count, 12);
+        assert_eq!(metrics[0].first_token_ms, None);
+        assert!(metrics[0].post_processed);
+        assert!(!metrics[0].streamed);
+
+        // Learned-words table: rows persist and undo marks them.
+        conn.execute(
+            "INSERT INTO learned_words (timestamp, word, undone) VALUES (1000, 'handy', 0)",
+            [],
+        )
+        .expect("insert learned word");
+        conn.execute(
+            "INSERT INTO learned_words (timestamp, word, undone) VALUES (1001, 'world', 0)",
+            [],
+        )
+        .expect("insert learned word");
+        conn.execute(
+            "UPDATE learned_words SET undone = 1 WHERE word = 'handy'",
+            [],
+        )
+        .expect("mark undone");
+        let mut stmt = conn
+            .prepare("SELECT word FROM learned_words WHERE undone = 0 ORDER BY id DESC")
+            .expect("prepare learned select");
+        let words: Vec<String> = stmt
+            .query_map([], |row| row.get("word"))
+            .expect("query learned words")
+            .collect::<std::result::Result<Vec<_>, _>>()
+            .expect("collect learned words");
+        assert_eq!(words, vec!["world".to_string()]);
     }
 }

@@ -25,6 +25,7 @@ mod secure_input;
 mod settings;
 mod shortcut;
 mod signal_handle;
+pub mod stats;
 mod transcription_coordinator;
 mod tray;
 mod tray_i18n;
@@ -783,6 +784,9 @@ pub fn run(cli_args: CliArgs) {
             commands::history::retry_history_entry_transcription,
             commands::history::update_history_limit,
             commands::history::update_recording_retention_period,
+            commands::stats::get_dictation_stats,
+            commands::stats::get_recent_learned_words,
+            commands::stats::export_stats_csv,
             helpers::clamshell::is_laptop,
         ])
         .events(collect_events![

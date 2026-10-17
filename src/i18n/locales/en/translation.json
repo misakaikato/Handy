@@ -16,7 +16,8 @@
     "postProcessing": "Post Process",
     "history": "History",
     "debug": "Debug",
-    "about": "About"
+    "about": "About",
+    "stats": "Stats"
   },
   "onboarding": {
     "subtitle": "To get started, choose a transcription model",
@@ -689,6 +690,48 @@
           "details": "Handy's local speech-to-text is built on transcribe.cpp and ggml. Thanks to the amazing work by Georgi Gerganov and contributors."
         }
       }
+    },
+    "stats": {
+      "title": "Dictation Stats",
+      "periods": {
+        "today": "Today",
+        "week": "Last 7 days",
+        "month": "Last 30 days"
+      },
+      "dictations": "Dictations",
+      "characters": "Characters",
+      "avgTotalLatency": "Avg total latency",
+      "noData": "No dictations in this period yet.",
+      "loadError": "Failed to load statistics.",
+      "stageTimings": {
+        "title": "Stage timings",
+        "stage": "Stage",
+        "avg": "Avg",
+        "p50": "p50",
+        "p90": "p90"
+      },
+      "stages": {
+        "transcribe": "Transcribe",
+        "postProcess": "Post-process",
+        "firstToken": "First token",
+        "output": "Output (paste / typing)",
+        "total": "Total"
+      },
+      "streamedCount": "{{count}} streamed",
+      "postProcessedCount": "{{count}} post-processed",
+      "chart": {
+        "title": "Daily activity",
+        "characters": "Characters per day",
+        "latency": "Avg total latency (ms)"
+      },
+      "learnedWords": {
+        "title": "Recently learned words",
+        "empty": "No words learned yet."
+      },
+      "export": "Export CSV",
+      "exportSuccess": "Exported {{count}} entries.",
+      "exportError": "Export failed.",
+      "exportCancelled": "Export cancelled."
     }
   },
   "footer": {

@@ -16,7 +16,8 @@
     "postProcessing": "पोस्ट प्रोसेस",
     "history": "हिस्ट्री",
     "debug": "डिबग",
-    "about": "बारेमा"
+    "about": "बारेमा",
+    "stats": "तथ्याङ्क"
   },
   "onboarding": {
     "subtitle": "सुरु गर्न, एउटा ट्रान्सक्रिप्सन मोडेल छान्नुहोस्",
@@ -689,6 +690,48 @@
           "details": "Handy को स्थानीय स्पिच-टु-टेक्स्ट transcribe.cpp र ggml मा आधारित छ। Georgi Gerganov र योगदानकर्ताहरूको उत्कृष्ट कामका लागि धन्यवाद।"
         }
       }
+    },
+    "stats": {
+      "title": "डिक्टेसन तथ्याङ्क",
+      "periods": {
+        "today": "आज",
+        "week": "पछिल्ला ७ दिन",
+        "month": "पछिल्ला ३० दिन"
+      },
+      "dictations": "डिक्टेसन सङ्ख्या",
+      "characters": "अक्षर",
+      "avgTotalLatency": "औसत कुल ढिलाइ",
+      "noData": "यो अवधिमा अझै कुनै डिक्टेसन छैन।",
+      "loadError": "तथ्याङ्क लोड गर्न सकिएन।",
+      "stageTimings": {
+        "title": "चरणअनुसार समय",
+        "stage": "चरण",
+        "avg": "औसत",
+        "p50": "p50",
+        "p90": "p90"
+      },
+      "stages": {
+        "transcribe": "ट्रान्सक्राइब",
+        "postProcess": "पोस्ट-प्रोसेस",
+        "firstToken": "पहिलो टोकन",
+        "output": "निर्गम (पेस्ट/टाइपिङ)",
+        "total": "कुल"
+      },
+      "streamedCount": "{{count}} स्ट्रिम गरिएको",
+      "postProcessedCount": "{{count}} पोस्ट-प्रोसेस गरिएको",
+      "chart": {
+        "title": "दैनिक गतिविधि",
+        "characters": "प्रति दिन अक्षर",
+        "latency": "औसत कुल ढिलाइ (ms)"
+      },
+      "learnedWords": {
+        "title": "हालसालै सिकेका शब्दहरू",
+        "empty": "अझै कुनै शब्द सिकिएको छैन।"
+      },
+      "export": "CSV निर्यात गर्नुहोस्",
+      "exportSuccess": "{{count}} अभिलेख निर्यात गरियो।",
+      "exportError": "निर्यात असफल भयो।",
+      "exportCancelled": "निर्यात रद्द गरियो।"
     }
   },
   "footer": {

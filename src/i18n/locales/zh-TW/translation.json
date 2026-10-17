@@ -16,7 +16,8 @@
     "postProcessing": "後處理",
     "history": "歷史紀錄",
     "debug": "偵錯",
-    "about": "關於"
+    "about": "關於",
+    "stats": "統計"
   },
   "onboarding": {
     "subtitle": "首先，請選擇一種模型",
@@ -689,6 +690,48 @@
         "label": "顯示新功能",
         "description": "Handy 更新後顯示版本資訊"
       }
+    },
+    "stats": {
+      "title": "聽寫統計",
+      "periods": {
+        "today": "今天",
+        "week": "最近 7 天",
+        "month": "最近 30 天"
+      },
+      "dictations": "聽寫次數",
+      "characters": "字元數",
+      "avgTotalLatency": "平均總延遲",
+      "noData": "該時間段還沒有聽寫記錄。",
+      "loadError": "統計載入失敗。",
+      "stageTimings": {
+        "title": "各階段耗時",
+        "stage": "階段",
+        "avg": "平均",
+        "p50": "p50",
+        "p90": "p90"
+      },
+      "stages": {
+        "transcribe": "轉寫",
+        "postProcess": "後處理",
+        "firstToken": "首字元",
+        "output": "輸出（貼上/打字）",
+        "total": "總計"
+      },
+      "streamedCount": "串流輸出 {{count}} 次",
+      "postProcessedCount": "後處理 {{count}} 次",
+      "chart": {
+        "title": "每日活動",
+        "characters": "每日字元數",
+        "latency": "平均總延遲（毫秒）"
+      },
+      "learnedWords": {
+        "title": "最近學到的詞",
+        "empty": "還沒有學到的詞。"
+      },
+      "export": "匯出 CSV",
+      "exportSuccess": "已匯出 {{count}} 條記錄。",
+      "exportError": "匯出失敗。",
+      "exportCancelled": "已取消匯出。"
     }
   },
   "footer": {

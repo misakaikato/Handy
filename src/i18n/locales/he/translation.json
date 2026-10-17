@@ -16,7 +16,8 @@
     "postProcessing": "עיבוד משלים",
     "history": "היסטוריה",
     "debug": "ניפוי שגיאות",
-    "about": "אודות"
+    "about": "אודות",
+    "stats": "סטטיסטיקה"
   },
   "onboarding": {
     "subtitle": "כדי להתחיל, בחר מודל תמלול",
@@ -689,6 +690,48 @@
         "label": "הצג מה חדש",
         "description": "הצג הערות גרסה לאחר עדכוני Handy"
       }
+    },
+    "stats": {
+      "title": "סטטיסטיקת הקלטה",
+      "periods": {
+        "today": "היום",
+        "week": "7 הימים האחרונים",
+        "month": "30 הימים האחרונים"
+      },
+      "dictations": "הקלטות",
+      "characters": "תווים",
+      "avgTotalLatency": "חביון ממוצע",
+      "noData": "אין עדיין הקלטות בתקופה זו.",
+      "loadError": "טעינת הסטטיסטיקה נכשלה.",
+      "stageTimings": {
+        "title": "זמני שלבים",
+        "stage": "שלב",
+        "avg": "ממוצע",
+        "p50": "p50",
+        "p90": "p90"
+      },
+      "stages": {
+        "transcribe": "תמלול",
+        "postProcess": "עיבוד מאוחר",
+        "firstToken": "אסימון ראשון",
+        "output": "פלט (הדבקה/הקלדה)",
+        "total": "סה״כ"
+      },
+      "streamedCount": "{{count}} בהזרמה",
+      "postProcessedCount": "{{count}} עם עיבוד מאוחר",
+      "chart": {
+        "title": "פעילות יומית",
+        "characters": "תווים ליום",
+        "latency": "חביון ממוצע (ms)"
+      },
+      "learnedWords": {
+        "title": "מילים שנלמדו לאחרונה",
+        "empty": "טרם נלמדו מילים."
+      },
+      "export": "ייצוא CSV",
+      "exportSuccess": "יוצאו {{count}} רשומות.",
+      "exportError": "הייצוא נכשל.",
+      "exportCancelled": "הייצוא בוטל."
     }
   },
   "footer": {

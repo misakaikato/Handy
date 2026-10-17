@@ -16,7 +16,8 @@
     "postProcessing": "Post proceso",
     "history": "Historial",
     "debug": "Depuración",
-    "about": "Acerca de"
+    "about": "Acerca de",
+    "stats": "Estadísticas"
   },
   "onboarding": {
     "subtitle": "Para comenzar, elige un modelo de transcripción",
@@ -689,6 +690,48 @@
         "label": "Mostrar novedades",
         "description": "Mostrar notas de la versión después de las actualizaciones de Handy"
       }
+    },
+    "stats": {
+      "title": "Estadísticas de dictado",
+      "periods": {
+        "today": "Hoy",
+        "week": "Últimos 7 días",
+        "month": "Últimos 30 días"
+      },
+      "dictations": "Dictados",
+      "characters": "Caracteres",
+      "avgTotalLatency": "Latencia total media",
+      "noData": "Aún no hay dictados en este período.",
+      "loadError": "No se pudieron cargar las estadísticas.",
+      "stageTimings": {
+        "title": "Tiempos por etapa",
+        "stage": "Etapa",
+        "avg": "Media",
+        "p50": "p50",
+        "p90": "p90"
+      },
+      "stages": {
+        "transcribe": "Transcripción",
+        "postProcess": "Posprocesado",
+        "firstToken": "Primer token",
+        "output": "Salida (pegar/escritura)",
+        "total": "Total"
+      },
+      "streamedCount": "{{count}} con transmisión",
+      "postProcessedCount": "{{count}} posprocesados",
+      "chart": {
+        "title": "Actividad diaria",
+        "characters": "Caracteres por día",
+        "latency": "Latencia total media (ms)"
+      },
+      "learnedWords": {
+        "title": "Palabras aprendidas recientemente",
+        "empty": "Todavía no hay palabras aprendidas."
+      },
+      "export": "Exportar CSV",
+      "exportSuccess": "{{count}} registros exportados.",
+      "exportError": "Error al exportar.",
+      "exportCancelled": "Exportación cancelada."
     }
   },
   "footer": {
