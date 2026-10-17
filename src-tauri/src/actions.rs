@@ -249,11 +249,26 @@ async fn post_process_transcription(settings: &AppSettings, transcription: &str)
     // field the endpoint understands and retries without it if rejected.
     let disable_reasoning = matches!(provider.id.as_str(), "custom" | "openrouter");
 
+    // Reference-only text around the cursor in the focused field (macOS;
+    // silent skip on any failure or when disabled).
+    let cursor_context = if settings.use_cursor_context {
+        crate::cursor_context::read_cursor_context(settings.cursor_context_chars).await
+    } else {
+        None
+    };
+
     if provider.supports_structured_output {
         debug!("Using structured outputs for provider '{}'", provider.id);
 
         let glossary = custom_words_glossary(&settings.custom_words);
         let system_prompt = format!("{}{glossary}", build_system_prompt(&prompt));
+        let system_prompt = match &cursor_context {
+            Some(context) => format!(
+                "{system_prompt}{}",
+                crate::cursor_context::context_prompt_block(context)
+            ),
+            None => system_prompt,
+        };
         let user_content = transcription.to_string();
 
         // Handle Apple Intelligence separately since it uses native Swift APIs
@@ -369,7 +384,10 @@ async fn post_process_transcription(settings: &AppSettings, transcription: &str)
 
     // Legacy mode: Replace ${output} variable in the prompt with the actual text
     let glossary = custom_words_glossary(&settings.custom_words);
-    let processed_prompt = format!("{}{glossary}", prompt.replace("${output}", transcription));
+    let mut processed_prompt = format!("{}{glossary}", prompt.replace("${output}", transcription));
+    if let Some(context) = &cursor_context {
+        processed_prompt.push_str(&crate::cursor_context::context_prompt_block(context));
+    }
     debug!("Processed prompt length: {} chars", processed_prompt.len());
 
     match crate::llm_client::send_chat_completion(

@@ -5,11 +5,13 @@ mod audio_feedback;
 pub mod audio_toolkit;
 mod auto_learn;
 mod autostart;
+mod ax_reader;
 mod catalog;
 mod chinese_script;
 pub mod cli;
 mod clipboard;
 mod commands;
+mod cursor_context;
 pub mod engine_supervisor;
 mod helpers;
 mod input;
@@ -694,6 +696,8 @@ pub fn run(cli_args: CliArgs) {
             shortcut::change_auto_learn_delay_ms_setting,
             shortcut::change_auto_learn_notification_duration_ms_setting,
             shortcut::undo_auto_learn,
+            shortcut::change_use_cursor_context_setting,
+            shortcut::change_cursor_context_chars_setting,
             shortcut::suspend_all_bindings,
             shortcut::resume_all_bindings,
             shortcut::change_mute_while_recording_setting,

@@ -4,6 +4,8 @@ import { ShowOverlay } from "../ShowOverlay";
 import { ModelUnloadTimeoutSetting } from "../ModelUnloadTimeout";
 import { CustomWords } from "../CustomWords";
 import { AutoLearnCustomWords } from "../AutoLearnCustomWords";
+import { CursorContext } from "../CursorContext";
+import { CursorContextChars } from "../CursorContextChars";
 import { SettingsGroup } from "../../ui/SettingsGroup";
 import { StartHidden } from "../StartHidden";
 import { AutostartToggle } from "../AutostartToggle";
@@ -57,6 +59,8 @@ export const AdvancedSettings: React.FC = () => {
         <ChineseScriptSetting descriptionMode="tooltip" grouped={true} />
         <CustomWords descriptionMode="tooltip" grouped />
         <AutoLearnCustomWords descriptionMode="tooltip" grouped={true} />
+        <CursorContext descriptionMode="tooltip" grouped={true} />
+        <CursorContextChars descriptionMode="tooltip" grouped={true} />
         <AppendTrailingSpace descriptionMode="tooltip" grouped={true} />
       </SettingsGroup>
 

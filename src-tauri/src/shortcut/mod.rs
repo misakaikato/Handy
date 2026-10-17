@@ -916,6 +916,24 @@ pub fn change_auto_learn_notification_duration_ms_setting(
     Ok(())
 }
 
+#[tauri::command]
+#[specta::specta]
+pub fn change_use_cursor_context_setting(app: AppHandle, enabled: bool) -> Result<(), String> {
+    let mut settings = settings::get_settings(&app);
+    settings.use_cursor_context = enabled;
+    settings::write_settings(&app, settings);
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn change_cursor_context_chars_setting(app: AppHandle, chars: u32) -> Result<(), String> {
+    let mut settings = settings::get_settings(&app);
+    settings.cursor_context_chars = chars.clamp(50, 10_000);
+    settings::write_settings(&app, settings);
+    Ok(())
+}
+
 /// Removes the words added by the toast's learn event (no-op when the event
 /// is stale or the platform has no auto-learning).
 #[tauri::command]

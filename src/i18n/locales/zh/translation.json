@@ -383,6 +383,14 @@
           "simplified": "简体",
           "traditional": "繁体"
         }
+      },
+      "cursorContext": {
+        "title": "光标上下文后处理",
+        "description": "重写前读取焦点应用中光标前后的文字，作为仅供参考的上下文传给模型。密码输入框始终跳过。（仅 macOS）"
+      },
+      "cursorContextChars": {
+        "title": "光标上下文长度",
+        "description": "光标前后各自最多读取的字符数。"
       }
     },
     "postProcessing": {

@@ -383,6 +383,14 @@
           "simplified": "Simplificado",
           "traditional": "Tradicional"
         }
+      },
+      "cursorContext": {
+        "title": "Contexto del cursor para el posprocesado",
+        "description": "Antes de reescribir, lee el texto alrededor del cursor en la aplicación enfocada y lo pasa al modelo como contexto de solo referencia. Los campos de contraseña siempre se omiten. (solo macOS)"
+      },
+      "cursorContextChars": {
+        "title": "Longitud del contexto del cursor",
+        "description": "Número máximo de caracteres leídos antes y después del cursor, por cada lado."
       }
     },
     "postProcessing": {

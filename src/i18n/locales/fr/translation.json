@@ -383,6 +383,14 @@
           "simplified": "Simplifié",
           "traditional": "Traditionnel"
         }
+      },
+      "cursorContext": {
+        "title": "Contexte du curseur pour le post-traitement",
+        "description": "Avant la réécriture, lit le texte autour du curseur dans l'application active et le transmet au modèle comme contexte de référence uniquement. Les champs de mot de passe sont toujours ignorés. (macOS uniquement)"
+      },
+      "cursorContextChars": {
+        "title": "Longueur du contexte du curseur",
+        "description": "Nombre maximal de caractères lus avant et après le curseur, de chaque côté."
       }
     },
     "postProcessing": {

@@ -383,6 +383,14 @@
           "simplified": "簡體",
           "traditional": "繁體"
         }
+      },
+      "cursorContext": {
+        "title": "游標上下文後處理",
+        "description": "改寫前讀取焦點應用程式中游標前後的文字，作為僅供參考的上下文傳給模型。密碼輸入框一律跳過。（僅 macOS）"
+      },
+      "cursorContextChars": {
+        "title": "游標上下文長度",
+        "description": "游標前後各自最多讀取的字元數。"
       }
     },
     "postProcessing": {

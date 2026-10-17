@@ -383,6 +383,14 @@
           "simplified": "Sederhana",
           "traditional": "Tradisional"
         }
+      },
+      "cursorContext": {
+        "title": "Konteks kursor untuk pascapemrosesan",
+        "description": "Sebelum menulis ulang, membaca teks di sekitar kursor di aplikasi yang difokuskan dan meneruskannya ke model sebagai konteks referensi saja. Kolom kata sandi selalu dilewati. (hanya macOS)"
+      },
+      "cursorContextChars": {
+        "title": "Panjang konteks kursor",
+        "description": "Jumlah maksimum karakter yang dibaca sebelum dan sesudah kursor, tiap sisi."
       }
     },
     "postProcessing": {

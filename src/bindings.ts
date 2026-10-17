@@ -356,6 +356,22 @@ async undoAutoLearn(eventId: number) : Promise<Result<null, string>> {
     else return { status: "error", error: e  as any };
 }
 },
+async changeUseCursorContextSetting(enabled: boolean) : Promise<Result<null, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("change_use_cursor_context_setting", { enabled }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async changeCursorContextCharsSetting(chars: number) : Promise<Result<null, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("change_cursor_context_chars_setting", { chars }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
 /**
  * Temporarily unregister all bindings while the user is recording a
  * shortcut in the UI. This avoids firing actions while keys are recorded.
@@ -1092,7 +1108,17 @@ auto_learn_delay_ms?: number;
 /**
  * How long the learned-words toast stays visible, in milliseconds.
  */
-auto_learn_notification_duration_ms?: number }
+auto_learn_notification_duration_ms?: number; 
+/**
+ * Pass the text around the cursor in the focused field to the
+ * post-processing LLM as reference-only context (macOS only; silent
+ * no-op elsewhere).
+ */
+use_cursor_context?: boolean; 
+/**
+ * Maximum characters of cursor context read on each side of the cursor.
+ */
+cursor_context_chars?: number }
 export type AudioDevice = { index: string; name: string; is_default: boolean }
 export type AutoSubmitKey = "enter" | "ctrl_enter" | "cmd_enter"
 export type AvailableAccelerators = { transcribe: string[]; gpu_devices: GpuDeviceOption[] }

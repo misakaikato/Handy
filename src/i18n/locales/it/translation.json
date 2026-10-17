@@ -383,6 +383,14 @@
           "simplified": "Semplificato",
           "traditional": "Tradizionale"
         }
+      },
+      "cursorContext": {
+        "title": "Contesto del cursore per la post-elaborazione",
+        "description": "Prima della riscrittura, legge il testo attorno al cursore nell'app attiva e lo passa al modello come contesto di solo riferimento. I campi password sono sempre ignorati. (solo macOS)"
+      },
+      "cursorContextChars": {
+        "title": "Lunghezza del contesto del cursore",
+        "description": "Numero massimo di caratteri letti prima e dopo il cursore, per ciascun lato."
       }
     },
     "postProcessing": {

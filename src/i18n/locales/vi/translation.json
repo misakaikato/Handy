@@ -383,6 +383,14 @@
           "simplified": "Giản thể",
           "traditional": "Phồn thể"
         }
+      },
+      "cursorContext": {
+        "title": "Ngữ cảnh con trỏ cho hậu xử lý",
+        "description": "Trước khi viết lại, đọc văn bản xung quanh con trỏ trong ứng dụng đang tập trung và truyền cho mô hình như ngữ cảnh chỉ để tham khảo. Ô mật khẩu luôn bị bỏ qua. (chỉ macOS)"
+      },
+      "cursorContextChars": {
+        "title": "Độ dài ngữ cảnh con trỏ",
+        "description": "Số ký tự tối đa được đọc trước và sau con trỏ, mỗi bên."
       }
     },
     "postProcessing": {

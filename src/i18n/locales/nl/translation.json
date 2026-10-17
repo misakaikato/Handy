@@ -383,6 +383,14 @@
           "simplified": "Vereenvoudigd",
           "traditional": "Traditioneel"
         }
+      },
+      "cursorContext": {
+        "title": "Cursorcontext voor nabewerking",
+        "description": "Leest vóór het herschrijven de tekst rond de cursor in de actieve app en geeft deze als uitsluitend ter referentie door aan het model. Wachtwoordvelden worden altijd overgeslagen. (alleen macOS)"
+      },
+      "cursorContextChars": {
+        "title": "Lengte van cursorcontext",
+        "description": "Maximaal aantal tekens dat vóór en na de cursor wordt gelezen, per kant."
       }
     },
     "postProcessing": {

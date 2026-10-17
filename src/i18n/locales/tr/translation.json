@@ -383,6 +383,14 @@
           "simplified": "Basitleştirilmiş",
           "traditional": "Geleneksel"
         }
+      },
+      "cursorContext": {
+        "title": "Son işleme için imleç bağlamı",
+        "description": "Yeniden yazmadan önce, odaklanmış uygulamada imlecin çevresindeki metni okur ve modele yalnızca başvuru bağlamı olarak iletir. Parola alanları her zaman atlanır. (yalnızca macOS)"
+      },
+      "cursorContextChars": {
+        "title": "İmleç bağlamı uzunluğu",
+        "description": "İmlecin önünde ve arkasında okunan en fazla karakter sayısı (her yön için)."
       }
     },
     "postProcessing": {

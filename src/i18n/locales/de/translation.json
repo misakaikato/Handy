@@ -383,6 +383,14 @@
           "simplified": "Vereinfacht",
           "traditional": "Traditionell"
         }
+      },
+      "cursorContext": {
+        "title": "Kontext am Cursor für die Nachbearbeitung",
+        "description": "Liest vor dem Umschreiben den Text um den Cursor in der fokussierten App und übergibt ihn dem Modell als reine Referenz. Passwortfelder werden immer übersprungen. (nur macOS)"
+      },
+      "cursorContextChars": {
+        "title": "Länge des Cursor-Kontexts",
+        "description": "Maximale Anzahl Zeichen, die vor und nach dem Cursor gelesen werden (je Seite)."
       }
     },
     "postProcessing": {

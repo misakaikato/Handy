@@ -383,6 +383,14 @@
           "simplified": "Forenklet",
           "traditional": "Traditionel"
         }
+      },
+      "cursorContext": {
+        "title": "Markørkontekst til efterbehandling",
+        "description": "Læser før omskrivningen teksten omkring markøren i den fokuserede app og sender den til modellen som udelukkende referencekontekst. Adgangskodefelter springes altid over. (kun macOS)"
+      },
+      "cursorContextChars": {
+        "title": "Længde på markørkontekst",
+        "description": "Maksimalt antal tegn, der læses før og efter markøren, på hver side."
       }
     },
     "postProcessing": {

@@ -383,6 +383,14 @@
           "simplified": "Simplificat",
           "traditional": "Tradicional"
         }
+      },
+      "cursorContext": {
+        "title": "Context del cursor per al postprocessat",
+        "description": "Abans de reescriure, llegeix el text al voltant del cursor a l'aplicació enfocada i el passa al model com a context de només referència. Els camps de contrasenya sempre s'ometen. (només macOS)"
+      },
+      "cursorContextChars": {
+        "title": "Longitud del context del cursor",
+        "description": "Nombre màxim de caràcters llegits abans i després del cursor, per cada costat."
       }
     },
     "postProcessing": {

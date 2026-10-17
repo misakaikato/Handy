@@ -383,6 +383,14 @@
           "simplified": "Zjednodušené",
           "traditional": "Tradiční"
         }
+      },
+      "cursorContext": {
+        "title": "Kontext kurzoru pro postprocessing",
+        "description": "Před přepsáním přečte text kolem kurzoru v aktivní aplikaci a předá ho modelu pouze jako referenční kontext. Pole pro hesla se vždy přeskočí. (pouze macOS)"
+      },
+      "cursorContextChars": {
+        "title": "Délka kontextu kurzoru",
+        "description": "Maximální počet znaků přečtených před a za kurzorem, na každé straně."
       }
     },
     "postProcessing": {

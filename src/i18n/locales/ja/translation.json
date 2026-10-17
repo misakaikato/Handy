@@ -383,6 +383,14 @@
           "simplified": "簡体字",
           "traditional": "繁体字"
         }
+      },
+      "cursorContext": {
+        "title": "カーソルコンテキストの後処理",
+        "description": "書き換え前に、フォーカスされたアプリのカーソル前後のテキストを読み取り、参照専用のコンテキストとしてモデルに渡します。パスワード入力欄は常にスキップします（macOS のみ）。"
+      },
+      "cursorContextChars": {
+        "title": "カーソルコンテキストの長さ",
+        "description": "カーソルの前後それぞれで読み取る最大文字数。"
       }
     },
     "postProcessing": {

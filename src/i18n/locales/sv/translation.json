@@ -383,6 +383,14 @@
           "simplified": "Förenklad",
           "traditional": "Traditionell"
         }
+      },
+      "cursorContext": {
+        "title": "Markörkontext för efterbehandling",
+        "description": "Läser före omskrivningen texten runt markören i det fokuserade programmet och skickar den till modellen som endast referenskontext. Lösenordsfält hoppas alltid över. (endast macOS)"
+      },
+      "cursorContextChars": {
+        "title": "Längd på markörkontext",
+        "description": "Maximalt antal tecken som läses före och efter markören, på var sida."
       }
     },
     "postProcessing": {

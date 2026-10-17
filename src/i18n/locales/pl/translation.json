@@ -383,6 +383,14 @@
           "simplified": "Uproszczone",
           "traditional": "Tradycyjne"
         }
+      },
+      "cursorContext": {
+        "title": "Kontekst kursora dla postprocessingu",
+        "description": "Przed przepisaniem odczytuje tekst wokół kursora w aktywnej aplikacji i przekazuje go modelowi wyłącznie jako kontekst referencyjny. Pola haseł są zawsze pomijane. (tylko macOS)"
+      },
+      "cursorContextChars": {
+        "title": "Długość kontekstu kursora",
+        "description": "Maksymalna liczba znaków odczytywanych przed i po kursorze, z każdej strony."
       }
     },
     "postProcessing": {

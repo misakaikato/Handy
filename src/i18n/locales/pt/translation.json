@@ -383,6 +383,14 @@
           "simplified": "Simplificado",
           "traditional": "Tradicional"
         }
+      },
+      "cursorContext": {
+        "title": "Contexto do cursor para pós-processamento",
+        "description": "Antes de reescrever, lê o texto ao redor do cursor na aplicação em foco e o envia ao modelo como contexto somente de referência. Campos de senha são sempre ignorados. (apenas macOS)"
+      },
+      "cursorContextChars": {
+        "title": "Comprimento do contexto do cursor",
+        "description": "Número máximo de caracteres lidos antes e depois do cursor, em cada lado."
       }
     },
     "postProcessing": {

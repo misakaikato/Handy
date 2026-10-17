@@ -383,6 +383,14 @@
           "simplified": "Simplified",
           "traditional": "Traditional"
         }
+      },
+      "cursorContext": {
+        "title": "Cursor Context for Post-Processing",
+        "description": "Before rewriting, read the text around the cursor in the focused app and pass it to the model as reference-only context. Password fields are always skipped. (macOS only)"
+      },
+      "cursorContextChars": {
+        "title": "Cursor Context Length",
+        "description": "Maximum number of characters read before and after the cursor, each side."
       }
     },
     "postProcessing": {

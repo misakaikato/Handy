@@ -147,6 +147,10 @@ const settingUpdaters: {
     commands.changeAutoLearnDelayMsSetting(value as number),
   auto_learn_notification_duration_ms: (value) =>
     commands.changeAutoLearnNotificationDurationMsSetting(value as number),
+  use_cursor_context: (value) =>
+    commands.changeUseCursorContextSetting(value as boolean),
+  cursor_context_chars: (value) =>
+    commands.changeCursorContextCharsSetting(value as number),
   word_correction_threshold: (value) =>
     commands.changeWordCorrectionThresholdSetting(value as number),
   paste_delay_ms: (value) =>

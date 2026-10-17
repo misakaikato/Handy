@@ -546,6 +546,14 @@ pub struct AppSettings {
     /// How long the learned-words toast stays visible, in milliseconds.
     #[serde(default = "default_auto_learn_notification_duration_ms")]
     pub auto_learn_notification_duration_ms: u64,
+    /// Pass the text around the cursor in the focused field to the
+    /// post-processing LLM as reference-only context (macOS only; silent
+    /// no-op elsewhere).
+    #[serde(default)]
+    pub use_cursor_context: bool,
+    /// Maximum characters of cursor context read on each side of the cursor.
+    #[serde(default = "default_cursor_context_chars")]
+    pub cursor_context_chars: u32,
 }
 
 fn default_model() -> String {
@@ -654,6 +662,13 @@ fn default_auto_learn_delay_ms() -> u64 {
 /// terms and hit Undo, short enough not to linger over the user's work.
 fn default_auto_learn_notification_duration_ms() -> u64 {
     5_000
+}
+
+/// Default per-side limit of cursor context passed to post-processing: enough
+/// to resolve pronouns and half-sentences without shipping whole documents
+/// to the rewrite endpoint.
+fn default_cursor_context_chars() -> u32 {
+    500
 }
 
 fn default_paste_delay_after_ms() -> u64 {
@@ -1049,6 +1064,8 @@ pub fn get_default_settings() -> AppSettings {
         auto_learn_custom_words: false,
         auto_learn_delay_ms: default_auto_learn_delay_ms(),
         auto_learn_notification_duration_ms: default_auto_learn_notification_duration_ms(),
+        use_cursor_context: false,
+        cursor_context_chars: default_cursor_context_chars(),
     }
 }
 

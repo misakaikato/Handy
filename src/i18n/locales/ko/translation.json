@@ -383,6 +383,14 @@
           "simplified": "간체",
           "traditional": "번체"
         }
+      },
+      "cursorContext": {
+        "title": "후처리용 커서 컨텍스트",
+        "description": "다시 쓰기 전에 포커스된 앱의 커서 주변 텍스트를 읽어 참고 전용 컨텍스트로 모델에 전달합니다. 비밀번호 입력란은 항상 건너뜁니다. (macOS 전용)"
+      },
+      "cursorContextChars": {
+        "title": "커서 컨텍스트 길이",
+        "description": "커서 앞뒤로 각각 읽는 최대 글자 수."
       }
     },
     "postProcessing": {
