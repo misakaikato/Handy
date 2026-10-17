@@ -15,7 +15,7 @@
 //! Failures are silent skips (no selection, no provider configured, LLM
 //! error) so a stray trigger never disturbs the user.
 
-use crate::settings::{get_settings, AppSettings, APPLE_INTELLIGENCE_PROVIDER_ID};
+use crate::settings::{get_settings, APPLE_INTELLIGENCE_PROVIDER_ID};
 use log::{debug, error};
 use once_cell::sync::Lazy;
 use std::sync::Mutex;
@@ -227,11 +227,6 @@ pub(crate) async fn apply_voice_edit(app: &AppHandle, instruction: &str) -> Opti
             None
         }
     }
-}
-
-/// Whether the voice-edit binding should be registered right now.
-pub fn binding_enabled(settings: &AppSettings) -> bool {
-    settings.voice_edit_enabled
 }
 
 #[cfg(test)]

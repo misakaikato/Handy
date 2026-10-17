@@ -60,17 +60,6 @@ struct ThinkingRequestFields {
     extra_body: Option<serde_json::Map<String, Value>>,
 }
 
-impl ThinkingRequestFields {
-    fn is_empty(&self) -> bool {
-        self.reasoning.is_empty() && self.extra_body.is_none()
-    }
-
-    fn clear(&mut self) {
-        self.reasoning = ReasoningParams::default();
-        self.extra_body = None;
-    }
-}
-
 fn thinking_request_fields(thinking: PostProcessThinking) -> ThinkingRequestFields {
     match thinking {
         PostProcessThinking::Default => ThinkingRequestFields::default(),
@@ -434,9 +423,8 @@ pub async fn send_chat_completion_with_schema(
     });
 
     let key = endpoint_key(provider, model);
-    let mut thinking_fields = if thinking == PostProcessThinking::Default {
-        ThinkingRequestFields::default()
-    } else if is_known_rejected(&key) {
+    let mut thinking_fields = if thinking == PostProcessThinking::Default || is_known_rejected(&key)
+    {
         ThinkingRequestFields::default()
     } else {
         thinking_request_fields(thinking)
@@ -844,9 +832,8 @@ pub(crate) async fn send_chat_completion_streaming(
     });
 
     let key = endpoint_key(provider, model);
-    let mut thinking_fields = if thinking == PostProcessThinking::Default {
-        ThinkingRequestFields::default()
-    } else if is_known_rejected(&key) {
+    let mut thinking_fields = if thinking == PostProcessThinking::Default || is_known_rejected(&key)
+    {
         ThinkingRequestFields::default()
     } else {
         thinking_request_fields(thinking)
@@ -1232,9 +1219,18 @@ mod tests {
 
     #[test]
     fn thinking_request_fields_is_empty_only_for_default() {
-        assert!(thinking_request_fields(PostProcessThinking::Default).is_empty());
-        assert!(!thinking_request_fields(PostProcessThinking::Off).is_empty());
-        assert!(!thinking_request_fields(PostProcessThinking::Low).is_empty());
+        let is_empty = |fields: &ThinkingRequestFields| {
+            fields.reasoning.is_empty() && fields.extra_body.is_none()
+        };
+        assert!(is_empty(&thinking_request_fields(
+            PostProcessThinking::Default
+        )));
+        assert!(!is_empty(&thinking_request_fields(
+            PostProcessThinking::Off
+        )));
+        assert!(!is_empty(&thinking_request_fields(
+            PostProcessThinking::Low
+        )));
     }
 
     #[tokio::test]

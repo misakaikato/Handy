@@ -318,16 +318,13 @@ async fn post_process_transcription(settings: &AppSettings, transcription: &str)
         return None;
     }
 
-    let Some(PostProcessRequest {
+    let PostProcessRequest {
         provider,
         model,
         prompt,
         api_key,
         thinking,
-    }) = resolve_post_process_request(settings)
-    else {
-        return None;
-    };
+    } = resolve_post_process_request(settings)?;
 
     debug!(
         "Starting LLM post-processing with provider '{}' (model: {})",
@@ -781,14 +778,15 @@ async fn stream_post_process_and_type(
             // invisible-char-stripped, think-stripped by the client).
             typer.flush();
             let text = typer.received_text().to_string();
-            let typing = typer.typing_duration();
-            typer.finalize(&settings);
             if text.is_empty() {
                 // The endpoint answered without streaming any content (e.g. it
-                // ignored stream:true); fall back rather than paste nothing.
+                // ignored stream:true); fall back rather than paste nothing —
+                // and without applying the finalize niceties to empty output.
                 debug!("Streamed rewrite produced no text; falling back to the normal path");
                 return StreamedPipeline::Unavailable;
             }
+            let typing = typer.typing_duration();
+            typer.finalize(&settings);
             StreamedPipeline::Done {
                 text,
                 first_token: _outcome.first_token,
