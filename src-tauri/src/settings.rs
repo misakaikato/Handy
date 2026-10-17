@@ -554,6 +554,10 @@ pub struct AppSettings {
     /// Maximum characters of cursor context read on each side of the cursor.
     #[serde(default = "default_cursor_context_chars")]
     pub cursor_context_chars: u32,
+    /// Type the post-processing rewrite at the cursor as it streams from the
+    /// LLM, instead of waiting for the full response and pasting.
+    #[serde(default)]
+    pub stream_post_process: bool,
 }
 
 fn default_model() -> String {
@@ -1066,6 +1070,7 @@ pub fn get_default_settings() -> AppSettings {
         auto_learn_notification_duration_ms: default_auto_learn_notification_duration_ms(),
         use_cursor_context: false,
         cursor_context_chars: default_cursor_context_chars(),
+        stream_post_process: false,
     }
 }
 

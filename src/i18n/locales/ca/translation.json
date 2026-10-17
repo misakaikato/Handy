@@ -454,6 +454,11 @@
         "cancel": "Cancel·leu",
         "selectToEdit": "Seleccioneu una indicació more amunt per veure'n i editar-ne els detalls.",
         "createFirst": "Feu clic a «Creeu una indicació nova» més amunt per crear la primera indicació de postprocessament."
+      },
+      "streaming": {
+        "groupTitle": "Transmissió en directe",
+        "title": "Transmet el resultat del postprocessat",
+        "description": "Escriu el text reescrit al cursor mentre es genera, en lloc de enganxar-lo quan arriba la resposta completa. En cas d'error, torna a l'enganxat. Requereix un proveïdor compatible amb OpenAI."
       }
     },
     "history": {

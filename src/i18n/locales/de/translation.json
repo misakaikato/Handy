@@ -454,6 +454,11 @@
         "cancel": "Abbrechen",
         "selectToEdit": "Wähle oben einen Prompt aus, um dessen Details anzuzeigen und zu bearbeiten.",
         "createFirst": "Klicke oben auf 'Neuen Prompt erstellen', um deinen ersten Nachbearbeitungs-Prompt zu erstellen."
+      },
+      "streaming": {
+        "groupTitle": "Streaming",
+        "title": "Umschreibung streamen",
+        "description": "Tippt den umgeschriebenen Text bereits während der Generierung am Cursor ein, statt ihn erst nach der vollständigen Antwort einzufügen. Fällt bei Fehlern auf Einfügen zurück. Erfordert einen OpenAI-kompatiblen Anbieter."
       }
     },
     "history": {

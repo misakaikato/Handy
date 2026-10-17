@@ -454,6 +454,11 @@
         "cancel": "Annuller",
         "selectToEdit": "Vælg en prompt ovenfor for at se og redigere dens detaljer.",
         "createFirst": "Klik på 'Opret ny prompt' ovenfor for at oprette din første efterbehandlingsprompt."
+      },
+      "streaming": {
+        "groupTitle": "Streaming",
+        "title": "Stream omskrivningsresultatet",
+        "description": "Skriver den omskrevne tekst ved markøren, mens den genereres, i stedet for at indsætte den, når hele svaret ankommer. Falder tilbage til indsætning ved fejl. Kræver en OpenAI-kompatibel udbyder."
       }
     },
     "history": {

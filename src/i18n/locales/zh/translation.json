@@ -454,6 +454,11 @@
         "cancel": "取消",
         "selectToEdit": "选择上方的提示词以查看和编辑其详细信息。",
         "createFirst": "点击上方的「创建新提示词」来创建您的第一个后处理提示词。"
+      },
+      "streaming": {
+        "groupTitle": "流式输出",
+        "title": "流式输出重写结果",
+        "description": "重写结果边生成边输入到光标处，而不是等全部完成后再一次性粘贴。出错时回退为粘贴。需要 OpenAI 兼容接口。"
       }
     },
     "history": {

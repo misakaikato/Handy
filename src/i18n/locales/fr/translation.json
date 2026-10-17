@@ -454,6 +454,11 @@
         "cancel": "Annuler",
         "selectToEdit": "Sélectionnez un prompt ci-dessus pour voir et modifier ses détails.",
         "createFirst": "Cliquez sur 'Créer un nouveau prompt' ci-dessus pour créer votre premier prompt de post-traitement."
+      },
+      "streaming": {
+        "groupTitle": "Diffusion en continu",
+        "title": "Diffuser le résultat de la réécriture",
+        "description": "Saisit le texte réécrit au curseur pendant sa génération, au lieu de le coller une fois la réponse complète arrivée. Repasse au collage en cas d'erreur. Nécessite un fournisseur compatible OpenAI."
       }
     },
     "history": {

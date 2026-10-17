@@ -454,6 +454,11 @@
         "cancel": "Hủy",
         "selectToEdit": "Chọn một prompt ở trên để xem và chỉnh sửa chi tiết.",
         "createFirst": "Nhấn 'Tạo Prompt mới' ở trên để tạo prompt xử lý sau đầu tiên của bạn."
+      },
+      "streaming": {
+        "groupTitle": "Truyền phát",
+        "title": "Truyền phát kết quả viết lại",
+        "description": "Gõ văn bản đã viết lại tại con trỏ trong khi nó đang được tạo, thay vì dán khi toàn bộ phản hồi đến. Khi lỗi sẽ chuyển về dán. Yêu cầu nhà cung cấp tương thích OpenAI."
       }
     },
     "history": {

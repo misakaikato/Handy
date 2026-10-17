@@ -454,6 +454,11 @@
         "cancel": "Cancelar",
         "selectToEdit": "Selecione um prompt acima para visualizar e editar seus detalhes.",
         "createFirst": "Clique em 'Criar Novo Prompt' acima para criar seu primeiro prompt de pós-processamento."
+      },
+      "streaming": {
+        "groupTitle": "Streaming",
+        "title": "Transmitir o resultado da reescrita",
+        "description": "Digita o texto reescrito no cursor enquanto ele é gerado, em vez de colá-lo quando a resposta completa chega. Em caso de erro, retorna à colagem. Requer um provedor compatível com OpenAI."
       }
     },
     "history": {

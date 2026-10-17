@@ -927,6 +927,15 @@ pub fn change_use_cursor_context_setting(app: AppHandle, enabled: bool) -> Resul
 
 #[tauri::command]
 #[specta::specta]
+pub fn change_stream_post_process_setting(app: AppHandle, enabled: bool) -> Result<(), String> {
+    let mut settings = settings::get_settings(&app);
+    settings.stream_post_process = enabled;
+    settings::write_settings(&app, settings);
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
 pub fn change_cursor_context_chars_setting(app: AppHandle, chars: u32) -> Result<(), String> {
     let mut settings = settings::get_settings(&app);
     settings.cursor_context_chars = chars.clamp(50, 10_000);

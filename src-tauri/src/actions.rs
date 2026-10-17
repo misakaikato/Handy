@@ -8,7 +8,10 @@ use crate::managers::model::ModelManager;
 use crate::managers::transcription::policy::{live_decode, LiveDecode, ModelTraits};
 use crate::managers::transcription::StreamWorkKind;
 use crate::managers::transcription::TranscriptionManager;
-use crate::settings::{get_settings, AppSettings, OverlayStyle, APPLE_INTELLIGENCE_PROVIDER_ID};
+use crate::settings::{
+    get_settings, AppSettings, ClipboardHandling, OverlayStyle, PasteMethod, PostProcessApiFormat,
+    APPLE_INTELLIGENCE_PROVIDER_ID,
+};
 use crate::shortcut;
 use crate::tray::{set_tray_state, TrayIconState};
 use crate::utils::{
@@ -49,30 +52,44 @@ impl Drop for FinishGuard {
 }
 
 /// Per-stage latency of one transcription pipeline run, logged as a single
-/// info line once the paste attempt finishes, e.g.
+/// info line once the output attempt finishes, e.g.
 /// `timing: transcribe=812ms post_process=1430ms paste=35ms total=2277ms`.
 ///
 /// `transcribe` covers the model run (live finalize or batch decode,
 /// including any model-load wait), `post_process` the LLM post-processing
-/// call (near zero when disabled), and `paste` the clipboard paste itself.
-/// `total` spans the whole stop-to-paste pipeline, so it also includes what
-/// sits between the stages: recording teardown, WAV save/verify, history
-/// persistence, and main-thread dispatch.
+/// call (near zero when disabled), and the output stage the paste — or, for
+/// streamed rewrites, the incremental typing window (`type=...`), with
+/// `first_token` calling out how long the stream took to start producing
+/// visible text. `total` spans the whole stop-to-output pipeline, so it also
+/// includes what sits between the stages: recording teardown, WAV
+/// save/verify, history persistence, and main-thread dispatch.
 struct PipelineTimings {
     started: Instant,
     transcribe: Duration,
     post_process: Duration,
+    /// Streamed rewrite: time to the first visible token, when one arrived.
+    first_token: Option<Duration>,
+    /// Whether the output was typed as it streamed (vs. pasted at the end).
+    streamed: bool,
 }
 
 impl PipelineTimings {
-    fn log(&self, paste: Duration) {
-        info!(
-            "timing: transcribe={}ms post_process={}ms paste={}ms total={}ms",
-            self.transcribe.as_millis(),
-            self.post_process.as_millis(),
-            paste.as_millis(),
-            self.started.elapsed().as_millis()
-        );
+    fn log(&self, output: Duration) {
+        let transcribe = self.transcribe.as_millis();
+        let post_process = self.post_process.as_millis();
+        let total = self.started.elapsed().as_millis();
+        if self.streamed {
+            let first_token = self.first_token.map(|d| d.as_millis()).unwrap_or(0);
+            info!(
+                "timing: transcribe={transcribe}ms post_process={post_process}ms first_token={first_token}ms type={}ms total={total}ms",
+                output.as_millis()
+            );
+        } else {
+            info!(
+                "timing: transcribe={transcribe}ms post_process={post_process}ms paste={}ms total={total}ms",
+                output.as_millis()
+            );
+        }
     }
 }
 
@@ -177,12 +194,17 @@ fn custom_words_glossary(custom_words: &[String]) -> String {
     }
 }
 
-async fn post_process_transcription(settings: &AppSettings, transcription: &str) -> Option<String> {
-    if is_blank_transcription(transcription) {
-        debug!("Post-processing skipped because the transcription is empty");
-        return None;
-    }
+/// Everything a post-processing LLM call needs, resolved and validated from
+/// the current settings. Each `None` carries a debug log explaining the skip.
+struct PostProcessRequest {
+    provider: crate::settings::PostProcessProvider,
+    model: String,
+    prompt: String,
+    api_key: String,
+    disable_reasoning: bool,
+}
 
+fn resolve_post_process_request(settings: &AppSettings) -> Option<PostProcessRequest> {
     let provider = match settings.active_post_process_provider().cloned() {
         Some(provider) => provider,
         None => {
@@ -233,11 +255,6 @@ async fn post_process_transcription(settings: &AppSettings, transcription: &str)
         return None;
     }
 
-    debug!(
-        "Starting LLM post-processing with provider '{}' (model: {})",
-        provider.id, model
-    );
-
     let api_key = settings
         .post_process_api_keys
         .get(&provider.id)
@@ -248,6 +265,48 @@ async fn post_process_transcription(settings: &AppSettings, transcription: &str)
     // benefits from it and it adds seconds of latency. llm_client picks the
     // field the endpoint understands and retries without it if rejected.
     let disable_reasoning = matches!(provider.id.as_str(), "custom" | "openrouter");
+
+    Some(PostProcessRequest {
+        provider,
+        model,
+        prompt,
+        api_key,
+        disable_reasoning,
+    })
+}
+
+/// The currently selected post-processing prompt template, for history
+/// records.
+fn selected_post_process_prompt(settings: &AppSettings) -> Option<String> {
+    let prompt_id = settings.post_process_selected_prompt_id.as_ref()?;
+    settings
+        .post_process_prompts
+        .iter()
+        .find(|prompt| &prompt.id == prompt_id)
+        .map(|prompt| prompt.prompt.clone())
+}
+
+async fn post_process_transcription(settings: &AppSettings, transcription: &str) -> Option<String> {
+    if is_blank_transcription(transcription) {
+        debug!("Post-processing skipped because the transcription is empty");
+        return None;
+    }
+
+    let Some(PostProcessRequest {
+        provider,
+        model,
+        prompt,
+        api_key,
+        disable_reasoning,
+    }) = resolve_post_process_request(settings)
+    else {
+        return None;
+    };
+
+    debug!(
+        "Starting LLM post-processing with provider '{}' (model: {})",
+        provider.id, model
+    );
 
     // Reference-only text around the cursor in the focused field (macOS;
     // silent skip on any failure or when disabled).
@@ -428,7 +487,6 @@ pub(crate) struct ProcessedTranscription {
     pub post_processed_text: Option<String>,
     pub post_process_prompt: Option<String>,
 }
-
 pub(crate) async fn process_transcription_output(
     app: &AppHandle,
     transcription: &str,
@@ -443,16 +501,7 @@ pub(crate) async fn process_transcription_output(
         if let Some(processed_text) = post_process_transcription(&settings, &final_text).await {
             post_processed_text = Some(processed_text.clone());
             final_text = processed_text;
-
-            if let Some(prompt_id) = &settings.post_process_selected_prompt_id {
-                if let Some(prompt) = settings
-                    .post_process_prompts
-                    .iter()
-                    .find(|prompt| &prompt.id == prompt_id)
-                {
-                    post_process_prompt = Some(prompt.prompt.clone());
-                }
-            }
+            post_process_prompt = selected_post_process_prompt(&settings);
         }
     }
 
@@ -460,6 +509,291 @@ pub(crate) async fn process_transcription_output(
         final_text,
         post_processed_text,
         post_process_prompt,
+    }
+}
+
+// ------------------------------------------------- streamed rewrite output
+
+/// Timing facts of a streamed rewrite, for the pipeline timing log.
+struct StreamedTimings {
+    first_token: Option<Duration>,
+    typing: Duration,
+}
+
+/// Decides when buffered streamed text is worth a typing dispatch: after a
+/// sentence or clause boundary once a minimum has accumulated, or at a hard
+/// cap so a steady stream never stalls waiting for punctuation.
+fn should_flush_stream_buffer(pending: &str) -> bool {
+    const MIN_CHARS: usize = 12;
+    const MAX_CHARS: usize = 48;
+    let count = pending.chars().count();
+    if count >= MAX_CHARS {
+        return true;
+    }
+    if count < MIN_CHARS {
+        return false;
+    }
+    pending.chars().last().is_some_and(|c| {
+        matches!(
+            c,
+            '。' | '！' | '？' | '；' | '\n' | '.' | '!' | '?' | ';' | '，' | ','
+        )
+    })
+}
+
+/// Types streamed rewrite text at the cursor as it arrives, in small chunks.
+///
+/// Dispatches go through `run_on_main_thread` (the paste path's convention —
+/// enigo's macOS layout resolution must run there), which preserves order, so
+/// typed output always matches `received` up to `typed_chars`.
+struct StreamTyper {
+    app: AppHandle,
+    /// All visible text received so far (invisible chars already stripped).
+    received: String,
+    /// How many chars of `received` have been dispatched for typing.
+    typed_chars: usize,
+    /// Received but not yet dispatched.
+    pending: String,
+    /// When the first dispatch happened, to measure the typing window.
+    typing_started: Option<Instant>,
+}
+
+impl StreamTyper {
+    fn new(app: AppHandle) -> Self {
+        Self {
+            app,
+            received: String::new(),
+            typed_chars: 0,
+            pending: String::new(),
+            typing_started: None,
+        }
+    }
+
+    fn receive(&mut self, delta: &str) {
+        let delta = strip_invisible_chars(delta);
+        if delta.is_empty() {
+            return;
+        }
+        self.received.push_str(&delta);
+        self.pending.push_str(&delta);
+        if should_flush_stream_buffer(&self.pending) {
+            self.flush();
+        }
+    }
+
+    /// Dispatches buffered text to the main thread for typing. A failed
+    /// dispatch keeps the chunk buffered so a later fallback paste still
+    /// includes it.
+    fn flush(&mut self) {
+        if self.pending.is_empty() {
+            return;
+        }
+        let chunk = std::mem::take(&mut self.pending);
+        let app = self.app.clone();
+        let app_for_closure = app.clone();
+        let chunk_for_closure = chunk.clone();
+        let dispatched = app
+            .run_on_main_thread(move || {
+                if let Err(e) =
+                    crate::clipboard::type_text_at_cursor(&app_for_closure, &chunk_for_closure)
+                {
+                    debug!("Streamed typing failed: {e}");
+                }
+            })
+            .is_ok();
+        if dispatched {
+            if self.typing_started.is_none() {
+                self.typing_started = Some(Instant::now());
+            }
+            self.typed_chars += chunk.chars().count();
+        } else {
+            self.pending = chunk;
+        }
+    }
+
+    fn typed_anything(&self) -> bool {
+        self.typed_chars > 0
+    }
+
+    fn received_text(&self) -> &str {
+        &self.received
+    }
+
+    /// Everything received but not typed, for the mid-stream error fallback.
+    fn untyped_text(&self) -> String {
+        self.received.chars().skip(self.typed_chars).collect()
+    }
+
+    /// Elapsed time of the typing window (first dispatch to now).
+    fn typing_duration(&self) -> Duration {
+        self.typing_started
+            .map(|start| start.elapsed())
+            .unwrap_or(Duration::ZERO)
+    }
+
+    /// Applies the output-side settings the paste path applies — trailing
+    /// space, clipboard copy, auto-submit — and kicks the auto-learn hook with
+    /// the fully typed text.
+    fn finalize(&self, settings: &AppSettings) {
+        let text = self.received.clone();
+        if settings.append_trailing_space {
+            self.dispatch_typing(" ");
+        }
+        if settings.auto_submit {
+            let app = self.app.clone();
+            let app_for_closure = app.clone();
+            let _ = app.run_on_main_thread(move || {
+                if let Err(e) = crate::clipboard::send_auto_submit_key(&app_for_closure) {
+                    debug!("Auto-submit after streamed typing failed: {e}");
+                }
+            });
+        }
+        if settings.clipboard_handling == ClipboardHandling::CopyToClipboard {
+            if let Err(e) = crate::clipboard::write_text_to_clipboard(&self.app, &text) {
+                debug!("Copying streamed text to clipboard failed: {e}");
+            }
+        }
+        crate::auto_learn::schedule_after_paste(&self.app, text);
+    }
+
+    fn dispatch_typing(&self, text: &str) {
+        let app = self.app.clone();
+        let app_for_closure = app.clone();
+        let chunk = text.to_string();
+        let _ = app.run_on_main_thread(move || {
+            if let Err(e) = crate::clipboard::type_text_at_cursor(&app_for_closure, &chunk) {
+                debug!("Streamed typing failed: {e}");
+            }
+        });
+    }
+}
+
+/// Result of attempting the streamed rewrite.
+enum StreamedPipeline {
+    /// The rewrite streamed and was fully typed at the cursor. `text` is what
+    /// the user now sees; no further paste is needed.
+    Done {
+        text: String,
+        first_token: Option<Duration>,
+        typing: Duration,
+    },
+    /// Streaming was disabled, not applicable, or failed before typing
+    /// anything — the caller falls back to the non-streaming path (which in
+    /// turn falls back to pasting the raw transcript).
+    Unavailable,
+    /// Cancelled mid-stream: whatever was typed stays, nothing more happens.
+    Cancelled,
+}
+
+/// Streams the post-processing rewrite and types it at the cursor as chunks
+/// arrive, instead of waiting for the full response and pasting.
+async fn stream_post_process_and_type(
+    app: &AppHandle,
+    transcription: &str,
+    post_process: bool,
+    is_cancelled: impl Fn() -> bool,
+) -> StreamedPipeline {
+    let settings = get_settings(app);
+    if !post_process || !settings.stream_post_process {
+        return StreamedPipeline::Unavailable;
+    }
+    if is_blank_transcription(transcription) {
+        return StreamedPipeline::Unavailable;
+    }
+    if settings.paste_method == PasteMethod::None {
+        // The user asked for no output injection; typing would violate that.
+        debug!("Streamed rewrite skipped: paste method is None");
+        return StreamedPipeline::Unavailable;
+    }
+
+    let Some(request) = resolve_post_process_request(&settings) else {
+        return StreamedPipeline::Unavailable;
+    };
+    // Only the OpenAI-compatible Chat Completions endpoint streams; the
+    // Anthropic Messages format and Apple Intelligence keep the plain path.
+    if request.provider.api_format != PostProcessApiFormat::OpenAi
+        || request.provider.id == APPLE_INTELLIGENCE_PROVIDER_ID
+    {
+        debug!(
+            "Streamed rewrite unsupported for provider '{}'; using the normal path",
+            request.provider.id
+        );
+        return StreamedPipeline::Unavailable;
+    }
+
+    // Same prompt shape as the non-streaming structured path: system prompt,
+    // glossary, and reference-only cursor context.
+    let glossary = custom_words_glossary(&settings.custom_words);
+    let mut system_prompt = format!("{}{glossary}", build_system_prompt(&request.prompt));
+    if settings.use_cursor_context {
+        if let Some(context) =
+            crate::cursor_context::read_cursor_context(settings.cursor_context_chars).await
+        {
+            system_prompt = format!(
+                "{system_prompt}{}",
+                crate::cursor_context::context_prompt_block(&context)
+            );
+        }
+    }
+
+    let mut typer = StreamTyper::new(app.clone());
+    let result = crate::llm_client::send_chat_completion_streaming(
+        &request.provider,
+        request.api_key,
+        &request.model,
+        Some(system_prompt),
+        transcription.to_string(),
+        request.disable_reasoning,
+        |delta| typer.receive(delta),
+        is_cancelled,
+    )
+    .await;
+
+    match result {
+        Ok(Some(_outcome)) => {
+            // The canonical text is what the typer received (already
+            // invisible-char-stripped, think-stripped by the client).
+            typer.flush();
+            let text = typer.received_text().to_string();
+            let typing = typer.typing_duration();
+            typer.finalize(&settings);
+            if text.is_empty() {
+                // The endpoint answered without streaming any content (e.g. it
+                // ignored stream:true); fall back rather than paste nothing.
+                debug!("Streamed rewrite produced no text; falling back to the normal path");
+                return StreamedPipeline::Unavailable;
+            }
+            StreamedPipeline::Done {
+                text,
+                first_token: _outcome.first_token,
+                typing,
+            }
+        }
+        Ok(None) => StreamedPipeline::Cancelled,
+        Err(e) => {
+            if !typer.typed_anything() {
+                warn!("Streamed rewrite failed before any output: {e}; falling back to the normal path");
+                StreamedPipeline::Unavailable
+            } else {
+                // Keep the partial rewrite: paste whatever was received but
+                // not yet typed, so the user ends up with the full partial.
+                warn!("Streamed rewrite failed mid-output: {e}; pasting the remainder");
+                let text = typer.received_text().to_string();
+                let typing = typer.typing_duration();
+                let remainder = typer.untyped_text();
+                let paste_app = app.clone();
+                let _ = app.run_on_main_thread(move || {
+                    if let Err(paste_err) = utils::paste(remainder, paste_app.clone()) {
+                        error!("Failed to paste streamed remainder: {paste_err}");
+                    }
+                });
+                StreamedPipeline::Done {
+                    text,
+                    first_token: None,
+                    typing,
+                }
+            }
+        }
     }
 }
 
@@ -778,22 +1112,74 @@ impl ShortcutAction for TranscribeAction {
                                     show_processing_overlay(&ah);
                                 }
                             }
+                            let settings_at_stop = get_settings(&ah);
+                            let mut streamed_timings: Option<StreamedTimings> = None;
                             let post_process_started = Instant::now();
-                            let Some(processed) = complete_unless_cancelled(
-                                process_transcription_output(&ah, &transcription, post_process),
+                            // Streamed rewrite: type the LLM output at the
+                            // cursor as chunks arrive instead of pasting at
+                            // the end. Falls back to the normal path when
+                            // disabled, unsupported, or failed before typing.
+                            let streamed = stream_post_process_and_type(
+                                &ah,
+                                &transcription,
+                                post_process,
                                 || rm.was_cancelled_since(cancel_generation),
                             )
-                            .await
-                            else {
-                                debug!("Transcription operation cancelled during output handling");
-                                utils::hide_recording_overlay(&ah);
-                                set_tray_state(&ah, TrayIconState::Idle);
-                                return;
+                            .await;
+
+                            let processed = match streamed {
+                                StreamedPipeline::Cancelled => {
+                                    debug!(
+                                        "Transcription operation cancelled during streamed output"
+                                    );
+                                    utils::hide_recording_overlay(&ah);
+                                    set_tray_state(&ah, TrayIconState::Idle);
+                                    return;
+                                }
+                                StreamedPipeline::Done {
+                                    text,
+                                    first_token,
+                                    typing,
+                                } => {
+                                    streamed_timings = Some(StreamedTimings {
+                                        first_token,
+                                        typing,
+                                    });
+                                    ProcessedTranscription {
+                                        final_text: text.clone(),
+                                        post_processed_text: Some(text),
+                                        post_process_prompt: selected_post_process_prompt(
+                                            &settings_at_stop,
+                                        ),
+                                    }
+                                }
+                                StreamedPipeline::Unavailable => {
+                                    let Some(processed) = complete_unless_cancelled(
+                                        process_transcription_output(
+                                            &ah,
+                                            &transcription,
+                                            post_process,
+                                        ),
+                                        || rm.was_cancelled_since(cancel_generation),
+                                    )
+                                    .await
+                                    else {
+                                        debug!(
+                                            "Transcription operation cancelled during output handling"
+                                        );
+                                        utils::hide_recording_overlay(&ah);
+                                        set_tray_state(&ah, TrayIconState::Idle);
+                                        return;
+                                    };
+                                    processed
+                                }
                             };
                             let timings = PipelineTimings {
                                 started: pipeline_started,
                                 transcribe: transcribe_elapsed,
                                 post_process: post_process_started.elapsed(),
+                                first_token: streamed_timings.as_ref().and_then(|t| t.first_token),
+                                streamed: streamed_timings.is_some(),
                             };
 
                             if rm.was_cancelled_since(cancel_generation) {
@@ -817,6 +1203,13 @@ impl ShortcutAction for TranscribeAction {
                             }
 
                             if processed.final_text.is_empty() {
+                                utils::hide_recording_overlay(&ah);
+                                set_tray_state(&ah, TrayIconState::Idle);
+                            } else if let Some(streamed) = streamed_timings {
+                                // Everything was already typed at the cursor
+                                // while the rewrite streamed (or pasted as a
+                                // mid-stream fallback); nothing left to emit.
+                                timings.log(streamed.typing);
                                 utils::hide_recording_overlay(&ah);
                                 set_tray_state(&ah, TrayIconState::Idle);
                             } else {
@@ -974,7 +1367,7 @@ pub static ACTION_MAP: Lazy<HashMap<String, Arc<dyn ShortcutAction>>> = Lazy::ne
 mod tests {
     use super::{
         complete_unless_cancelled, custom_words_glossary, is_blank_transcription,
-        should_use_streaming_overlay, strip_think_block,
+        should_flush_stream_buffer, should_use_streaming_overlay, strip_think_block,
     };
     use crate::settings::OverlayStyle;
     use std::future;
@@ -1083,5 +1476,26 @@ mod tests {
         assert!(!should_use_streaming_overlay(OverlayStyle::Live, false));
         assert!(!should_use_streaming_overlay(OverlayStyle::Minimal, true));
         assert!(!should_use_streaming_overlay(OverlayStyle::None, true));
+    }
+
+    #[test]
+    fn stream_buffer_waits_for_a_minimum_before_flushing() {
+        assert!(!should_flush_stream_buffer(""));
+        assert!(!should_flush_stream_buffer("Hello."));
+        assert!(!should_flush_stream_buffer(
+            "twelve chars.".get(0..11).unwrap_or("")
+        ));
+        // At the minimum, a sentence/clause boundary flushes.
+        assert!(should_flush_stream_buffer("twelve chars."));
+        assert!(should_flush_stream_buffer("十二个字符了，现在可以。"));
+        assert!(should_flush_stream_buffer("enough text\n"));
+    }
+
+    #[test]
+    fn stream_buffer_flushes_at_the_hard_cap_without_punctuation() {
+        assert!(should_flush_stream_buffer(&"x".repeat(48)));
+        assert!(should_flush_stream_buffer(&"长".repeat(48)));
+        // Just under the cap with no boundary still waits.
+        assert!(!should_flush_stream_buffer(&"x".repeat(47)));
     }
 }

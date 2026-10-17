@@ -454,6 +454,11 @@
         "cancel": "Annuleren",
         "selectToEdit": "Selecteer hierboven een prompt om de details te bekijken en te bewerken.",
         "createFirst": "Klik hierboven op 'Nieuwe prompt maken' om je eerste naverwerkingsprompt aan te maken."
+      },
+      "streaming": {
+        "groupTitle": "Streaming",
+        "title": "Herschrijvingsresultaat streamen",
+        "description": "Typt de herschreven tekst al bij de cursor terwijl deze wordt gegenereerd, in plaats van te plakken wanneer het volledige antwoord binnenkomt. Valt bij fouten terug op plakken. Vereist een OpenAI-compatibele aanbieder."
       }
     },
     "history": {

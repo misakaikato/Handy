@@ -1,4 +1,5 @@
 use crate::settings::{PostProcessApiFormat, PostProcessProvider};
+use futures_util::StreamExt;
 use log::{debug, error, info};
 use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION, CONTENT_TYPE, REFERER, USER_AGENT};
 use serde::{Deserialize, Serialize};
@@ -6,6 +7,11 @@ use serde_json::Value;
 use std::collections::HashSet;
 use std::error::Error as StdError;
 use std::sync::{Mutex, OnceLock};
+use std::time::{Duration, Instant};
+
+/// How often a streaming response is polled for cancellation while waiting
+/// for the next chunk.
+const STREAM_CANCEL_POLL_INTERVAL: Duration = Duration::from_millis(25);
 
 #[derive(Debug, Serialize)]
 struct ChatMessage {
@@ -434,57 +440,8 @@ pub async fn send_chat_completion_with_schema(
         reasoning,
     };
 
-    let mut response = client
-        .post(&url)
-        .json(&request_body)
-        .send()
-        .await
-        .map_err(|e| report_reqwest_error("HTTP request failed", &e))?;
-    let mut status = response.status();
-    debug!(
-        "Chat completion response received with status {} over {:?} from {}",
-        status,
-        response.version(),
-        sanitized_url(response.url())
-    );
-
-    // A 400/422 on a request carrying reasoning-disable fields is almost always
-    // the endpoint rejecting those fields — retry once without them.
-    if !status.is_success()
-        && matches!(status.as_u16(), 400 | 422)
-        && !request_body.reasoning.is_empty()
-    {
-        let error_text = response.text().await.unwrap_or_else(|e| {
-            report_reqwest_error("Failed to read reasoning rejection response", &e)
-        });
-        info!(
-            "Endpoint rejected request with reasoning disabled (status {}): {}. Retrying without reasoning fields",
-            status, error_text
-        );
-
-        request_body.reasoning = ReasoningParams::default();
-        response = client
-            .post(&url)
-            .json(&request_body)
-            .send()
-            .await
-            .map_err(|e| report_reqwest_error("HTTP retry failed", &e))?;
-        status = response.status();
-        debug!(
-            "Chat completion retry response received with status {} over {:?} from {}",
-            status,
-            response.version(),
-            sanitized_url(response.url())
-        );
-
-        if status.is_success() {
-            info!(
-                "Retry without reasoning fields succeeded; '{}' (model '{}') will skip them from now on",
-                sanitized_url_for_log(base_url), model
-            );
-            remember_rejection(key);
-        }
-    }
+    let response = send_with_reasoning_retry(&client, &url, &mut request_body).await?;
+    let status = response.status();
 
     if !status.is_success() {
         let error_text = response
@@ -514,6 +471,435 @@ pub async fn send_chat_completion_with_schema(
     }
 
     Ok(choice.message.content)
+}
+
+/// Sends a chat-completions request, retrying once without the
+/// reasoning-disable fields when the endpoint rejects them with a 400/422
+/// (see `reasoning_disable_params`). Returns the final response whatever its
+/// status; callers surface non-success statuses.
+async fn send_with_reasoning_retry(
+    client: &reqwest::Client,
+    url: &str,
+    request_body: &mut ChatCompletionRequest,
+) -> Result<reqwest::Response, String> {
+    let mut response = client
+        .post(url)
+        .json(&request_body)
+        .send()
+        .await
+        .map_err(|e| report_reqwest_error("HTTP request failed", &e))?;
+    let mut status = response.status();
+    debug!(
+        "Chat completion response received with status {} over {:?} from {}",
+        status,
+        response.version(),
+        sanitized_url(response.url())
+    );
+
+    // A 400/422 on a request carrying reasoning-disable fields is almost always
+    // the endpoint rejecting those fields — retry once without them.
+    if !status.is_success()
+        && matches!(status.as_u16(), 400 | 422)
+        && !request_body.reasoning.is_empty()
+    {
+        let error_text = response.text().await.unwrap_or_else(|e| {
+            report_reqwest_error("Failed to read reasoning rejection response", &e)
+        });
+        info!(
+            "Endpoint rejected request with reasoning disabled (status {}): {}. Retrying without reasoning fields",
+            status, error_text
+        );
+
+        request_body.reasoning = ReasoningParams::default();
+        response = client
+            .post(url)
+            .json(&request_body)
+            .send()
+            .await
+            .map_err(|e| report_reqwest_error("HTTP retry failed", &e))?;
+        status = response.status();
+        debug!(
+            "Chat completion retry response received with status {} over {:?} from {}",
+            status,
+            response.version(),
+            sanitized_url(response.url())
+        );
+
+        if status.is_success() {
+            info!(
+                "Retry without reasoning fields succeeded; '{}' (model '{}') will skip them from now on",
+                sanitized_url_for_log(url),
+                request_body.model
+            );
+            remember_rejection(endpoint_key_from_url(url, &request_body.model));
+        }
+    }
+
+    Ok(response)
+}
+
+/// Reconstructs the rejection-memo key for a retry that succeeded without
+/// reasoning fields. The base_url in the key omits the trailing
+/// `/chat/completions` so it matches keys built by `endpoint_key`.
+fn endpoint_key_from_url(url: &str, model: &str) -> String {
+    let base = url.strip_suffix("/chat/completions").unwrap_or(url);
+    format!("{base}|{model}")
+}
+
+// ------------------------------------------------------------- streaming
+
+/// Incremental server-sent-events parser for `text/event-stream` responses.
+///
+/// Fed arbitrary UTF-8 chunks, it yields the joined `data:` payload of every
+/// completely received event. Non-data lines (`event:`, `id:`, comments) and
+/// incomplete trailing lines are held back until more data arrives; [`SseParser::finish`]
+/// flushes whatever remains when the stream ends.
+#[derive(Debug, Default)]
+pub(crate) struct SseParser {
+    buffer: String,
+    current: Option<String>,
+}
+
+impl SseParser {
+    pub(crate) fn push(&mut self, chunk: &str) -> Vec<String> {
+        self.buffer.push_str(chunk);
+        let mut events = Vec::new();
+        while let Some(newline) = self.buffer.find('\n') {
+            let mut line: String = self.buffer.drain(..=newline).collect();
+            if line.ends_with('\n') {
+                line.pop();
+            }
+            let line = line.trim_end_matches('\r');
+            if line.is_empty() {
+                if let Some(event) = self.current.take() {
+                    events.push(event);
+                }
+            } else if let Some(data) = line.strip_prefix("data:") {
+                // A single space after the colon is optional per the SSE spec.
+                let data = data.strip_prefix(' ').unwrap_or(data);
+                let event = self.current.get_or_insert_with(String::new);
+                if !event.is_empty() {
+                    event.push('\n');
+                }
+                event.push_str(data);
+            }
+        }
+        events
+    }
+
+    /// Flushes a trailing event that arrived without its terminating blank
+    /// line before the stream closed.
+    pub(crate) fn finish(&mut self) -> Vec<String> {
+        let leftover = std::mem::take(&mut self.buffer);
+        let mut events = if leftover.is_empty() {
+            Vec::new()
+        } else {
+            self.push(&format!("{leftover}\n"))
+        };
+        if let Some(event) = self.current.take() {
+            events.push(event);
+        }
+        events
+    }
+}
+
+/// Extracts the visible text delta from one streamed chat-completions event.
+/// Only `choices[0].delta.content` counts: `reasoning_content` deltas (the
+/// thinking some models stream separately) are deliberately ignored.
+fn extract_stream_delta(payload: &str) -> Option<String> {
+    let value: Value = serde_json::from_str(payload).ok()?;
+    let delta = value.get("choices")?.get(0)?.get("delta")?;
+    let content = delta.get("content")?.as_str()?;
+    (!content.is_empty()).then(|| content.to_string())
+}
+
+/// Extracts `choices[0].finish_reason` from a streamed event, when present.
+fn extract_stream_finish_reason(payload: &str) -> Option<String> {
+    let value: Value = serde_json::from_str(payload).ok()?;
+    value
+        .get("choices")?
+        .get(0)?
+        .get("finish_reason")?
+        .as_str()
+        .map(|reason| reason.to_string())
+}
+
+/// Extracts a transport-level error object (`{"error":{...}}`) that some
+/// endpoints deliver mid-stream instead of an HTTP error status.
+fn extract_stream_error(payload: &str) -> Option<String> {
+    let value: Value = serde_json::from_str(payload).ok()?;
+    let message = value.get("error")?.get("message")?.as_str()?.to_string();
+    (!message.is_empty()).then_some(message)
+}
+
+/// Longest suffix of `text` that is a proper prefix of `tag`, so a `<think>`
+/// or `</think>` split across chunk boundaries is still recognized.
+fn partial_tag_suffix(text: &str, tag: &str) -> usize {
+    let bytes = text.as_bytes();
+    let max = tag.len() - 1;
+    for length in (1..=max).rev() {
+        if length > bytes.len() {
+            continue;
+        }
+        if text.as_bytes()[bytes.len() - length..] == tag.as_bytes()[..length] {
+            return length;
+        }
+    }
+    0
+}
+
+/// Streaming companion of the think stripping applied to complete responses:
+/// feeds deltas in, gets the visible text out. A `<think>...</think>` block
+/// split across any chunk boundaries is swallowed whole; the swallowed text
+/// is kept until the block closes so a stream that ends inside an unterminated
+/// block can still emit it verbatim (matching the non-streaming strip, which
+/// leaves unclosed blocks untouched).
+#[derive(Debug, Default)]
+pub(crate) struct ThinkFilter {
+    in_think: bool,
+    think_text: String,
+    /// Trailing partial tag held back until the next chunk resolves it.
+    held: String,
+}
+
+impl ThinkFilter {
+    pub(crate) fn push(&mut self, chunk: &str) -> String {
+        let mut input = std::mem::take(&mut self.held);
+        input.push_str(chunk);
+        let mut visible = String::new();
+
+        loop {
+            if self.in_think {
+                let Some(end) = input.find("</think>") else {
+                    let hold = partial_tag_suffix(&input, "</think>");
+                    let keep = input.len() - hold;
+                    self.think_text.push_str(&input[..keep]);
+                    self.held = input[keep..].to_string();
+                    break;
+                };
+                self.think_text.push_str(&input[..end]);
+                self.think_text.clear();
+                input.drain(..end + "</think>".len());
+                self.in_think = false;
+            } else {
+                let Some(start) = input.find("<think>") else {
+                    let hold = partial_tag_suffix(&input, "<think>");
+                    let keep = input.len() - hold;
+                    visible.push_str(&input[..keep]);
+                    self.held = input[keep..].to_string();
+                    break;
+                };
+                visible.push_str(&input[..start]);
+                input.drain(..start + "<think>".len());
+                self.in_think = true;
+            }
+        }
+
+        visible
+    }
+
+    /// Emits whatever a stream ending here leaves: a held partial tag outside
+    /// a think block, or an unterminated think block kept verbatim.
+    pub(crate) fn finish(&mut self) -> String {
+        let held = std::mem::take(&mut self.held);
+        let think_text = std::mem::take(&mut self.think_text);
+        let in_think = self.in_think;
+        self.in_think = false;
+        if in_think {
+            format!("<think>{think_text}{held}")
+        } else {
+            held
+        }
+    }
+}
+
+/// Outcome of a fully streamed rewrite. The visible text itself was already
+/// delivered through `on_text` as it arrived; callers keep their own copy.
+#[derive(Debug, Clone)]
+pub(crate) struct StreamingOutcome {
+    /// Time from request start to the first visible content token.
+    pub first_token: Option<Duration>,
+}
+
+/// State accumulated while consuming one streaming response.
+struct StreamAccumulator {
+    filter: ThinkFilter,
+    first_token: Option<Duration>,
+    finish_reason: Option<String>,
+    started: Instant,
+}
+
+impl StreamAccumulator {
+    fn new(started: Instant) -> Self {
+        Self {
+            filter: ThinkFilter::default(),
+            first_token: None,
+            finish_reason: None,
+            started,
+        }
+    }
+
+    /// Processes one SSE payload. Returns `true` when the stream signaled
+    /// `[DONE]`.
+    fn on_event(&mut self, payload: &str, on_text: &mut impl FnMut(&str)) -> Result<bool, String> {
+        if payload == "[DONE]" {
+            return Ok(true);
+        }
+        if let Some(error) = extract_stream_error(payload) {
+            return Err(format!("API stream error: {error}"));
+        }
+        if let Some(reason) = extract_stream_finish_reason(payload) {
+            self.finish_reason = Some(reason);
+        }
+        if let Some(delta) = extract_stream_delta(payload) {
+            if self.first_token.is_none() {
+                self.first_token = Some(self.started.elapsed());
+            }
+            let visible = self.filter.push(&delta);
+            if !visible.is_empty() {
+                on_text(&visible);
+            }
+        }
+        Ok(false)
+    }
+
+    /// Emits any text a closing stream still holds (a trailing event without
+    /// its blank line, or an unterminated think block) into `on_text`.
+    fn finish(&mut self, mut on_text: impl FnMut(&str)) {
+        let tail = self.filter.finish();
+        if !tail.is_empty() {
+            on_text(&tail);
+        }
+    }
+
+    fn into_outcome(self) -> Result<Option<StreamingOutcome>, String> {
+        // A response cut off at the provider's output limit is incomplete;
+        // surfacing it as an error lets the caller fall back to pasting the
+        // remainder, exactly like the non-streaming path refuses truncated
+        // output.
+        if self.finish_reason.as_deref() == Some("length") {
+            return Err("Response was truncated at the provider's output token limit".to_string());
+        }
+        Ok(Some(StreamingOutcome {
+            first_token: self.first_token,
+        }))
+    }
+}
+
+/// Streams a chat completion from an OpenAI-compatible endpoint, invoking
+/// `on_text` with each visible chunk (after think stripping) as it arrives.
+///
+/// Returns `Ok(Some(outcome))` when the stream completed, `Ok(None)` when
+/// `is_cancelled` turned true before completion (nothing is typed after
+/// that point), and `Err` on transport/HTTP/stream errors — including a
+/// response truncated at the provider's output limit, which is surfaced as
+/// an error after the already-delivered text, exactly like the
+/// non-streaming path.
+#[allow(clippy::too_many_arguments)]
+pub(crate) async fn send_chat_completion_streaming(
+    provider: &PostProcessProvider,
+    api_key: String,
+    model: &str,
+    system_prompt: Option<String>,
+    user_content: String,
+    disable_reasoning: bool,
+    mut on_text: impl FnMut(&str),
+    is_cancelled: impl Fn() -> bool,
+) -> Result<Option<StreamingOutcome>, String> {
+    if is_cancelled() {
+        return Ok(None);
+    }
+
+    let base_url = provider.base_url.trim_end_matches('/');
+    let url = format!("{base_url}/chat/completions");
+    debug!(
+        "Sending streaming chat completion request to: {}",
+        sanitized_url_for_log(&url)
+    );
+
+    let client = create_client(provider, &api_key)?;
+
+    let mut messages = Vec::new();
+    if let Some(system) = system_prompt {
+        messages.push(ChatMessage {
+            role: "system".to_string(),
+            content: system,
+        });
+    }
+    messages.push(ChatMessage {
+        role: "user".to_string(),
+        content: user_content,
+    });
+
+    let key = endpoint_key(provider, model);
+    let reasoning = if disable_reasoning && !is_known_rejected(&key) {
+        reasoning_disable_params(provider)
+    } else {
+        ReasoningParams::default()
+    };
+
+    let mut request_body = ChatCompletionRequest {
+        model: model.to_string(),
+        messages,
+        stream: true,
+        response_format: None,
+        reasoning,
+    };
+
+    let started = Instant::now();
+    let response = send_with_reasoning_retry(&client, &url, &mut request_body).await?;
+    let status = response.status();
+    if !status.is_success() {
+        let error_text = response
+            .text()
+            .await
+            .unwrap_or_else(|e| report_reqwest_error("Failed to read API error response", &e));
+        return Err(format!(
+            "API request failed with status {}: {}",
+            status, error_text
+        ));
+    }
+
+    let mut stream = response.bytes_stream();
+    let mut parser = SseParser::default();
+    let mut accumulator = StreamAccumulator::new(started);
+    let mut done = false;
+
+    loop {
+        if is_cancelled() {
+            debug!("Streaming chat completion cancelled");
+            return Ok(None);
+        }
+
+        let chunk = match tokio::time::timeout(STREAM_CANCEL_POLL_INTERVAL, stream.next()).await {
+            Err(_) => continue,
+            Ok(None) => break,
+            Ok(Some(Ok(bytes))) => bytes,
+            Ok(Some(Err(e))) => return Err(report_reqwest_error("Streaming response failed", &e)),
+        };
+
+        let chunk = String::from_utf8_lossy(&chunk);
+        for payload in parser.push(&chunk) {
+            if accumulator.on_event(&payload, &mut on_text)? {
+                done = true;
+                break;
+            }
+        }
+        if done {
+            break;
+        }
+    }
+
+    if !done {
+        for payload in parser.finish() {
+            if accumulator.on_event(&payload, &mut on_text)? {
+                break;
+            }
+        }
+    }
+
+    accumulator.finish(|visible| on_text(visible));
+    accumulator.into_outcome()
 }
 
 /// Send a single-prompt request to an Anthropic Messages API (`/messages`).
@@ -896,6 +1282,268 @@ mod tests {
         assert_eq!(json["messages"][0]["role"], "user");
         assert!(json.get("stream").is_none());
         assert!(json.get("reasoning_effort").is_none());
+    }
+
+    // ------------------------------------------------------- streaming
+
+    /// Serves a raw SSE-style response body and closes the connection.
+    async fn serve_sse_response(body: &str) -> String {
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let address = listener.local_addr().unwrap();
+        let response = format!(
+            "HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\nConnection: close\r\n\r\n{body}"
+        );
+        tokio::spawn(async move {
+            let (mut stream, _) = listener.accept().await.unwrap();
+            let mut request = [0_u8; 4096];
+            let _ = stream.read(&mut request).await.unwrap();
+            stream.write_all(response.as_bytes()).await.unwrap();
+        });
+        format!("http://{address}")
+    }
+
+    #[test]
+    fn sse_parser_emits_complete_events() {
+        let mut parser = SseParser::default();
+        // Two events arrive in one chunk.
+        let events = parser.push("data: {\"a\":1}\n\ndata: [DONE]\n\n");
+        assert_eq!(events, vec![r#"{"a":1}"#, "[DONE]"]);
+    }
+
+    #[test]
+    fn sse_parser_handles_split_chunks_and_crlf() {
+        let mut parser = SseParser::default();
+        let mut events = Vec::new();
+        events.extend(parser.push("data: {\"a\":"));
+        events.extend(parser.push("1}\r"));
+        events.extend(parser.push("\n\r\n"));
+        events.extend(parser.push("data: [DONE]\r\n\r\n"));
+        assert_eq!(events, vec![r#"{"a":1}"#, "[DONE]"]);
+    }
+
+    #[test]
+    fn sse_parser_ignores_comments_and_non_data_lines() {
+        let mut parser = SseParser::default();
+        let events = parser.push(": keep-alive\nevent: chunk\nid: 7\ndata: payload\n\n");
+        assert_eq!(events, vec!["payload"]);
+    }
+
+    #[test]
+    fn sse_parser_finish_flushes_unterminated_event() {
+        let mut parser = SseParser::default();
+        assert!(parser.push("data: tail").is_empty());
+        assert_eq!(parser.finish(), vec!["tail"]);
+    }
+
+    #[test]
+    fn stream_delta_takes_only_content() {
+        let payload = r#"{"choices":[{"delta":{"content":"Hello"}}]}"#;
+        assert_eq!(extract_stream_delta(payload).as_deref(), Some("Hello"));
+
+        // reasoning_content deltas must never surface as text
+        let reasoning = r#"{"choices":[{"delta":{"reasoning_content":"thinking..."}}]}"#;
+        assert_eq!(extract_stream_delta(reasoning), None);
+
+        // both present: only content counts
+        let mixed = r#"{"choices":[{"delta":{"reasoning_content":"hmm","content":"!"}}]}"#;
+        assert_eq!(extract_stream_delta(mixed).as_deref(), Some("!"));
+
+        // empty content, role-only deltas, and non-choices frames
+        assert_eq!(
+            extract_stream_delta(r#"{"choices":[{"delta":{"content":""}}]}"#),
+            None
+        );
+        assert_eq!(
+            extract_stream_delta(r#"{"choices":[{"delta":{"role":"assistant"}}]}"#),
+            None
+        );
+        assert_eq!(extract_stream_delta("{}"), None);
+    }
+
+    #[test]
+    fn stream_finish_reason_and_errors_are_extracted() {
+        assert_eq!(
+            extract_stream_finish_reason(r#"{"choices":[{"finish_reason":"stop"}]}"#).as_deref(),
+            Some("stop")
+        );
+        assert_eq!(extract_stream_finish_reason(r#"{"choices":[{}]}"#), None);
+
+        assert_eq!(
+            extract_stream_error(r#"{"error":{"message":"rate limited"}}"#).as_deref(),
+            Some("rate limited")
+        );
+        assert_eq!(extract_stream_error(r#"{"choices":[]}"#), None);
+    }
+
+    #[test]
+    fn think_filter_strips_blocks_across_arbitrary_chunk_boundaries() {
+        // For every possible split point of this stream, the visible output
+        // must reconstruct exactly the non-think text.
+        let full = "<think>reasoning 123</think>Hello, world!<think>more</think> Bye.";
+        for split in 0..full.len() {
+            let (head, tail) = full.split_at(split);
+            let mut filter = ThinkFilter::default();
+            let mut visible = filter.push(head);
+            visible.push_str(&filter.push(tail));
+            visible.push_str(&filter.finish());
+            assert_eq!(visible, "Hello, world! Bye.", "split at {split}");
+        }
+    }
+
+    #[test]
+    fn think_filter_preserves_text_mentioning_tags() {
+        let mut filter = ThinkFilter::default();
+        let visible = filter.push("a < thinker> b </thinkable> c");
+        assert_eq!(visible, "a < thinker> b </thinkable> c");
+    }
+
+    #[test]
+    fn think_filter_unterminated_block_is_kept_verbatim() {
+        let mut filter = ThinkFilter::default();
+        let visible = filter.push("<think>never closed");
+        assert_eq!(visible, "");
+        assert_eq!(filter.finish(), "<think>never closed");
+    }
+
+    #[test]
+    fn streaming_request_sets_stream_true() {
+        let request = ChatCompletionRequest {
+            model: "m".to_string(),
+            messages: vec![],
+            stream: true,
+            response_format: None,
+            reasoning: ReasoningParams::default(),
+        };
+        assert_eq!(serde_json::to_value(&request).unwrap()["stream"], true);
+    }
+
+    #[tokio::test]
+    async fn streaming_delivers_text_and_first_token() {
+        let base_url = serve_sse_response(
+            "data: {\"choices\":[{\"delta\":{\"reasoning_content\":\"ignore me\"}}]}\n\n\
+             data: {\"choices\":[{\"delta\":{\"content\":\"Hello\"}}]}\n\n\
+             data: {\"choices\":[{\"delta\":{\"content\":\" world\"}}]}\n\n\
+             data: {\"choices\":[{\"delta\":{},\"finish_reason\":\"stop\"}]}\n\n\
+             data: [DONE]\n\n",
+        )
+        .await;
+
+        let mut seen = String::new();
+        let result = send_chat_completion_streaming(
+            &provider("custom", &base_url),
+            "key".to_string(),
+            "test-model",
+            None,
+            "raw text".to_string(),
+            false,
+            |delta| seen.push_str(delta),
+            || false,
+        )
+        .await
+        .unwrap()
+        .expect("stream should complete");
+
+        assert_eq!(seen, "Hello world");
+        assert!(result.first_token.is_some(), "first token must be recorded");
+    }
+
+    #[tokio::test]
+    async fn streaming_strips_think_blocks_from_typed_text() {
+        let base_url = serve_sse_response(
+            "data: {\"choices\":[{\"delta\":{\"content\":\"<think>sec\"}}]}\n\n\
+             data: {\"choices\":[{\"delta\":{\"content\":\"ret\"}}]}\n\n\
+             data: {\"choices\":[{\"delta\":{\"content\":\"</think>Clean\"}}]}\n\n\
+             data: [DONE]\n\n",
+        )
+        .await;
+
+        let mut seen = String::new();
+        send_chat_completion_streaming(
+            &provider("custom", &base_url),
+            "key".to_string(),
+            "test-model",
+            None,
+            "raw text".to_string(),
+            false,
+            |delta| seen.push_str(delta),
+            || false,
+        )
+        .await
+        .unwrap()
+        .expect("stream should complete");
+
+        assert_eq!(seen, "Clean");
+    }
+
+    #[tokio::test]
+    async fn streaming_surfaces_truncated_responses_as_errors() {
+        let base_url = serve_sse_response(
+            "data: {\"choices\":[{\"delta\":{\"content\":\"partial\"}}]}\n\n\
+             data: {\"choices\":[{\"delta\":{},\"finish_reason\":\"length\"}]}\n\n\
+             data: [DONE]\n\n",
+        )
+        .await;
+
+        let result = send_chat_completion_streaming(
+            &provider("custom", &base_url),
+            "key".to_string(),
+            "test-model",
+            None,
+            "raw text".to_string(),
+            false,
+            |delta| {
+                let _ = delta;
+            },
+            || false,
+        )
+        .await;
+
+        assert!(result.unwrap_err().contains("truncated"));
+    }
+
+    #[tokio::test]
+    async fn streaming_cancellation_returns_none_without_typing() {
+        let base_url =
+            serve_sse_response("data: {\"choices\":[{\"delta\":{\"content\":\"too late\"}}]}\n\n")
+                .await;
+
+        let mut seen = String::new();
+        let result = send_chat_completion_streaming(
+            &provider("custom", &base_url),
+            "key".to_string(),
+            "test-model",
+            None,
+            "raw text".to_string(),
+            false,
+            |delta| seen.push_str(delta),
+            || true,
+        )
+        .await;
+
+        assert!(result.unwrap().is_none());
+        assert!(seen.is_empty(), "nothing may be typed after cancellation");
+    }
+
+    #[tokio::test]
+    async fn streaming_mid_stream_error_object_fails_the_call() {
+        let base_url =
+            serve_sse_response("data: {\"error\":{\"message\":\"upstream exploded\"}}\n\n").await;
+
+        let result = send_chat_completion_streaming(
+            &provider("custom", &base_url),
+            "key".to_string(),
+            "test-model",
+            None,
+            "raw text".to_string(),
+            false,
+            |delta| {
+                let _ = delta;
+            },
+            || false,
+        )
+        .await;
+
+        assert_eq!(result.unwrap_err(), "API stream error: upstream exploded");
     }
 
     #[test]

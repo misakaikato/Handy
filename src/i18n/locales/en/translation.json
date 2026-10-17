@@ -454,6 +454,11 @@
         "cancel": "Cancel",
         "selectToEdit": "Select a prompt above to view and edit its details.",
         "createFirst": "Click 'Create New Prompt' above to create your first post-processing prompt."
+      },
+      "streaming": {
+        "groupTitle": "Streaming",
+        "title": "Stream Rewrite Output",
+        "description": "Type the rewritten text at the cursor while it is being generated, instead of pasting it once the full response arrives. Falls back to pasting on error. Requires an OpenAI-compatible provider."
       }
     },
     "history": {

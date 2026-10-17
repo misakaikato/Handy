@@ -454,6 +454,11 @@
         "cancel": "Annulla",
         "selectToEdit": "Scegli un prompt qui sopra per visualizzare o modificare i dettagli.",
         "createFirst": "Clicca 'Crea un nuovo prompt' qui sopra per creare il tuo primo prompt di post-elaborazione."
+      },
+      "streaming": {
+        "groupTitle": "Streaming",
+        "title": "Trasmetti in streaming il risultato della riscrittura",
+        "description": "Digita il testo riscritto al cursore mentre viene generato, invece di incollarlo quando arriva la risposta completa. In caso di errore torna all'incollatura. Richiede un provider compatibile OpenAI."
       }
     },
     "history": {

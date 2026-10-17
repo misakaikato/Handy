@@ -151,6 +151,8 @@ const settingUpdaters: {
     commands.changeUseCursorContextSetting(value as boolean),
   cursor_context_chars: (value) =>
     commands.changeCursorContextCharsSetting(value as number),
+  stream_post_process: (value) =>
+    commands.changeStreamPostProcessSetting(value as boolean),
   word_correction_threshold: (value) =>
     commands.changeWordCorrectionThresholdSetting(value as number),
   paste_delay_ms: (value) =>

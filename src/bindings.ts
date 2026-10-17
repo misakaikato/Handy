@@ -372,6 +372,14 @@ async changeCursorContextCharsSetting(chars: number) : Promise<Result<null, stri
     else return { status: "error", error: e  as any };
 }
 },
+async changeStreamPostProcessSetting(enabled: boolean) : Promise<Result<null, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("change_stream_post_process_setting", { enabled }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
 /**
  * Temporarily unregister all bindings while the user is recording a
  * shortcut in the UI. This avoids firing actions while keys are recorded.
@@ -1118,7 +1126,12 @@ use_cursor_context?: boolean;
 /**
  * Maximum characters of cursor context read on each side of the cursor.
  */
-cursor_context_chars?: number }
+cursor_context_chars?: number; 
+/**
+ * Type the post-processing rewrite at the cursor as it streams from the
+ * LLM, instead of waiting for the full response and pasting.
+ */
+stream_post_process?: boolean }
 export type AudioDevice = { index: string; name: string; is_default: boolean }
 export type AutoSubmitKey = "enter" | "ctrl_enter" | "cmd_enter"
 export type AvailableAccelerators = { transcribe: string[]; gpu_devices: GpuDeviceOption[] }

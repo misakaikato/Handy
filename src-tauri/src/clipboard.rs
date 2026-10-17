@@ -28,7 +28,7 @@ fn with_enigo<T>(
     f(&mut enigo)
 }
 
-fn write_text_to_clipboard(app_handle: &AppHandle, text: &str) -> Result<(), String> {
+pub(crate) fn write_text_to_clipboard(app_handle: &AppHandle, text: &str) -> Result<(), String> {
     #[cfg(target_os = "linux")]
     if is_wayland() && is_wl_copy_available() {
         info!("Using wl-copy for clipboard write on Wayland");
@@ -769,6 +769,21 @@ pub(crate) fn send_return_key(enigo: &mut Enigo, key_type: AutoSubmitKey) -> Res
 
 fn should_send_auto_submit(auto_submit: bool, paste_method: PasteMethod) -> bool {
     auto_submit && paste_method != PasteMethod::None
+}
+
+/// Types text directly at the cursor via enigo's text input, as streamed
+/// rewrites do instead of pasting at the end. Callers dispatch this onto the
+/// main thread on macOS (the paste path's convention); enigo itself is safe
+/// to call from any thread, but the shared Enigo instance serializes callers.
+pub(crate) fn type_text_at_cursor(app_handle: &AppHandle, text: &str) -> Result<(), String> {
+    with_enigo(app_handle, |enigo| input::paste_text_direct(enigo, text))
+}
+
+/// Sends the configured auto-submit key (used after streamed typing, where
+/// there is no paste call to piggyback on). Main-thread convention as above.
+pub(crate) fn send_auto_submit_key(app_handle: &AppHandle) -> Result<(), String> {
+    let auto_submit_key = get_settings(app_handle).auto_submit_key;
+    with_enigo(app_handle, |enigo| send_return_key(enigo, auto_submit_key))
 }
 
 pub fn paste(text: String, app_handle: AppHandle) -> Result<(), String> {

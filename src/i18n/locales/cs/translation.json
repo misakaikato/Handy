@@ -454,6 +454,11 @@
         "cancel": "Zrušit",
         "selectToEdit": "Vyberte výše prompt, abyste zobrazili a upravili jeho podrobnosti.",
         "createFirst": "Klikněte nahoře na 'Vytvořit nový prompt' a vytvořte svůj první prompt pro následné zpracování."
+      },
+      "streaming": {
+        "groupTitle": "Streamování",
+        "title": "Streamovat výsledek přepisu",
+        "description": "Zapisuje přepsaný text u kurzoru během generování, místo aby jej vkládal po doračení celé odpovědi. Při chybě se vrátí k vložení. Vyžaduje poskytovatele kompatibilního s OpenAI."
       }
     },
     "history": {

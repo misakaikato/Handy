@@ -698,6 +698,7 @@ pub fn run(cli_args: CliArgs) {
             shortcut::undo_auto_learn,
             shortcut::change_use_cursor_context_setting,
             shortcut::change_cursor_context_chars_setting,
+            shortcut::change_stream_post_process_setting,
             shortcut::suspend_all_bindings,
             shortcut::resume_all_bindings,
             shortcut::change_mute_while_recording_setting,
