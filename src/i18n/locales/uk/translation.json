@@ -354,7 +354,19 @@
         "placeholder": "Додати слово",
         "add": "Додати",
         "remove": "Видалити {{word}}",
-        "duplicate": "\"{{word}}\" вже існує"
+        "duplicate": "\"{{word}}\" вже існує",
+        "import": "Імпорт",
+        "importSummary": "У {{file}} знайдено слів: {{total}} — нових: {{new}}, вже є: {{duplicate}}.",
+        "importMerge": "Об'єднати",
+        "importReplace": "Замінити список",
+        "importCancel": "Скасувати",
+        "importEmpty": "У файлі немає слів для імпорту.",
+        "importError": "Не вдалося імпортувати слова.",
+        "importSuccess": "Імпортовано слів: {{count}}.",
+        "exportTxt": "Експорт у TXT",
+        "exportJson": "Експорт у JSON",
+        "exportSuccess": "Експортовано слів: {{count}}.",
+        "exportError": "Помилка експорту."
       },
       "autoLearnCustomWords": {
         "title": "Автонавчання користувацьких слів",

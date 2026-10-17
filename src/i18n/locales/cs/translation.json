@@ -354,7 +354,19 @@
         "placeholder": "Přidat slovo",
         "add": "Přidat",
         "remove": "Odebrat {{word}}",
-        "duplicate": "\"{{word}}\" již existuje"
+        "duplicate": "\"{{word}}\" již existuje",
+        "import": "Importovat",
+        "importSummary": "V {{file}} nalezeno {{total}} slov: {{new}} nových, {{duplicate}} již existujících.",
+        "importMerge": "Sloučit",
+        "importReplace": "Nahradit seznam",
+        "importCancel": "Zrušit",
+        "importEmpty": "V tomto souboru nejsou žádná importovatelná slova.",
+        "importError": "Slova se nepodařilo importovat.",
+        "importSuccess": "Importováno slov: {{count}}.",
+        "exportTxt": "Exportovat TXT",
+        "exportJson": "Exportovat JSON",
+        "exportSuccess": "Exportováno slov: {{count}}.",
+        "exportError": "Export selhal."
       },
       "autoLearnCustomWords": {
         "title": "Učení se vlastním slovům",

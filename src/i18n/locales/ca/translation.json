@@ -354,7 +354,19 @@
         "placeholder": "Afegiu una paraula",
         "add": "Afegiu",
         "remove": "Suprimiu {{word}}",
-        "duplicate": "«{{word}}» ja existeix"
+        "duplicate": "«{{word}}» ja existeix",
+        "import": "Importa",
+        "importSummary": "S'han trobat {{total}} paraules a {{file}}: {{new}} de noves, {{duplicate}} ja presents.",
+        "importMerge": "Fusiona",
+        "importReplace": "Substitueix la llista",
+        "importCancel": "Cancel·la",
+        "importEmpty": "No hi ha paraules importables en aquest fitxer.",
+        "importError": "No s'han pogut importar les paraules.",
+        "importSuccess": "S'han importat {{count}} paraules.",
+        "exportTxt": "Exporta TXT",
+        "exportJson": "Exporta JSON",
+        "exportSuccess": "S'han exportat {{count}} paraules.",
+        "exportError": "L'exportació ha fallat."
       },
       "autoLearnCustomWords": {
         "title": "Aprèn paraules personalitzades",

@@ -354,7 +354,19 @@
         "placeholder": "Kelime ekle",
         "add": "Ekle",
         "remove": "{{word}} Kaldır",
-        "duplicate": "\"{{word}}\" zaten mevcut"
+        "duplicate": "\"{{word}}\" zaten mevcut",
+        "import": "İçe aktar",
+        "importSummary": "{{file}} içinde {{total}} kelime bulundu: {{new}} yeni, {{duplicate}} zaten mevcut.",
+        "importMerge": "Birleştir",
+        "importReplace": "Listeyi değiştir",
+        "importCancel": "İptal",
+        "importEmpty": "Bu dosyada içe aktarılabilir kelime yok.",
+        "importError": "Kelimeler içe aktarılamadı.",
+        "importSuccess": "{{count}} kelime içe aktarıldı.",
+        "exportTxt": "TXT dışa aktar",
+        "exportJson": "JSON dışa aktar",
+        "exportSuccess": "{{count}} kelime dışa aktarıldı.",
+        "exportError": "Dışa aktarma başarısız."
       },
       "autoLearnCustomWords": {
         "title": "Özel kelimeleri öğrenme",

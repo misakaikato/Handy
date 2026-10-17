@@ -354,7 +354,19 @@
         "placeholder": "Wort hinzufügen",
         "add": "Hinzufügen",
         "remove": "{{word}} entfernen",
-        "duplicate": "\"{{word}}\" existiert bereits"
+        "duplicate": "\"{{word}}\" existiert bereits",
+        "import": "Importieren",
+        "importSummary": "{{total}} Wörter in {{file}} gefunden: {{new}} neu, {{duplicate}} bereits vorhanden.",
+        "importMerge": "Zusammenführen",
+        "importReplace": "Liste ersetzen",
+        "importCancel": "Abbrechen",
+        "importEmpty": "Keine importierbaren Wörter in dieser Datei.",
+        "importError": "Import fehlgeschlagen.",
+        "importSuccess": "{{count}} Wörter importiert.",
+        "exportTxt": "Als TXT exportieren",
+        "exportJson": "Als JSON exportieren",
+        "exportSuccess": "{{count}} Wörter exportiert.",
+        "exportError": "Export fehlgeschlagen."
       },
       "autoLearnCustomWords": {
         "title": "Benutzerdefinierte Wörter lernen",

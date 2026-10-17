@@ -354,7 +354,19 @@
         "placeholder": "Добавете дума",
         "add": "Добавяне",
         "remove": "Премахване на {{word}}",
-        "duplicate": "„{{word}}“ вече съществува"
+        "duplicate": "„{{word}}“ вече съществува",
+        "import": "Импортиране",
+        "importSummary": "Намерени са {{total}} думи в {{file}}: {{new}} нови, {{duplicate}} вече налични.",
+        "importMerge": "Сливане",
+        "importReplace": "Замяна на списъка",
+        "importCancel": "Отказ",
+        "importEmpty": "Няма думи за импортиране в този файл.",
+        "importError": "Неуспешно импортиране на думите.",
+        "importSuccess": "Импортирани думи: {{count}}.",
+        "exportTxt": "Експорт в TXT",
+        "exportJson": "Експорт в JSON",
+        "exportSuccess": "Експортирани думи: {{count}}.",
+        "exportError": "Експортът не успя."
       },
       "autoLearnCustomWords": {
         "title": "Автоматично изучаване на потребителски думи",

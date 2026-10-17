@@ -354,7 +354,19 @@
         "placeholder": "Добавить слово",
         "add": "Добавить",
         "remove": "Удалить {{word}}",
-        "duplicate": "\"{{word}}\" уже существует"
+        "duplicate": "\"{{word}}\" уже существует",
+        "import": "Импорт",
+        "importSummary": "В {{file}} найдено слов: {{total}} — новых: {{new}}, уже есть: {{duplicate}}.",
+        "importMerge": "Объединить",
+        "importReplace": "Заменить список",
+        "importCancel": "Отмена",
+        "importEmpty": "В файле нет слов для импорта.",
+        "importError": "Не удалось импортировать слова.",
+        "importSuccess": "Импортировано слов: {{count}}.",
+        "exportTxt": "Экспорт в TXT",
+        "exportJson": "Экспорт в JSON",
+        "exportSuccess": "Экспортировано слов: {{count}}.",
+        "exportError": "Ошибка экспорта."
       },
       "autoLearnCustomWords": {
         "title": "Автоизучение пользовательских слов",

@@ -354,7 +354,19 @@
         "placeholder": "Tilføj et ord",
         "add": "Tilføj",
         "remove": "Fjern {{word}}",
-        "duplicate": "\"{{word}}\" findes allerede"
+        "duplicate": "\"{{word}}\" findes allerede",
+        "import": "Importér",
+        "importSummary": "Fandt {{total}} ord i {{file}}: {{new}} nye, {{duplicate}} findes allerede.",
+        "importMerge": "Flet",
+        "importReplace": "Erstat liste",
+        "importCancel": "Annullér",
+        "importEmpty": "Ingen importerbare ord i denne fil.",
+        "importError": "Kunne ikke importere ord.",
+        "importSuccess": "Importerede {{count}} ord.",
+        "exportTxt": "Eksportér TXT",
+        "exportJson": "Eksportér JSON",
+        "exportSuccess": "Eksporterede {{count}} ord.",
+        "exportError": "Eksport mislykkedes."
       },
       "autoLearnCustomWords": {
         "title": "Lær tilpassede ord",

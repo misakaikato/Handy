@@ -354,7 +354,19 @@
         "placeholder": "Adicionar uma palavra",
         "add": "Adicionar",
         "remove": "Remover {{word}}",
-        "duplicate": "\"{{word}}\" já existe"
+        "duplicate": "\"{{word}}\" já existe",
+        "import": "Importar",
+        "importSummary": "Encontradas {{total}} palavras em {{file}}: {{new}} novas, {{duplicate}} já presentes.",
+        "importMerge": "Mesclar",
+        "importReplace": "Substituir lista",
+        "importCancel": "Cancelar",
+        "importEmpty": "Não há palavras importáveis neste ficheiro.",
+        "importError": "Falha ao importar palavras.",
+        "importSuccess": "{{count}} palavras importadas.",
+        "exportTxt": "Exportar TXT",
+        "exportJson": "Exportar JSON",
+        "exportSuccess": "{{count}} palavras exportadas.",
+        "exportError": "Falha na exportação."
       },
       "autoLearnCustomWords": {
         "title": "Aprender palavras personalizadas",

@@ -354,7 +354,19 @@
         "placeholder": "הוסף מילה",
         "add": "הוסף",
         "remove": "הסר את {{word}}",
-        "duplicate": "\"{{word}}\" כבר קיימת"
+        "duplicate": "\"{{word}}\" כבר קיימת",
+        "import": "ייבוא",
+        "importSummary": "נמצאו {{total}} מילים ב{{file}}: {{new}} חדשות, {{duplicate}} קיימות כבר.",
+        "importMerge": "מיזוג",
+        "importReplace": "החלפת הרשימה",
+        "importCancel": "ביטול",
+        "importEmpty": "אין מילים הניתנות לייבוא בקובץ זה.",
+        "importError": "ייבוא המילים נכשל.",
+        "importSuccess": "יובאו {{count}} מילים.",
+        "exportTxt": "ייצוא TXT",
+        "exportJson": "ייצוא JSON",
+        "exportSuccess": "יוצאו {{count}} מילים.",
+        "exportError": "הייצוא נכשל."
       },
       "autoLearnCustomWords": {
         "title": "למידת מילים מותאמות אישית",

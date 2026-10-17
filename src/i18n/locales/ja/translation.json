@@ -354,7 +354,19 @@
         "placeholder": "単語を追加",
         "add": "追加",
         "remove": "{{word}}を削除",
-        "duplicate": "「{{word}}」は既に存在します"
+        "duplicate": "「{{word}}」は既に存在します",
+        "import": "インポート",
+        "importSummary": "{{file}} 内に {{total}} 語見つかりました：新規 {{new}} 語、既存 {{duplicate}} 語。",
+        "importMerge": "マージ",
+        "importReplace": "リストを置き換え",
+        "importCancel": "キャンセル",
+        "importEmpty": "インポートできる単語がありません。",
+        "importError": "インポートに失敗しました。",
+        "importSuccess": "{{count}} 語をインポートしました。",
+        "exportTxt": "TXT をエクスポート",
+        "exportJson": "JSON をエクスポート",
+        "exportSuccess": "{{count}} 語をエクスポートしました。",
+        "exportError": "エクスポートに失敗しました。"
       },
       "autoLearnCustomWords": {
         "title": "カスタム単語を自動学習",

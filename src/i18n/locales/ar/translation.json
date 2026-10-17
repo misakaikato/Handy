@@ -324,7 +324,19 @@
         "placeholder": "أضف كلمة",
         "add": "إضافة",
         "remove": "إزالة {{word}}",
-        "duplicate": "\"{{word}}\" موجود بالفعل"
+        "duplicate": "\"{{word}}\" موجود بالفعل",
+        "import": "استيراد",
+        "importSummary": "تم العثور على {{total}} كلمة في {{file}}: {{new}} جديدة، و{{duplicate}} موجودة مسبقًا.",
+        "importMerge": "دمج",
+        "importReplace": "استبدال القائمة",
+        "importCancel": "إلغاء",
+        "importEmpty": "لا توجد كلمات قابلة للاستيراد في هذا الملف.",
+        "importError": "تعذر استيراد الكلمات.",
+        "importSuccess": "تم استيراد {{count}} كلمة.",
+        "exportTxt": "تصدير TXT",
+        "exportJson": "تصدير JSON",
+        "exportSuccess": "تم تصدير {{count}} كلمة.",
+        "exportError": "فشل التصدير."
       },
       "autoLearnCustomWords": {
         "title": "تعلّم الكلمات المخصصة",

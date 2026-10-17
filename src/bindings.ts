@@ -328,6 +328,43 @@ async updateCustomWords(words: string[]) : Promise<Result<null, string>> {
     else return { status: "error", error: e  as any };
 }
 },
+/**
+ * Reads an import file and previews it against the current custom words.
+ */
+async importWordlistPreview(path: string) : Promise<Result<WordlistPreview, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("import_wordlist_preview", { path }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+/**
+ * Applies an import the user confirmed: merge into the current custom words
+ * (case-insensitive dedupe, existing casing wins) or replace the list.
+ * Returns the final word list; emits `settings-changed` so open windows
+ * pick it up even without an optimistic frontend update.
+ */
+async applyWordlistImport(words: string[], replace: boolean) : Promise<Result<string[], string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("apply_wordlist_import", { words, replace }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+/**
+ * Writes the current custom words to `path` in the given format
+ * ("txt" or "json"). Returns the number of words written.
+ */
+async exportWordlist(path: string, format: string) : Promise<Result<number, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("export_wordlist", { path, format }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
 async changeAutoLearnCustomWordsSetting(enabled: boolean) : Promise<Result<null, string>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("change_auto_learn_custom_words_setting", { enabled }) };
@@ -1463,6 +1500,25 @@ export type TranscribeAcceleratorSetting = "auto" | "cpu" | "gpu"
 export type TypingTool = "auto" | "wtype" | "kwtype" | "dotool" | "ydotool" | "xdotool"
 export type VadBackend = "silero" | "earshot"
 export type WindowsMicrophonePermissionStatus = { supported: boolean; overall_access: PermissionAccess; device_access: PermissionAccess; app_access: PermissionAccess; desktop_app_access: PermissionAccess }
+/**
+ * A parsed import file, ready for preview: normalized, deduplicated words
+ * (in file order) plus how many of them are new relative to the current
+ * custom words.
+ */
+export type WordlistPreview = { 
+/**
+ * All importable words from the file, deduplicated within the file.
+ */
+words: string[]; 
+/**
+ * Raw non-empty entries seen in the file (before normalization dropped
+ * or merged any).
+ */
+total_in_file: number; 
+/**
+ * Words not already present in the current custom words.
+ */
+new_count: number }
 
 /** tauri-specta globals **/
 

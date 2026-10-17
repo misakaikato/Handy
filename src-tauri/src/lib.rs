@@ -31,6 +31,7 @@ mod tray;
 mod tray_i18n;
 mod utils;
 mod voice_edit;
+mod wordlist;
 
 pub use cli::CliArgs;
 #[cfg(debug_assertions)]
@@ -695,6 +696,9 @@ pub fn run(cli_args: CliArgs) {
             shortcut::delete_post_process_prompt,
             shortcut::set_post_process_selected_prompt,
             shortcut::update_custom_words,
+            wordlist::import_wordlist_preview,
+            wordlist::apply_wordlist_import,
+            wordlist::export_wordlist,
             shortcut::change_auto_learn_custom_words_setting,
             shortcut::change_auto_learn_delay_ms_setting,
             shortcut::change_auto_learn_notification_duration_ms_setting,

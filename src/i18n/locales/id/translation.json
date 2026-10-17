@@ -354,7 +354,19 @@
         "placeholder": "Tambahkan kata",
         "add": "Tambah",
         "remove": "Hapus {{word}}",
-        "duplicate": "\"{{word}}\" sudah ada"
+        "duplicate": "\"{{word}}\" sudah ada",
+        "import": "Impor",
+        "importSummary": "Menemukan {{total}} kata di {{file}}: {{new}} baru, {{duplicate}} sudah ada.",
+        "importMerge": "Gabungkan",
+        "importReplace": "Ganti daftar",
+        "importCancel": "Batal",
+        "importEmpty": "Tidak ada kata yang dapat diimpor dari berkas ini.",
+        "importError": "Gagal mengimpor kata.",
+        "importSuccess": "{{count}} kata diimpor.",
+        "exportTxt": "Ekspor TXT",
+        "exportJson": "Ekspor JSON",
+        "exportSuccess": "{{count}} kata diekspor.",
+        "exportError": "Ekspor gagal."
       },
       "autoLearnCustomWords": {
         "title": "Pelajari kata khusus",

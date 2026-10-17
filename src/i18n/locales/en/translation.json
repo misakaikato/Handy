@@ -354,7 +354,19 @@
         "placeholder": "Add a word",
         "add": "Add",
         "remove": "Remove {{word}}",
-        "duplicate": "\"{{word}}\" already exists"
+        "duplicate": "\"{{word}}\" already exists",
+        "import": "Import",
+        "importSummary": "Found {{total}} words in {{file}}: {{new}} new, {{duplicate}} already present.",
+        "importMerge": "Merge",
+        "importReplace": "Replace list",
+        "importCancel": "Cancel",
+        "importEmpty": "No importable words found in this file.",
+        "importError": "Failed to import words.",
+        "importSuccess": "Imported {{count}} words.",
+        "exportTxt": "Export TXT",
+        "exportJson": "Export JSON",
+        "exportSuccess": "Exported {{count}} words.",
+        "exportError": "Export failed."
       },
       "autoLearnCustomWords": {
         "title": "Learn Custom Words",

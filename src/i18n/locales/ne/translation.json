@@ -354,7 +354,19 @@
         "placeholder": "शब्द थप्नुहोस्",
         "add": "थप्नुहोस्",
         "remove": "{{word}} हटाउनुहोस्",
-        "duplicate": "\"{{word}}\" पहिले नै छ"
+        "duplicate": "\"{{word}}\" पहिले नै छ",
+        "import": "आयात गर्नुहोस्",
+        "importSummary": "{{file}} मा {{total}} शब्द भेटिए: {{new}} नयाँ, {{duplicate}} पहिले नै छन्।",
+        "importMerge": "मिलाउनुहोस्",
+        "importReplace": "सूची बदल्नुहोस्",
+        "importCancel": "रद्द गर्नुहोस्",
+        "importEmpty": "यो फाइलमा आयात गर्न मिल्ने शब्द छैनन्।",
+        "importError": "शब्द आयात गर्न सकिएन।",
+        "importSuccess": "{{count}} शब्द आयात भयो।",
+        "exportTxt": "TXT निर्यात गर्नुहोस्",
+        "exportJson": "JSON निर्यात गर्नुहोस्",
+        "exportSuccess": "{{count}} शब्द निर्यात भयो।",
+        "exportError": "निर्यात असफल।"
       },
       "autoLearnCustomWords": {
         "title": "कस्टम शब्दहरू सिक्ने",

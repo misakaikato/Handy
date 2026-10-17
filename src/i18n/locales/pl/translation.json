@@ -354,7 +354,19 @@
         "placeholder": "Dodaj słowo",
         "add": "Dodaj",
         "remove": "Usuń {{word}}",
-        "duplicate": "\"{{word}}\" już istnieje"
+        "duplicate": "\"{{word}}\" już istnieje",
+        "import": "Importuj",
+        "importSummary": "Znaleziono {{total}} słów w {{file}}: {{new}} nowych, {{duplicate}} już obecnych.",
+        "importMerge": "Połącz",
+        "importReplace": "Zamień listę",
+        "importCancel": "Anuluj",
+        "importEmpty": "Brak słów do zaimportowania w tym pliku.",
+        "importError": "Nie udało się zaimportować słów.",
+        "importSuccess": "Zaimportowano {{count}} słów.",
+        "exportTxt": "Eksportuj TXT",
+        "exportJson": "Eksportuj JSON",
+        "exportSuccess": "Wyeksportowano {{count}} słów.",
+        "exportError": "Eksport nie powiódł się."
       },
       "autoLearnCustomWords": {
         "title": "Uczenie się słów niestandardowych",

@@ -354,7 +354,19 @@
         "placeholder": "Woord toevoegen",
         "add": "Toevoegen",
         "remove": "{{word}} verwijderen",
-        "duplicate": "\"{{word}}\" bestaat al"
+        "duplicate": "\"{{word}}\" bestaat al",
+        "import": "Importeren",
+        "importSummary": "{{total}} woorden gevonden in {{file}}: {{new}} nieuw, {{duplicate}} al aanwezig.",
+        "importMerge": "Samenvoegen",
+        "importReplace": "Lijst vervangen",
+        "importCancel": "Annuleren",
+        "importEmpty": "Geen importeerbare woorden in dit bestand.",
+        "importError": "Woorden importeren mislukt.",
+        "importSuccess": "{{count}} woorden geïmporteerd.",
+        "exportTxt": "Exporteren als TXT",
+        "exportJson": "Exporteren als JSON",
+        "exportSuccess": "{{count}} woorden geëxporteerd.",
+        "exportError": "Exporteren mislukt."
       },
       "autoLearnCustomWords": {
         "title": "Aangepaste woorden leren",

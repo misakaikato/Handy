@@ -354,7 +354,19 @@
         "placeholder": "Lägg till ett ord",
         "add": "Lägg till",
         "remove": "Ta bort {{word}}",
-        "duplicate": "\"{{word}}\" finns redan"
+        "duplicate": "\"{{word}}\" finns redan",
+        "import": "Importera",
+        "importSummary": "Hittade {{total}} ord i {{file}}: {{new}} nya, {{duplicate}} finns redan.",
+        "importMerge": "Slå ihop",
+        "importReplace": "Ersätt lista",
+        "importCancel": "Avbryt",
+        "importEmpty": "Inga importerbara ord i filen.",
+        "importError": "Kunde inte importera ord.",
+        "importSuccess": "Importerade {{count}} ord.",
+        "exportTxt": "Exportera TXT",
+        "exportJson": "Exportera JSON",
+        "exportSuccess": "Exporterade {{count}} ord.",
+        "exportError": "Exporten misslyckades."
       },
       "autoLearnCustomWords": {
         "title": "Lär in egna ord",

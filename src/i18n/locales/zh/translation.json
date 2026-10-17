@@ -354,7 +354,19 @@
         "placeholder": "添加词汇",
         "add": "添加",
         "remove": "删除 {{word}}",
-        "duplicate": "\"{{word}}\" 已存在"
+        "duplicate": "\"{{word}}\" 已存在",
+        "import": "导入",
+        "importSummary": "在 {{file}} 中找到 {{total}} 个词：{{new}} 个新增，{{duplicate}} 个已存在。",
+        "importMerge": "合并",
+        "importReplace": "替换列表",
+        "importCancel": "取消",
+        "importEmpty": "文件中没有可导入的词。",
+        "importError": "导入失败。",
+        "importSuccess": "已导入 {{count}} 个词。",
+        "exportTxt": "导出 TXT",
+        "exportJson": "导出 JSON",
+        "exportSuccess": "已导出 {{count}} 个词。",
+        "exportError": "导出失败。"
       },
       "autoLearnCustomWords": {
         "title": "自动学习自定义词汇",

@@ -354,7 +354,19 @@
         "placeholder": "新增詞彙",
         "add": "新增",
         "remove": "刪除 {{word}}",
-        "duplicate": "「{{word}}」已存在"
+        "duplicate": "「{{word}}」已存在",
+        "import": "匯入",
+        "importSummary": "在 {{file}} 中找到 {{total}} 個詞：{{new}} 個新增，{{duplicate}} 個已存在。",
+        "importMerge": "合併",
+        "importReplace": "取代清單",
+        "importCancel": "取消",
+        "importEmpty": "檔案中沒有可匯入的詞。",
+        "importError": "匯入失敗。",
+        "importSuccess": "已匯入 {{count}} 個詞。",
+        "exportTxt": "匯出 TXT",
+        "exportJson": "匯出 JSON",
+        "exportSuccess": "已匯出 {{count}} 個詞。",
+        "exportError": "匯出失敗。"
       },
       "autoLearnCustomWords": {
         "title": "自動學習自訂詞彙",

@@ -354,7 +354,19 @@
         "placeholder": "단어 추가",
         "add": "추가",
         "remove": "{{word}} 제거",
-        "duplicate": "\"{{word}}\"이(가) 이미 존재합니다"
+        "duplicate": "\"{{word}}\"이(가) 이미 존재합니다",
+        "import": "가져오기",
+        "importSummary": "{{file}}에서 {{total}}개의 단어를 찾았습니다: 새 단어 {{new}}개, 이미 있는 단어 {{duplicate}}개.",
+        "importMerge": "병합",
+        "importReplace": "목록 교체",
+        "importCancel": "취소",
+        "importEmpty": "가져올 수 있는 단어가 없습니다.",
+        "importError": "가져오기 실패.",
+        "importSuccess": "{{count}}개의 단어를 가져왔습니다.",
+        "exportTxt": "TXT 내보내기",
+        "exportJson": "JSON 내보내기",
+        "exportSuccess": "{{count}}개의 단어를 내보냈습니다.",
+        "exportError": "내보내기 실패."
       },
       "autoLearnCustomWords": {
         "title": "사용자 지정 단어 자동 학습",
